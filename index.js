@@ -7,21 +7,21 @@ const ObjectsToCsv = require('objects-to-csv')
 // Need 2 bots first one is too far away for get entitys can check
 const bot = mineflayer.createBot({
     username: 'Archer',
-    port: 54758
+    port: 54409
 })
 bot.loadPlugin(pathfinder)
 const botChecker = mineflayer.createBot({
     username: 'Looker',
-    port: 54758
+    port: 54409
 })
 botChecker.loadPlugin(pathfinder)
 
 /* Notes 
 Please give to bot a bow:
-/give Guard1 bow{Enchantments:[{id:unbreaking,lvl:100}]} 1
+/give Archer bow{Enchantments:[{id:unbreaking,lvl:100}]} 1
 
 And arrows
-/give Guard1 minecraft:arrow 6000
+/give Archer minecraft:arrow 6000
 */
 
 // Go to Start Point (center of map)
@@ -44,6 +44,7 @@ bot.once("spawn", () => {
 let grades = 500;
 let reportedArrow = false;
 let arrowSave = {};
+let parabollicArrowData = [];
 
 // This bot Fires arrow
 bot.on('goal_reached', () => {
@@ -71,6 +72,7 @@ bot.on('goal_reached', () => {
             bot.deactivateItem();
             arrowSave.time = Date.now();
             bowIsCharged = false;
+            parabollicArrowData = [];
             grades++;
             if (grades > 900) {
                 grades = 0;
@@ -88,7 +90,6 @@ botChecker.on('goal_reached', () => {
     let lastPositionArrow = {};
     let counPosition = 0;
     let timeToImpact = 0;
-
 
     botChecker.on('physicTick', function() {
         let allArrows = getAllArrows(botChecker);
@@ -110,9 +111,8 @@ botChecker.on('goal_reached', () => {
             }
         });
 
-
         if (currentArrow !== null) {
-            //console.log("lastPositionArrow", lastPositionArrow.x, currentArrow.position.x);
+
             if (
                 lastPositionArrow.x == currentArrow.position.x &&
                 lastPositionArrow.y == currentArrow.position.y &&
@@ -132,9 +132,16 @@ botChecker.on('goal_reached', () => {
                     };
                     let dataArray = [];
                     dataArray.push(data);
+                    parabollicArrowData.push(data);
+
                     console.log("Arrow Impacted! ", data.id, "Grade:", data.grade / 10, "Time to impact", data.timeToImpact);
-                    const csv = new ObjectsToCsv(dataArray)
-                    csv.toDisk('./bigData.csv', { append: true })
+
+                    const csv = new ObjectsToCsv(dataArray);
+                    csv.toDisk('./bigData.csv', { append: true });
+
+                    const csvParabolic = new ObjectsToCsv(parabollicArrowData);
+                    csvParabolic.toDisk('./bigDataParabolic.csv', { append: true });
+
                     counPosition = 0;
                     reportedArrow = true;
                 }
@@ -145,12 +152,25 @@ botChecker.on('goal_reached', () => {
             } else {
                 counPosition = 0;
             }
+
+            const parabolicData = {
+                id: currentArrow.id,
+                grade: grades - 1,
+                x_origin: arrowSave.x,
+                y_origin: arrowSave.y,
+                z_origin: arrowSave.z,
+                x_destination: currentArrow.position.x,
+                y_destination: currentArrow.position.y,
+                z_destination: currentArrow.position.z,
+                timePosition: Date.now() - arrowSave.time,
+            };
+
+            parabollicArrowData.push(parabolicData);
+
             lastPositionArrow.x = currentArrow.position.x;
             lastPositionArrow.y = currentArrow.position.y;
             lastPositionArrow.z = currentArrow.position.z;
         }
-
-
     });
 })
 
