@@ -105,3 +105,4 @@ dist
 
 # Custom folder for CSV
 files/
+config.js

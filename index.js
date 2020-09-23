@@ -1,18 +1,19 @@
-const mineflayer = require('mineflayer')
-const Vec3 = require('vec3').Vec3
-const { pathfinder, Movements } = require('mineflayer-pathfinder')
-const { GoalNear } = require('mineflayer-pathfinder').goals
-const ObjectsToCsv = require('objects-to-csv')
+const config = require('./config');
+const mineflayer = require('mineflayer');
+const { pathfinder, Movements } = require('mineflayer-pathfinder');
+const { GoalNear } = require('mineflayer-pathfinder').goals;
 
 // Need 2 bots first one is too far away for get entitys can check
 const bot = mineflayer.createBot({
-    username: 'Archer',
-    port: 54409
+    username: config.usernameA,
+    port: config.port,
+    server: config.server
 })
 bot.loadPlugin(pathfinder)
 const botChecker = mineflayer.createBot({
-    username: 'Looker',
-    port: 54409
+    username: config.usernameB,
+    port: config.port,
+    server: config.server
 })
 botChecker.loadPlugin(pathfinder)
 
@@ -41,7 +42,7 @@ bot.once("spawn", () => {
     bot.pathfinder.setGoal(new GoalNear(0, 3, 0, 1)); // Go to Start point
 });
 
-let grades = 500;
+let grades = 300;
 let reportedArrow = false;
 let arrowSave = {};
 let parabollicArrowData = [];
@@ -73,7 +74,7 @@ bot.on('goal_reached', () => {
             arrowSave.time = Date.now();
             bowIsCharged = false;
             parabollicArrowData = [];
-            grades++;
+            grades += 10;
             if (grades > 900) {
                 grades = 0;
             }
@@ -119,6 +120,7 @@ botChecker.on('goal_reached', () => {
                 lastPositionArrow.z == currentArrow.position.z
             ) {
                 if (counPosition >= 20 && !reportedArrow) {
+                    const distance = getDistance(currentArrow.position, arrowSave);
                     const data = {
                         id: currentArrow.id,
                         grade: grades - 1,
@@ -128,19 +130,18 @@ botChecker.on('goal_reached', () => {
                         x_destination: currentArrow.position.x,
                         y_destination: currentArrow.position.y,
                         z_destination: currentArrow.position.z,
-                        timeToImpact: timeToImpact
+                        timeToImpact: timeToImpact,
+                        distance_origin_to_target: distance,
+                        rate_speed: distance / timeToImpact * 1000 // block per second
                     };
                     let dataArray = [];
                     dataArray.push(data);
                     parabollicArrowData.push(data);
 
-                    console.log("Arrow Impacted! ", data.id, "Grade:", data.grade / 10, "Time to impact", data.timeToImpact);
+                    console.log("Arrow Impacted! Arrow:", data.id, "Grade:", data.grade / 10, "Time to impact:", data.timeToImpact, "Distance:", Math.round(data.distance_origin_to_target * 100) / 100, "m/s:", Math.round(data.rate_speed * 100) / 100);
 
-                    const csv = new ObjectsToCsv(dataArray);
-                    csv.toDisk('./bigData.csv', { append: true });
-
-                    const csvParabolic = new ObjectsToCsv(parabollicArrowData);
-                    csvParabolic.toDisk('./bigDataParabolic.csv', { append: true });
+                    save(dataArray, './files/bigData.csv');
+                    save(parabollicArrowData, './files/parabolicArrowData.csv');
 
                     counPosition = 0;
                     reportedArrow = true;
@@ -150,22 +151,24 @@ botChecker.on('goal_reached', () => {
                 }
                 counPosition++;
             } else {
+                const distance = getDistance(currentArrow.position, arrowSave);
+                const parabolicData = {
+                    id: currentArrow.id,
+                    grade: grades - 1,
+                    x_origin: arrowSave.x,
+                    y_origin: arrowSave.y,
+                    z_origin: arrowSave.z,
+                    x_destination: currentArrow.position.x,
+                    y_destination: currentArrow.position.y,
+                    z_destination: currentArrow.position.z,
+                    timePosition: Date.now() - arrowSave.time,
+                    distange_last_record: distance,
+                    rate_speed: distance / timeToImpact * 1000 // block per second
+                };
+                parabollicArrowData.push(parabolicData);
+
                 counPosition = 0;
             }
-
-            const parabolicData = {
-                id: currentArrow.id,
-                grade: grades - 1,
-                x_origin: arrowSave.x,
-                y_origin: arrowSave.y,
-                z_origin: arrowSave.z,
-                x_destination: currentArrow.position.x,
-                y_destination: currentArrow.position.y,
-                z_destination: currentArrow.position.z,
-                timePosition: Date.now() - arrowSave.time,
-            };
-
-            parabollicArrowData.push(parabolicData);
 
             lastPositionArrow.x = currentArrow.position.x;
             lastPositionArrow.y = currentArrow.position.y;
@@ -174,6 +177,15 @@ botChecker.on('goal_reached', () => {
     });
 })
 
+
+function getDistance(a, b) {
+    return Math.sqrt(
+        Math.pow(a.x - b.x, 2) +
+        Math.pow(a.y - b.y, 2) +
+        Math.pow(a.z - b.z, 2)
+    )
+
+}
 
 function getAllArrows(bot) {
     let arrows = [];
@@ -193,4 +205,14 @@ function degrees_to_radians(degrees) {
 function radians_to_degrees(radians) {
     var pi = Math.PI;
     return radians * (180 / pi);
+}
+
+function save(data, file) {
+    const { Parser } = require('json2csv');
+    const fs = require('fs');
+    const json2csvParser = new Parser({ delimiter: ';', output: file });
+    const csv = json2csvParser.parse(data);
+    fs.writeFile(file, csv, function(err) {
+        if (err) throw err;
+    });
 }
