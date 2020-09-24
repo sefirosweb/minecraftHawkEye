@@ -48,6 +48,8 @@ let reportedArrow = false;
 let arrowSave = {};
 let parabollicArrowData = [];
 
+let factorGrades = 100;
+
 // This bot Fires arrow
 bot.on('goal_reached', () => {
     bot.chat('Rdy!');
@@ -59,7 +61,7 @@ bot.on('goal_reached', () => {
         // bot.lookAt(headTo); <-- don't use this no have enough accuracy
         // Look by Yaw & Pitch /* Pitch == Radians */ 
         // 3.1385715147451663 => default look to Z
-        bot.look(degrees_to_radians(180), degrees_to_radians(grades / 10));
+        bot.look(degrees_to_radians(180), degrees_to_radians(grades / factorGrades));
 
         const currentTime = Date.now();
 
@@ -76,7 +78,7 @@ bot.on('goal_reached', () => {
             bowIsCharged = false;
             parabollicArrowData = [];
             grades++;
-            if (grades > 900) {
+            if (grades > 90 * factorGrades) {
                 grades = 0;
             }
         }
