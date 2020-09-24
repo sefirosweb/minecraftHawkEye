@@ -75,7 +75,7 @@ bot.on('goal_reached', () => {
             arrowSave.time = Date.now();
             bowIsCharged = false;
             parabollicArrowData = [];
-            grades += 10;
+            grades++;
             if (grades > 900) {
                 grades = 0;
             }
