@@ -42,9 +42,8 @@ Clear area or use a plain world (see screenshots)
 
 - node index.js
 
-In world give a bow + arrows:
-/give Archer bow{Enchantments:[{id:unbreaking,lvl:100}]} 1
-
+In world give a bow + arrows: \
+/give Archer bow{Enchantments:[{id:unbreaking,lvl:100}]} 1 \
 /give Archer minecraft:arrow 6000
 
 And done, the bots fires automatically and change the grade of 0,01 every shot until 90º the they reset to 0º
