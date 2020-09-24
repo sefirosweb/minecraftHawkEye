@@ -140,7 +140,7 @@ botChecker.on('goal_reached', () => {
                     let dataArray = [];
                     dataArray.push(data);
 
-                    console.log("Arrow Impacted! Arrow:", data.id, "Grade:", data.grade / 10, "Time to impact:", data.timeToImpact, "Distance:", Math.round(data.distance_origin_to_target * 100) / 100, "m/s:", Math.round(data.rate_speed * 100) / 100);
+                    console.log("Arrow Impacted! Arrow:", data.id, "Grade:", data.grade / factorGrades, "Time to impact:", data.timeToImpact, "Distance:", Math.round(data.distance_origin_to_target * 100) / 100, "m/s:", Math.round(data.rate_speed * 100) / 100);
 
                     save(dataArray, './files/bigData.csv');
                     save(parabollicArrowData, './files/parabolicArrowData.csv');
