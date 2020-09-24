@@ -3,15 +3,15 @@ Minecraft bot for equations when shooting an arrow
 
 This program / bot is based on <a href="https://github.com/PrismarineJS/mineflayer" target="_blank">mineflayer</a> repository
 
-Everyone:
-- Get huge data from shootouts.
-- Get the data of the parabolic arrow (all parabollic data)
+Todo:
 - When you have clear data to obtain the "gravity" equation for arrows
+- Make simply bot can attack players on huge distance
 
 Done
 - Bot can shoot an arrow
 - Bot shoot arrows and get start / end points and time
-
+- Get huge data from every shot.
+- Get the data of the parabolic arrow (all parabollic data)
 
 Install:
 - Install Novde version 10+
