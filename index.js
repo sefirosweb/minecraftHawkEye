@@ -3,17 +3,18 @@ const mineflayer = require('mineflayer');
 const { pathfinder, Movements } = require('mineflayer-pathfinder');
 const { GoalNear } = require('mineflayer-pathfinder').goals;
 
+
 // Need 2 bots first one is too far away for get entitys can check
 const bot = mineflayer.createBot({
     username: config.usernameA,
     port: config.port,
-    server: config.server
+    host: config.host
 })
 bot.loadPlugin(pathfinder)
 const botChecker = mineflayer.createBot({
     username: config.usernameB,
     port: config.port,
-    server: config.server
+    host: config.host
 })
 botChecker.loadPlugin(pathfinder)
 
@@ -42,7 +43,7 @@ bot.once("spawn", () => {
     bot.pathfinder.setGoal(new GoalNear(0, 3, 0, 1)); // Go to Start point
 });
 
-let grades = 300;
+let grades = 0;
 let reportedArrow = false;
 let arrowSave = {};
 let parabollicArrowData = [];
@@ -136,7 +137,6 @@ botChecker.on('goal_reached', () => {
                     };
                     let dataArray = [];
                     dataArray.push(data);
-                    parabollicArrowData.push(data);
 
                     console.log("Arrow Impacted! Arrow:", data.id, "Grade:", data.grade / 10, "Time to impact:", data.timeToImpact, "Distance:", Math.round(data.distance_origin_to_target * 100) / 100, "m/s:", Math.round(data.rate_speed * 100) / 100);
 
@@ -210,9 +210,31 @@ function radians_to_degrees(radians) {
 function save(data, file) {
     const { Parser } = require('json2csv');
     const fs = require('fs');
-    const json2csvParser = new Parser({ delimiter: ';', output: file });
-    const csv = json2csvParser.parse(data);
-    fs.writeFile(file, csv, function(err) {
-        if (err) throw err;
-    });
+    var newLine = "\r\n";
+
+
+    try {
+        if (fs.existsSync(file)) {
+            const json2csvParser = new Parser({ delimiter: ';', header: false });
+            const csv = json2csvParser.parse(data) + newLine;
+
+            fs.appendFile(file, csv, function(err) {
+                if (err) throw err;
+            });
+
+
+        } else {
+            const json2csvParser = new Parser({ delimiter: ';', header: true });
+            const csv = json2csvParser.parse(data) + newLine;
+
+            fs.writeFile(file, csv, function(err) {
+                if (err) throw err;
+            });
+        }
+    } catch (err) {
+        console.error(err)
+    }
+
+
+
 }
