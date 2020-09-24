@@ -13,16 +13,13 @@ Done
 - Bot shoot arrows and get start / end points and time
 
 Noe
-Please change data for access to your server,
+Please change config.js data for access to your server,
 
 ```js
-const bot = mineflayer.createBot({
-    username: 'Archer',
-    port: 54758
-})
-bot.loadPlugin(pathfinder)
-const botChecker = mineflayer.createBot({
-    username: 'Looker',
-    port: 54758
-})
+module.exports = {
+    port: 22222,
+    host: 'XXXX',
+    usernameA: 'Archer',
+    usernameB: "Looker"
+};
 ```
