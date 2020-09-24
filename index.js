@@ -1,27 +1,29 @@
-const mineflayer = require('mineflayer')
-const Vec3 = require('vec3').Vec3
-const { pathfinder, Movements } = require('mineflayer-pathfinder')
-const { GoalNear } = require('mineflayer-pathfinder').goals
-const ObjectsToCsv = require('objects-to-csv')
+const config = require('./config');
+const mineflayer = require('mineflayer');
+const { pathfinder, Movements } = require('mineflayer-pathfinder');
+const { GoalNear } = require('mineflayer-pathfinder').goals;
+
 
 // Need 2 bots first one is too far away for get entitys can check
 const bot = mineflayer.createBot({
-    username: 'Archer',
-    port: 54758
+    username: config.usernameA,
+    port: config.port,
+    host: config.host
 })
 bot.loadPlugin(pathfinder)
 const botChecker = mineflayer.createBot({
-    username: 'Looker',
-    port: 54758
+    username: config.usernameB,
+    port: config.port,
+    host: config.host
 })
 botChecker.loadPlugin(pathfinder)
 
 /* Notes 
 Please give to bot a bow:
-/give Guard1 bow{Enchantments:[{id:unbreaking,lvl:100}]} 1
+/give Archer bow{Enchantments:[{id:unbreaking,lvl:100}]} 1
 
 And arrows
-/give Guard1 minecraft:arrow 6000
+/give Archer minecraft:arrow 6000
 */
 
 // Go to Start Point (center of map)
@@ -41,9 +43,10 @@ bot.once("spawn", () => {
     bot.pathfinder.setGoal(new GoalNear(0, 3, 0, 1)); // Go to Start point
 });
 
-let grades = 500;
+let grades = 0;
 let reportedArrow = false;
 let arrowSave = {};
+let parabollicArrowData = [];
 
 // This bot Fires arrow
 bot.on('goal_reached', () => {
@@ -71,7 +74,8 @@ bot.on('goal_reached', () => {
             bot.deactivateItem();
             arrowSave.time = Date.now();
             bowIsCharged = false;
-            grades++;
+            parabollicArrowData = [];
+            grades += 10;
             if (grades > 900) {
                 grades = 0;
             }
@@ -88,7 +92,6 @@ botChecker.on('goal_reached', () => {
     let lastPositionArrow = {};
     let counPosition = 0;
     let timeToImpact = 0;
-
 
     botChecker.on('physicTick', function() {
         let allArrows = getAllArrows(botChecker);
@@ -110,15 +113,15 @@ botChecker.on('goal_reached', () => {
             }
         });
 
-
         if (currentArrow !== null) {
-            //console.log("lastPositionArrow", lastPositionArrow.x, currentArrow.position.x);
+
             if (
                 lastPositionArrow.x == currentArrow.position.x &&
                 lastPositionArrow.y == currentArrow.position.y &&
                 lastPositionArrow.z == currentArrow.position.z
             ) {
                 if (counPosition >= 20 && !reportedArrow) {
+                    const distance = getDistance(currentArrow.position, arrowSave);
                     const data = {
                         id: currentArrow.id,
                         grade: grades - 1,
@@ -128,13 +131,18 @@ botChecker.on('goal_reached', () => {
                         x_destination: currentArrow.position.x,
                         y_destination: currentArrow.position.y,
                         z_destination: currentArrow.position.z,
-                        timeToImpact: timeToImpact
+                        timeToImpact: timeToImpact,
+                        distance_origin_to_target: distance,
+                        rate_speed: distance / timeToImpact * 1000 // block per second
                     };
                     let dataArray = [];
                     dataArray.push(data);
-                    console.log("Arrow Impacted! ", data.id, "Grade:", data.grade / 10, "Time to impact", data.timeToImpact);
-                    const csv = new ObjectsToCsv(dataArray)
-                    csv.toDisk('./bigData.csv', { append: true })
+
+                    console.log("Arrow Impacted! Arrow:", data.id, "Grade:", data.grade / 10, "Time to impact:", data.timeToImpact, "Distance:", Math.round(data.distance_origin_to_target * 100) / 100, "m/s:", Math.round(data.rate_speed * 100) / 100);
+
+                    save(dataArray, './files/bigData.csv');
+                    save(parabollicArrowData, './files/parabolicArrowData.csv');
+
                     counPosition = 0;
                     reportedArrow = true;
                 }
@@ -143,17 +151,41 @@ botChecker.on('goal_reached', () => {
                 }
                 counPosition++;
             } else {
+                const distance = getDistance(currentArrow.position, arrowSave);
+                const parabolicData = {
+                    id: currentArrow.id,
+                    grade: grades - 1,
+                    x_origin: arrowSave.x,
+                    y_origin: arrowSave.y,
+                    z_origin: arrowSave.z,
+                    x_destination: currentArrow.position.x,
+                    y_destination: currentArrow.position.y,
+                    z_destination: currentArrow.position.z,
+                    timePosition: Date.now() - arrowSave.time,
+                    distange_last_record: distance,
+                    rate_speed: distance / timeToImpact * 1000 // block per second
+                };
+                parabollicArrowData.push(parabolicData);
+
                 counPosition = 0;
             }
+
             lastPositionArrow.x = currentArrow.position.x;
             lastPositionArrow.y = currentArrow.position.y;
             lastPositionArrow.z = currentArrow.position.z;
         }
-
-
     });
 })
 
+
+function getDistance(a, b) {
+    return Math.sqrt(
+        Math.pow(a.x - b.x, 2) +
+        Math.pow(a.y - b.y, 2) +
+        Math.pow(a.z - b.z, 2)
+    )
+
+}
 
 function getAllArrows(bot) {
     let arrows = [];
@@ -173,4 +205,36 @@ function degrees_to_radians(degrees) {
 function radians_to_degrees(radians) {
     var pi = Math.PI;
     return radians * (180 / pi);
+}
+
+function save(data, file) {
+    const { Parser } = require('json2csv');
+    const fs = require('fs');
+    var newLine = "\r\n";
+
+
+    try {
+        if (fs.existsSync(file)) {
+            const json2csvParser = new Parser({ delimiter: ';', header: false });
+            const csv = json2csvParser.parse(data) + newLine;
+
+            fs.appendFile(file, csv, function(err) {
+                if (err) throw err;
+            });
+
+
+        } else {
+            const json2csvParser = new Parser({ delimiter: ';', header: true });
+            const csv = json2csvParser.parse(data) + newLine;
+
+            fs.writeFile(file, csv, function(err) {
+                if (err) throw err;
+            });
+        }
+    } catch (err) {
+        console.error(err)
+    }
+
+
+
 }

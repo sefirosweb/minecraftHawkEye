@@ -1,0 +1,25 @@
+{
+  "name": "minecrafthawkeye",
+  "version": "1.0.0",
+  "description": "Minecraft bot for equations when shooting an arrow",
+  "main": "index.js",
+  "dependencies": {
+    "json2csv": "^5.0.1",
+    "mineflayer-pathfinder": "^1.0.10",
+    "mineflayer": "^2.28.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sefirosweb/minecraftHawkEye.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sefirosweb/minecraftHawkEye/issues"
+  },
+  "homepage": "https://github.com/sefirosweb/minecraftHawkEye#readme"
+}
