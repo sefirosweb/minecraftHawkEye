@@ -1,8 +1,10 @@
 const config = require('./config');
 const mineflayer = require('mineflayer');
+const Vec3 = require('vec3');
 const { pathfinder, Movements } = require('mineflayer-pathfinder');
 const { get } = require('http');
 const { time, count } = require('console');
+const { exit } = require('process');
 const { GoalNear } = require('mineflayer-pathfinder').goals;
 
 const botChecker = mineflayer.createBot({
@@ -25,6 +27,7 @@ function getEntity(bot) {
 }
 
 botChecker.on('spawn', function() {
+    botChecker.chat('/kill @e[type=minecraft:arrow]');
     let Vy = 0;
     let timeStart = 0;
     let timeEnd = 0;
@@ -37,6 +40,8 @@ botChecker.on('spawn', function() {
     let maxVelocityY = 0;
     let maxVelocity = 0;
 
+    let ticks = 0;
+
 
     botChecker.on('physicTick', function() {
         if (!entity || entity.isValid === false) {
@@ -46,7 +51,14 @@ botChecker.on('spawn', function() {
             timeMaxY = 0;
             maxVelocityY = 0;
             maxVelocity = 0;
+            if (entity) {
+                ticks = calc(entity);
+                console.log("Ticks", ticks)
+                return true;
+            }
         }
+
+        return true;
 
         if (entity) {
 
@@ -62,6 +74,9 @@ botChecker.on('spawn', function() {
                     console.log("MaxY", Math.round(maxY * 100) / 100, "Second from MaxY to finish", (timeEnd - timeMaxY) / 1000);
                     console.log("Max Velocity Y", Math.round(maxVelocityY * 100) / 100);
                     console.log("Max Velocity", Math.round(maxVelocity * 100) / 100);
+
+
+
                 }
             } else {
                 console.clear();
@@ -115,3 +130,43 @@ function getVelocity(a) {
         Math.pow(a.z, 2)
     )
 }
+
+function calc(arrow) {
+    // drag = 30;
+    base = arrow.position;
+    velocity = arrow.velocity;
+    downwardAccel = new Vec3(0, -0.05, 0);
+    // itr = new BlockIterator(base.getWorld(), base.toVector(), base.getDirection(), 0, 3);
+
+    tick = 0;
+    let intercepts = true
+    while (intercepts) {
+        velocity.add(downwardAccel);
+        base.add(velocity);
+        block = botChecker.blockAt(base).name;
+        console.log(base, block);
+        if (block !== 'air') {
+            intercepts = false
+        }
+        tick++;
+    }
+    tick--;
+
+    console.log(tick);
+    console.log(base);
+
+
+    return tick;
+
+}
+
+/* if incercetp block 
+function intercepts(itr) {
+    while (itr.hasNext()) {
+        if (itr.next().getType() != Material.AIR) { 
+            return true;
+        }
+    }
+    return false;
+}
+*/
