@@ -34,6 +34,8 @@ botChecker.on('spawn', function() {
 
     let maxY = 0;
     let timeMaxY = 0;
+    let maxVelocityY = 0;
+    let maxVelocity = 0;
 
 
     botChecker.on('physicTick', function() {
@@ -42,6 +44,8 @@ botChecker.on('spawn', function() {
             timeStart = Date.now();
             maxY = 0;
             timeMaxY = 0;
+            maxVelocityY = 0;
+            maxVelocity = 0;
         }
 
         if (entity) {
@@ -54,13 +58,27 @@ botChecker.on('spawn', function() {
 
                 if (countLastY === 10) {
                     console.log("Total Time:", (timeEnd - timeStart) / 1000);
-                    console.log("MaxY", Math.round(maxY * 100) / 100, "Time to max to end:", (timeEnd - timeMaxY) / 1000);
+                    console.log("MaxY", Math.round(maxY * 100) / 100, "Second from MaxY to finish", (timeEnd - timeMaxY) / 1000);
+                    console.log("Max Velocity Y", Math.round(maxVelocityY * 100) / 100);
+                    console.log("Max Velocity", Math.round(maxVelocity * 100) / 100);
                 }
             } else {
                 console.clear();
-                console.log(entity.position, entity.velocity.y);
+                console.log(entity.position);
+                console.log("Velocity per tick of Y", entity.velocity.y);
+                const velocity = getVelocity(entity.velocity);
+                console.log("Velocity", velocity);
+
                 countLastY = 0;
                 lastY = entity.position.y;
+
+                if (maxVelocityY <= entity.velocity.y) {
+                    maxVelocityY = entity.velocity.y;
+                }
+
+                if (maxVelocity <= velocity) {
+                    maxVelocity = velocity;
+                }
 
                 if (maxY <= entity.position.y) {
                     maxY = entity.position.y;
@@ -87,3 +105,12 @@ botChecker.on('spawn', function() {
         // .toString().replace(/\./, ','))
     });
 });
+
+
+function getVelocity(a) {
+    return Math.sqrt(
+        Math.pow(a.x, 2) +
+        Math.pow(a.y, 2) +
+        Math.pow(a.z, 2)
+    )
+}
