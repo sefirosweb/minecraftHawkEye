@@ -57,6 +57,7 @@ botChecker.on('spawn', function() {
                 countLastY++;
 
                 if (countLastY === 10) {
+                    console.log('************************ Resume ************************');
                     console.log("Total Time:", (timeEnd - timeStart) / 1000);
                     console.log("MaxY", Math.round(maxY * 100) / 100, "Second from MaxY to finish", (timeEnd - timeMaxY) / 1000);
                     console.log("Max Velocity Y", Math.round(maxVelocityY * 100) / 100);
