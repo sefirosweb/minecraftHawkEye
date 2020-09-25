@@ -1,6 +1,7 @@
 const config = require('./config');
 const mineflayer = require('mineflayer');
 const { pathfinder, Movements } = require('mineflayer-pathfinder');
+const { get } = require('http');
 const { GoalNear } = require('mineflayer-pathfinder').goals;
 
 
@@ -153,22 +154,43 @@ botChecker.on('goal_reached', () => {
                 }
                 counPosition++;
             } else {
-                const distance = getDistance(currentArrow.position, arrowSave);
-                const parabolicData = {
+
+                let previusParabolic = null;
+                let currentParabolicLenght = parabollicArrowData.length;
+                if (currentParabolicLenght === 0) {
+                    previusParabolic = arrowSave;
+                } else {
+                    currentParabolicLenght--;
+                    previusParabolic = parabollicArrowData[currentParabolicLenght];
+                    previusParabolic = {
+                        x: previusParabolic.x_destination,
+                        y: previusParabolic.y_destination,
+                        z: previusParabolic.z_destination,
+                    }
+                }
+
+                const distance = getDistance(currentArrow.position, previusParabolic);
+                let velocity = getVelocity(currentArrow.velocity)
+
+                let parabolicData = {
                     id: currentArrow.id,
                     grade: grades - 1,
-                    x_origin: arrowSave.x,
-                    y_origin: arrowSave.y,
-                    z_origin: arrowSave.z,
+                    x_origin: previusParabolic.x,
+                    y_origin: previusParabolic.y,
+                    z_origin: previusParabolic.z,
                     x_destination: currentArrow.position.x,
                     y_destination: currentArrow.position.y,
                     z_destination: currentArrow.position.z,
                     timePosition: Date.now() - arrowSave.time,
                     distange_last_record: distance,
-                    rate_speed: distance / timeToImpact * 1000 // block per second
+                    rate_speed: distance / timeToImpact * 1000, // block per second
+                    velocity_x: currentArrow.velocity.x,
+                    velocity_y: currentArrow.velocity.y,
+                    velocity_z: currentArrow.velocity.z,
+                    velocity: velocity,
                 };
-                parabollicArrowData.push(parabolicData);
 
+                parabollicArrowData.push(parabolicData);
                 counPosition = 0;
             }
 
@@ -179,6 +201,15 @@ botChecker.on('goal_reached', () => {
     });
 })
 
+function formatNumber(data) {
+    Object.keys(data).forEach(keyI => {
+        Object.keys(data[keyI]).forEach(key => {
+            data[keyI][key] = data[keyI][key].toString().replace(/\./, ',');
+        });
+    });
+    return data
+}
+
 
 function getDistance(a, b) {
     return Math.sqrt(
@@ -186,8 +217,17 @@ function getDistance(a, b) {
         Math.pow(a.y - b.y, 2) +
         Math.pow(a.z - b.z, 2)
     )
-
 }
+
+function getVelocity(a) {
+    return Math.sqrt(
+        Math.pow(a.x, 2) +
+        Math.pow(a.y, 2) +
+        Math.pow(a.z, 2)
+    )
+}
+
+
 
 function getAllArrows(bot) {
     let arrows = [];
@@ -210,6 +250,8 @@ function radians_to_degrees(radians) {
 }
 
 function save(data, file) {
+    data = formatNumber(data);
+
     const { Parser } = require('json2csv');
     const fs = require('fs');
     var newLine = "\r\n";
