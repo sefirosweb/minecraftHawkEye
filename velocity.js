@@ -94,12 +94,16 @@ botChecker.on('spawn', function() {
                     saveToFile(dataArray, './files/real_velocity.csv');
                 }
             } else {
+                /*
                 console.clear();
                 console.log(entity.position);
-                console.log("Velocity per tick of Y", entity.velocity.y);
+                console.log("Velocity per tick of Y", entity.velocity.y);*/
+
                 const velocity = getVelocity(entity.velocity);
+
+                /*
                 console.log("Velocity", velocity);
-                console.log(botChecker.time.age);
+                console.log(botChecker.time.age);*/
 
                 countLastY = 0;
                 lastY = entity.position.y;
@@ -146,14 +150,14 @@ function getVelocity(a) {
 
 function calcPreviewArrow(arrow) {
     // Gravedad y su derivada
-    const derivadaGravedad = -0.003;
+    const derivadaGravedad = -0.000125;
     let gravedadBase = -0.05;
 
     // Efecto de relentización dle aire y su derivada
-    const derivadaEfectoDelAire = -0.00012;
-    let efectoDelAire = -0.02;
+    const derivadaEfectoDelAire = -0.00012; // TODO ARREGLAR SEGUN ORIENTACION NO FUNCIONA
+    let efectoDelAire = -0.02; // TODO ARREGLAR SEGUN ORIENTACION NO FUNCIONA
 
-    let downwardAccel = new Vec3(0, gravedadBase, efectoDelAire);
+    let downwardAccel = new Vec3(0, gravedadBase, 0 /*efectoDelAire*/ );
 
     let dataArray = [];
 
@@ -171,17 +175,17 @@ function calcPreviewArrow(arrow) {
         velocity_z: velocity.z,
     });
 
-    let intercepts = incercetp_block(botChecker, position);
-    while (intercepts) {
+    while (incercetp_block(botChecker, position)) {
         tick++;
         velocity.add(downwardAccel);
-        position.add(velocity);
-        intercepts = incercetp_block(botChecker, position);
+        if (velocity.y < -3.9) {
+            velocity.y = -3.9;
+        }
 
+        position.add(velocity);
         gravedadBase = gravedadBase - derivadaGravedad;
         efectoDelAire = efectoDelAire - derivadaEfectoDelAire;
-
-        downwardAccel = new Vec3(0, gravedadBase, efectoDelAire);
+        downwardAccel = new Vec3(0, gravedadBase, 0 /* efectoDelAire*/ );
 
         dataArray.push({
             tick: tick,
@@ -192,7 +196,6 @@ function calcPreviewArrow(arrow) {
             velocity_y: velocity.y,
             velocity_z: velocity.z,
         });
-
     }
 
     saveToFile(dataArray, './files/velocity.csv');
