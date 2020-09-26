@@ -2,10 +2,7 @@ const config = require('./config');
 const mineflayer = require('mineflayer');
 const Vec3 = require('vec3');
 const { pathfinder, Movements } = require('mineflayer-pathfinder');
-const { get } = require('http');
-const { time, count } = require('console');
-const { exit } = require('process');
-const { GoalNear } = require('mineflayer-pathfinder').goals;
+const saveToFile = require('./saveToFile').save;
 
 const botChecker = mineflayer.createBot({
     username: config.usernameB,
@@ -34,6 +31,7 @@ botChecker.on('spawn', function() {
     let timeEnd = 0;
     let tickStart = 0;
     let tickEnd = 0;
+    let tick = 0;
 
     let lastY = 0;
     let countLastY = 0;
@@ -44,32 +42,39 @@ botChecker.on('spawn', function() {
     let maxVelocityY = 0;
     let maxVelocity = 0;
 
-    botChecker.chat('Ready!');
+    let dataArray = [];
 
+
+    botChecker.chat('Ready!');
 
 
     botChecker.on('physicTick', function() {
         if (!entity || entity.isValid === false) {
             entity = getEntity(botChecker);
             timeStart = Date.now();
-            tickStart = botChecker.time.timeOfDay;
+            tickStart = 0;
+
 
             maxY = 0;
             timeMaxY = 0;
             maxVelocityY = 0;
             maxVelocity = 0;
 
+            dataArray = [];
+
             if (entity) {
                 previewArrow = calcPreviewArrow(entity);
             }
         }
+
+        tickStart++;
 
         if (entity) {
 
             if (lastY === entity.position.y) {
                 if (countLastY === 0) {
                     timeEnd = Date.now();
-                    tickEnd = botChecker.time.timeOfDay;
+                    tickEnd = tickStart;
                 }
                 countLastY++;
                 if (countLastY === 10) {
@@ -81,7 +86,7 @@ botChecker.on('spawn', function() {
 
                     console.log('************************ Preview ************************');
                     console.log("Ticks", previewArrow.tick, "MaxZ", previewArrow.position.z);
-                    console.log(tickEnd - tickStart);
+                    console.log("physicTick", tickEnd);
 
 
                     botChecker.chat('/kill @e[type=minecraft:arrow]');
@@ -96,6 +101,17 @@ botChecker.on('spawn', function() {
 
                 countLastY = 0;
                 lastY = entity.position.y;
+
+                dataArray.push({
+                    tick: tick,
+                    position_x: entity.position.x,
+                    position_y: entity.position.y,
+                    position_z: entity.position.z,
+                    velocity_x: entity.velocity.x,
+                    velocity_y: entity.velocity.y,
+                    velocity_z: entity.velocity.z,
+                });
+
 
                 if (maxVelocityY <= entity.velocity.y) {
                     maxVelocityY = entity.velocity.y;
@@ -125,7 +141,6 @@ function getVelocity(a) {
     )
 }
 
-const saveToFile = require('./saveToFile').save;
 
 function calcPreviewArrow(arrow) {
     const downwardAccel = new Vec3(0, -0.05, 0); // Gravedad
