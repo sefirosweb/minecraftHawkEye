@@ -90,6 +90,8 @@ botChecker.on('spawn', function() {
 
 
                     botChecker.chat('/kill @e[type=minecraft:arrow]');
+
+                    saveToFile(dataArray, './files/real_velocity.csv');
                 }
             } else {
                 console.clear();
@@ -103,7 +105,7 @@ botChecker.on('spawn', function() {
                 lastY = entity.position.y;
 
                 dataArray.push({
-                    tick: tick,
+                    tick: tickStart,
                     position_x: entity.position.x,
                     position_y: entity.position.y,
                     position_z: entity.position.z,
@@ -143,7 +145,15 @@ function getVelocity(a) {
 
 
 function calcPreviewArrow(arrow) {
-    const downwardAccel = new Vec3(0, -0.05, 0); // Gravedad
+    // Gravedad y su derivada
+    const derivadaGravedad = -0.003;
+    let gravedadBase = -0.05;
+
+    // Efecto de relentización dle aire y su derivada
+    const derivadaEfectoDelAire = -0.00012;
+    let efectoDelAire = -0.02;
+
+    let downwardAccel = new Vec3(0, gravedadBase, efectoDelAire);
 
     let dataArray = [];
 
@@ -168,10 +178,15 @@ function calcPreviewArrow(arrow) {
         position.add(velocity);
         intercepts = incercetp_block(botChecker, position);
 
+        gravedadBase = gravedadBase - derivadaGravedad;
+        efectoDelAire = efectoDelAire - derivadaEfectoDelAire;
+
+        downwardAccel = new Vec3(0, gravedadBase, efectoDelAire);
+
         dataArray.push({
             tick: tick,
             position_x: position.x,
-            position_u: position.y,
+            position_y: position.y,
             position_z: position.z,
             velocity_x: velocity.x,
             velocity_y: velocity.y,
@@ -191,9 +206,13 @@ function calcPreviewArrow(arrow) {
 
 
 function incercetp_block(bot, position) {
-    block = bot.blockAt(position).name;
-    if (block !== 'air') {
+    block = bot.blockAt(position);
+    if (!block)
+        return false
+
+    if (block.name !== 'air') {
         return false
     }
+
     return true;
 }
