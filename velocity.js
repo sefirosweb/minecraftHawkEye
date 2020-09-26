@@ -124,29 +124,31 @@ function getVelocity(a) {
 }
 
 function calcPreviewArrow(arrow) {
-    // drag = 30;
-    base = new Vec3(arrow.position);
-    velocity = new Vec3(arrow.velocity);
-    downwardAccel = new Vec3(0, -0.05, 0);
-    tick = 0;
-    let intercepts = incercetp_block(botChecker);
+    const downwardAccel = new Vec3(0, -0.05, 0); // Gravedad
+
+    let tick = 0;
+    let position = new Vec3(arrow.position);
+    let velocity = new Vec3(arrow.velocity);
+
+    let intercepts = incercetp_block(botChecker, position);
     while (intercepts) {
-        velocity.add(downwardAccel);
-        base.add(velocity);
-        intercepts = incercetp_block(botChecker);
         tick++;
+        velocity.add(downwardAccel);
+        position.add(velocity);
+        intercepts = incercetp_block(botChecker, position);
+
     }
-    tick--;
 
     return {
         tick: tick,
-        position: base
+        position: position,
+        velocity: velocity
     };
 }
 
 
-function incercetp_block(bot) {
-    block = bot.blockAt(base).name;
+function incercetp_block(bot, position) {
+    block = bot.blockAt(position).name;
     if (block !== 'air') {
         return false
     }
