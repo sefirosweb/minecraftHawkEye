@@ -44,6 +44,8 @@ botChecker.on('spawn', function() {
     let maxVelocityY = 0;
     let maxVelocity = 0;
 
+    botChecker.chat('Ready!');
+
 
 
     botChecker.on('physicTick', function() {
