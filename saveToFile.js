@@ -1,4 +1,4 @@
-function saveFile(data, file) {
+function save(data, file) {
     data = formatNumber(data, ',');
     const { Parser } = require('json2csv');
     const fs = require('fs');
@@ -32,4 +32,7 @@ function formatNumber(data, separator) {
     return data
 }
 
-module.exports = saveFile
+module.exports = {
+    save,
+    formatNumber
+}

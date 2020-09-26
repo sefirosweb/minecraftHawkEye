@@ -125,12 +125,26 @@ function getVelocity(a) {
     )
 }
 
+const saveToFile = require('./saveToFile').save;
+
 function calcPreviewArrow(arrow) {
     const downwardAccel = new Vec3(0, -0.05, 0); // Gravedad
+
+    let dataArray = [];
 
     let tick = 0;
     let position = new Vec3(arrow.position);
     let velocity = new Vec3(arrow.velocity);
+
+    dataArray.push({
+        tick: tick,
+        position_x: position.x,
+        position_y: position.y,
+        position_z: position.z,
+        velocity_x: velocity.x,
+        velocity_y: velocity.y,
+        velocity_z: velocity.z,
+    });
 
     let intercepts = incercetp_block(botChecker, position);
     while (intercepts) {
@@ -139,7 +153,19 @@ function calcPreviewArrow(arrow) {
         position.add(velocity);
         intercepts = incercetp_block(botChecker, position);
 
+        dataArray.push({
+            tick: tick,
+            position_x: position.x,
+            position_u: position.y,
+            position_z: position.z,
+            velocity_x: velocity.x,
+            velocity_y: velocity.y,
+            velocity_z: velocity.z,
+        });
+
     }
+
+    saveToFile(dataArray, './files/velocity.csv');
 
     return {
         tick: tick,
