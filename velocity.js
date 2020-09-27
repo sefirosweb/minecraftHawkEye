@@ -3,6 +3,8 @@ const mineflayer = require('mineflayer');
 const Vec3 = require('vec3');
 const { pathfinder, Movements } = require('mineflayer-pathfinder');
 const saveToFile = require('./saveToFile').save;
+const { degrees_to_radians, radians_to_degrees, round, getVox, getVoy } = require('./hawkEyeEquations');
+const { getPlayer, getEntityArrow } = require('./botFunctions');
 
 const botChecker = mineflayer.createBot({
     username: config.usernameB,
@@ -11,21 +13,13 @@ const botChecker = mineflayer.createBot({
 })
 botChecker.loadPlugin(pathfinder)
 
-
-function getEntity(bot) {
-    for (const entity of Object.values(bot.entities)) {
-        //if (entity.type === 'player') {
-        if (entity.type === 'object' && entity.objectType === 'Arrow') {
-            return entity;
-        }
-    }
-
-    return false;
-}
-
 botChecker.on('spawn', function() {
+    const logs = true;
     botChecker.chat('/kill @e[type=minecraft:arrow]');
-    let Vy = 0;
+    const Vo = 3;
+
+    let Vox = 0;
+    let Voy = 0;
 
     let timeStart = 0;
     let timeEnd = 0;
@@ -44,13 +38,23 @@ botChecker.on('spawn', function() {
 
     let dataArray = [];
 
+    let yaw = 0;
+    let pitch = 0;
+
+
 
     botChecker.chat('Ready!');
 
 
     botChecker.on('physicTick', function() {
         if (!entity || entity.isValid === false) {
-            entity = getEntity(botChecker);
+            entity = getEntityArrow(botChecker);
+            player = getPlayer(botChecker, config.admin);
+            pitch = player.pitch;
+            yaw = player.yaw;
+            Vox = getVox(Vo, pitch);
+            Voy = getVoy(Vo, pitch);
+
             timeStart = Date.now();
             tickStart = 0;
 
@@ -62,9 +66,13 @@ botChecker.on('spawn', function() {
 
             dataArray = [];
 
+
             if (entity) {
                 previewArrow = calcPreviewArrow(entity);
             }
+
+
+
         }
 
         tickStart++;
@@ -78,32 +86,38 @@ botChecker.on('spawn', function() {
                 }
                 countLastY++;
                 if (countLastY === 10) {
+                    // console.clear();
                     console.log('************************ Resume ************************');
                     console.log("Total Time:", (timeEnd - timeStart) / 1000);
-                    console.log("MaxY", Math.round(maxY * 100) / 100, "Second from MaxY to finish", (timeEnd - timeMaxY) / 1000);
-                    console.log("Max Velocity Y", Math.round(maxVelocityY * 100) / 100);
-                    console.log("Max Velocity", Math.round(maxVelocity * 100) / 100);
+                    console.log("MaxY", round(maxY), "Second from MaxY to finish", (timeEnd - timeMaxY) / 1000);
+                    console.log("Max Velocity Y", round(maxVelocityY));
+                    console.log("Max Velocity", round(maxVelocity));
+
+                    console.log('************************ Player ************************');
+                    console.log("Yaw", round(180 - radians_to_degrees(yaw)), "Pitch (y)", round(-radians_to_degrees(pitch)));
+                    console.log("Vo", 3, "Vox", round(Vox), "Voy", round(Voy));
 
                     console.log('************************ Preview ************************');
-                    console.log("Ticks", previewArrow.tick, "MaxZ", previewArrow.position.z);
+                    console.log("Ticks", previewArrow.tick, "MaxZ", round(previewArrow.position.z));
                     console.log("physicTick", tickEnd);
-
 
                     botChecker.chat('/kill @e[type=minecraft:arrow]');
 
                     saveToFile(dataArray, './files/real_velocity.csv');
                 }
             } else {
-                /*
-                console.clear();
-                console.log(entity.position);
-                console.log("Velocity per tick of Y", entity.velocity.y);*/
+
+                if (logs) {
+                    console.clear();
+                    console.log(entity.position);
+                    console.log("Velocity per tick of Y", round(entity.velocity.y));
+                }
 
                 const velocity = getVelocity(entity.velocity);
 
-                /*
-                console.log("Velocity", velocity);
-                console.log(botChecker.time.age);*/
+                if (logs) {
+                    console.log("Velocity", round(velocity));
+                }
 
                 countLastY = 0;
                 lastY = entity.position.y;

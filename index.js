@@ -3,6 +3,7 @@ const mineflayer = require('mineflayer');
 const { pathfinder, Movements } = require('mineflayer-pathfinder');
 const { get } = require('http');
 const { GoalNear } = require('mineflayer-pathfinder').goals;
+const { degrees_to_radians } = require('./hawkEyeEquations');
 
 
 // Need 2 bots first one is too far away for get entitys can check
@@ -239,15 +240,7 @@ function getAllArrows(bot) {
     return arrows;
 }
 
-function degrees_to_radians(degrees) {
-    var pi = Math.PI;
-    return degrees * (pi / 180);
-}
 
-function radians_to_degrees(radians) {
-    var pi = Math.PI;
-    return radians * (180 / pi);
-}
 
 function save(data, file) {
     data = formatNumber(data);
