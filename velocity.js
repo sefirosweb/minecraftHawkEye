@@ -7,6 +7,13 @@ const { getPlayer, getEntityArrow } = require('./botFunctions');
 
 const { getTicks, degrees_to_radians, radians_to_degrees, round, getVox, getVoy, getMaxZ } = require('./hawkEyeEquations');
 
+const bot = mineflayer.createBot({
+    username: config.usernameA,
+    port: config.port,
+    host: config.host
+})
+bot.loadPlugin(pathfinder)
+
 const botChecker = mineflayer.createBot({
     username: config.usernameB,
     port: config.port,
@@ -48,15 +55,15 @@ botChecker.on('spawn', function() {
             entity = getEntityArrow(botChecker);
             if (entity) {
 
-                player = getPlayer(botChecker, config.admin);
+                player = getPlayer(botChecker, config.usernameA);
                 pitch = player.pitch;
                 yaw = player.yaw;
                 Vox = getVox(3, pitch);
                 Voy = getVoy(3, pitch);
 
-                ticks = getTicks(Voy, player.position.y, 4);
-                maxZ_preview = getMaxZ(Vox, player.position.z, ticks);
-
+                // No va
+                // ticks = getTicks(Voy, player.position.y, 4);
+                // maxZ_preview = getMaxZ(Vox, player.position.z, ticks);
                 // previewArrow = calcPreviewArrow(entity, ticks);
 
 
@@ -97,7 +104,7 @@ botChecker.on('spawn', function() {
                     console.log("Vo", 3, "Vox", round(Vox), "Voy", round(Voy));
 
                     console.log('************************ Preview ************************');
-                    console.log("Ticks", ticks, "Max Z:", maxZ_preview);
+                    // console.log("Ticks", ticks, "Max Z:", maxZ_preview);
 
                     // console.log("Ticks", previewArrow.tick, "MaxZ", round(previewArrow.position.z));
                     // console.log("physicTick", tickEnd);
@@ -165,3 +172,36 @@ function getVelocity(a) {
         Math.pow(a.z, 2)
     )
 }
+
+
+
+
+bot.on('spawn', function() {
+    let archerFire = false;
+    let archerAngleFire = 0;
+    let archerTimer = 0;
+
+    bot.chat('Ready!');
+
+    bot.on("chat", (username, message) => {
+        if (message.match(/shot.*/)) {
+            var msg = message.split(" ");
+            bot.chat("Shotting! " + msg[1]);
+            archerAngleFire = msg[1];
+            archerTimer = Date.now();
+            bot.activateItem();
+            archerFire = true;
+        }
+    });
+
+    bot.on('physicTick', function() {
+        if (archerFire) {
+            bot.look(degrees_to_radians(180), degrees_to_radians(archerAngleFire));
+
+            if (Date.now() - archerTimer > 1200) {
+                bot.deactivateItem();
+                archerFire = false;
+            }
+        }
+    });
+});
