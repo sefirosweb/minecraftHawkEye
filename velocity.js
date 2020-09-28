@@ -102,6 +102,7 @@ botChecker.on('spawn', function() {
                     console.log('************************ Player ************************');
                     console.log("Yaw", round(180 - radians_to_degrees(yaw)), "Pitch (y)", round(-radians_to_degrees(pitch)));
                     console.log("Vo", 3, "Vox", round(Vox), "Voy", round(Voy));
+                    console.log("Grade", grade);
 
                     console.log('************************ Preview ************************');
                     // console.log("Ticks", ticks, "Max Z:", maxZ_preview);
@@ -112,6 +113,8 @@ botChecker.on('spawn', function() {
                     botChecker.chat('/kill @e[type=minecraft:arrow]');
 
                     saveToFile(dataArray, './files/real_velocity.csv');
+
+                    nextShotReady = true;
                 }
             } else {
 
@@ -131,6 +134,8 @@ botChecker.on('spawn', function() {
                 lastY = entity.position.y;
 
                 dataArray.push({
+                    grade: grade,
+                    playerGrade: radians_to_degrees(pitch),
                     tick: tickStart,
                     position_x: entity.position.x,
                     position_y: entity.position.y,
@@ -177,31 +182,50 @@ function getVelocity(a) {
 
 
 bot.on('spawn', function() {
-    let archerFire = false;
-    let archerAngleFire = 0;
-    let archerTimer = 0;
-
     bot.chat('Ready!');
-
     bot.on("chat", (username, message) => {
         if (message.match(/shot.*/)) {
             var msg = message.split(" ");
             bot.chat("Shotting! " + msg[1]);
-            archerAngleFire = msg[1];
-            archerTimer = Date.now();
-            bot.activateItem();
-            archerFire = true;
+            shotBow(bot, msg[1], msg[2]);
         }
-    });
 
-    bot.on('physicTick', function() {
-        if (archerFire) {
-            bot.look(degrees_to_radians(180), degrees_to_radians(archerAngleFire));
-
-            if (Date.now() - archerTimer > 1200) {
-                bot.deactivateItem();
-                archerFire = false;
-            }
+        if (message.match(/go.*/)) {
+            var msg = message.split(" ");
+            multiShot(bot)
+            bot.on('physicTick', multiShot);
         }
     });
 });
+
+let nextShotReady = true;
+let grade = -1;
+
+function multiShot() {
+    if (nextShotReady) {
+        grade++;
+        nextShotReady = false;
+        setTimeout(() => {
+            bot.chat("Grade => " + grade);
+            shotBow(bot, grade, 180);
+        }, 2000);
+
+    }
+    if (grade >= 90) {
+        bot.removeListener('physicTick', multiShot)
+    }
+
+}
+
+function shotBow(bot, grade, yaw = null) {
+    if (yaw === null) {
+        yaw = bot.player.entity.yaw;
+    } else {
+        yaw = degrees_to_radians(yaw);
+    }
+    bot.look(yaw, degrees_to_radians(grade));
+    bot.activateItem();
+    setTimeout(() => {
+        bot.deactivateItem();
+    }, 1200);
+}
