@@ -30,7 +30,7 @@ var ball = {
 var Cd = 0.47; // Dimensionless
 var rho = 1.22; // kg / m^3
 var A = Math.PI * ball.radius * ball.radius / (10000); // m^2
-var ag = 9.81; // m / s^2
+var ag = 9.8; // m / s^2
 var mouse = { x: 0, y: 0, isDown: false };
 
 function getMousePosition(e) {
@@ -65,6 +65,11 @@ var setup = function() {
     ctx.strokeStyle = '#000000';
     loopTimer = setInterval(loop, frameDelay);
 }
+
+function print(id, val) {
+    document.getElementById(id).innerHTML = val;
+}
+
 var loop = function() {
     if (!mouse.isDown) {
         // Do physics
@@ -74,10 +79,17 @@ var loop = function() {
 
         Fx = (isNaN(Fx) ? 0 : Fx);
         Fy = (isNaN(Fy) ? 0 : Fy);
+        print('fy', Fy);
+        print('fx', Fx);
+
 
         // Calculate acceleration ( F = ma )
         var ax = Fx / ball.mass;
         var ay = ag + (Fy / ball.mass);
+
+        print('ay', ay);
+        print('ax', ax);
+
         // Integrate to get velocity
         ball.velocity.x += ax * frameRate;
         ball.velocity.y += ay * frameRate;
