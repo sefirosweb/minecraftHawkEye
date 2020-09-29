@@ -66,7 +66,16 @@ function shot(bot) {
     const distances = equations.getTargetDistance(bot, player);
     const yaw = equations.getTargetYaw(bot, player);
 
-    let dregrees = 0;
+    // Pitch / Degrees
+    let degrees = 0;
 
-    shotBow(bot, yaw, degrees_to_radians(dregrees));
+    if (distances.distance <= 20) {
+        degrees = equations.getTargetPitch(bot, player);
+        degrees = radians_to_degrees(degrees);
+
+    }
+
+    console.log(degrees, distances)
+
+    shotBow(bot, yaw, degrees_to_radians(degrees));
 }

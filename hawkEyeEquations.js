@@ -24,6 +24,13 @@ function getTargetYaw(bot, target) {
     return yaw;
 }
 
+function getTargetPitch(bot, target) {
+    const distance = getTargetDistance(bot, target);
+    const y_distance = target.position.y - bot.player.entity.position.y;
+    const pitch = Math.atan2(y_distance, distance.h_distance);
+    return pitch;
+}
+
 function degrees_to_radians(degrees) {
     var pi = Math.PI;
     return degrees * (pi / 180);
@@ -62,5 +69,6 @@ module.exports = {
     radians_to_degrees,
     round,
     getTargetDistance,
-    getTargetYaw
+    getTargetYaw,
+    getTargetPitch
 }
