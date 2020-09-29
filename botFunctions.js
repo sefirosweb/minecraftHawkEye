@@ -22,14 +22,16 @@ function getEntityArrow(bot) {
     return false;
 }
 
-function shotBow(bot, grade, yaw = null) {
+
+function shotBow(bot, yaw = null, grade = null) {
     if (yaw === null) {
         yaw = bot.player.entity.yaw;
-    } else {
-        yaw = equations.degrees_to_radians(yaw);
+    }
+    if (grade === null) {
+        grade = bot.player.entity.grade;
     }
 
-    bot.look(yaw, equations.degrees_to_radians(grade));
+    bot.look(yaw, grade);
     bot.activateItem();
     setTimeout(() => {
         bot.deactivateItem();
