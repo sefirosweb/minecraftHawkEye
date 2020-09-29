@@ -15,14 +15,14 @@ const bot = mineflayer.createBot({
 bot.on('spawn', function() {
     bot.chat('Ready!');
     let lastTime = Date.now();
-    /*
+
     bot.on('physicTick', function() {
         const currentTime = Date.now();
         if (currentTime - lastTime > 3000) {
             lastTime = currentTime;
             shot(bot);
         }
-    });*/
+    });
 
     bot.on("chat", (username, message) => {
         if (message.match(/shot.*/)) {
@@ -63,6 +63,7 @@ function shot(bot) {
             shotBow(bot, yaw, degrees_to_radians(degrees));
         } else {
             console.log("Target can reach!");
+            console.log(distances);
         }
     }
 
@@ -88,9 +89,9 @@ function getMasterGrade(bot, target) {
         tryG = tryGrade(grade, x_destination, y_destination)
         if (tryG)
             return grade;
-        grade = grade + 1;
+        grade = grade + 0.1;
         console.log(grade);
-        if (grade > 9) {
+        if (grade > 40) {
             return false;
         }
     }
@@ -108,9 +109,9 @@ function tryGrade(grade, x_destination, y_destination) {
     while (true) {
         if (
             (Vy - y_destination) > -1 &&
-            (Vy - y_destination) < 1 &&
-            (Vx - x_destination) > -1 &&
-            (Vx - x_destination) < 1
+            (Vy - y_destination) < 2 &&
+            (Vx - x_destination) > -2 &&
+            (Vx - x_destination) < 2
         ) { // +- 1 aproach
             console.log("Found grade", grade);
             return grade;
