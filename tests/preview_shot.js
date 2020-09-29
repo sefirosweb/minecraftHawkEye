@@ -1,10 +1,8 @@
-const config = require('./config');
+const config = require('../config');
 const mineflayer = require('mineflayer');
 const { pathfinder, Movements } = require('mineflayer-pathfinder');
-const { get } = require('http');
 const { GoalNear } = require('mineflayer-pathfinder').goals;
-const { degrees_to_radians } = require('./hawkEyeEquations');
-
+const Vec3 = require('vec3');
 
 // Need 2 bots first one is too far away for get entitys can check
 const bot = mineflayer.createBot({
@@ -50,7 +48,9 @@ let reportedArrow = false;
 let arrowSave = {};
 let parabollicArrowData = [];
 
-let factorGrades = 100;
+let factorGrades = 0.2;
+
+let preview = 0;
 
 // This bot Fires arrow
 bot.on('goal_reached', () => {
@@ -101,6 +101,8 @@ botChecker.on('goal_reached', () => {
         let allArrows = getAllArrows(botChecker);
         allArrows.forEach(arrow => {
             if (!currentArrows.includes(arrow.id)) {
+                preview = previewCalc(arrow);
+
                 currentArrows.push(arrow.id);
                 currentArrow = arrow;
 
@@ -139,13 +141,12 @@ botChecker.on('goal_reached', () => {
                         distance_origin_to_target: distance,
                         rate_speed: distance / timeToImpact * 1000 // block per second
                     };
-                    let dataArray = [];
-                    dataArray.push(data);
 
-                    console.log("Arrow Impacted! Arrow:", data.id, "Grade:", data.grade / factorGrades, "Time to impact:", data.timeToImpact, "Distance:", Math.round(data.distance_origin_to_target * 100) / 100, "m/s:", Math.round(data.rate_speed * 100) / 100);
+                    // console.log("Arrow Impacted! Arrow:", data.id, "Grade:", data.grade / factorGrades, "Time to impact:", data.timeToImpact, "Distance:", Math.round(data.distance_origin_to_target * 100) / 100, "m/s:", Math.round(data.rate_speed * 100) / 100);
+                    let zEnd = Math.round(currentArrow.position.z * 100) / 100;
+                    let rate = Math.round((zEnd - preview) * 100) / 100;
+                    console.log("Arrow impacted", "Grade:", data.grade / factorGrades, "Z", zEnd, "-", preview, "=>", rate);
 
-                    save(dataArray, './files/bigData.csv');
-                    save(parabollicArrowData, './files/parabolicArrowData.csv');
 
                     counPosition = 0;
                     reportedArrow = true;
@@ -170,28 +171,6 @@ botChecker.on('goal_reached', () => {
                     }
                 }
 
-                const distance = getDistance(currentArrow.position, previusParabolic);
-                let velocity = getVelocity(currentArrow.velocity)
-
-                let parabolicData = {
-                    id: currentArrow.id,
-                    grade: grades - 1,
-                    x_origin: previusParabolic.x,
-                    y_origin: previusParabolic.y,
-                    z_origin: previusParabolic.z,
-                    x_destination: currentArrow.position.x,
-                    y_destination: currentArrow.position.y,
-                    z_destination: currentArrow.position.z,
-                    timePosition: Date.now() - arrowSave.time,
-                    distange_last_record: distance,
-                    rate_speed: distance / timeToImpact * 1000, // block per second
-                    velocity_x: currentArrow.velocity.x,
-                    velocity_y: currentArrow.velocity.y,
-                    velocity_z: currentArrow.velocity.z,
-                    velocity: velocity,
-                };
-
-                parabollicArrowData.push(parabolicData);
                 counPosition = 0;
             }
 
@@ -240,7 +219,15 @@ function getAllArrows(bot) {
     return arrows;
 }
 
+function degrees_to_radians(degrees) {
+    var pi = Math.PI;
+    return degrees * (pi / 180);
+}
 
+function radians_to_degrees(radians) {
+    var pi = Math.PI;
+    return radians * (180 / pi);
+}
 
 function save(data, file) {
     data = formatNumber(data);
@@ -273,5 +260,34 @@ function save(data, file) {
     }
 
 
+
+}
+
+
+function previewCalc(arPrev) {
+    // drag = 30;
+
+    base = new Vec3(arPrev.position);
+    velocity = arPrev.velocity;
+    console.log("velocity", velocity);
+    downwardAccel = new Vec3(0, -0.05, 0);
+    // itr = new BlockIterator(base.getWorld(), base.toVector(), base.getDirection(), 0, 3);
+
+    tick = 0;
+    let intercepts = true
+    while (intercepts) {
+        velocity.add(downwardAccel);
+        base.add(velocity);
+        block = botChecker.blockAt(base).name;
+        // console.log(base, block);
+        if (block !== 'air') {
+            intercepts = false
+        }
+        tick++;
+    }
+    tick--;
+    // console.log(tick, Math.round(base.z * 100) / 100);
+    console.log(tick)
+    return Math.round(base.z * 100) / 100
 
 }

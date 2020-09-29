@@ -1,11 +1,11 @@
-const config = require('./config');
+const config = require('../config');
 const mineflayer = require('mineflayer');
 const { pathfinder } = require('mineflayer-pathfinder');
-const saveToFile = require('./saveToFile').save;
+const saveToFile = require('../saveToFile').save;
 
-const { getPlayer, getEntityArrow } = require('./botFunctions');
+const { getPlayer, getEntityArrow, shotBow } = require('../botFunctions');
 
-const { getTicks, degrees_to_radians, radians_to_degrees, round, getVox, getVoy, getMaxZ } = require('./hawkEyeEquations');
+const { getTicks, degrees_to_radians, radians_to_degrees, round, getVox, getVoy, getMaxZ } = require('../hawkEyeEquations');
 
 const bot = mineflayer.createBot({
     username: config.usernameA,
@@ -215,17 +215,4 @@ function multiShot() {
         bot.removeListener('physicTick', multiShot)
     }
 
-}
-
-function shotBow(bot, grade, yaw = null) {
-    if (yaw === null) {
-        yaw = bot.player.entity.yaw;
-    } else {
-        yaw = degrees_to_radians(yaw);
-    }
-    bot.look(yaw, degrees_to_radians(grade));
-    bot.activateItem();
-    setTimeout(() => {
-        bot.deactivateItem();
-    }, 1200);
 }
