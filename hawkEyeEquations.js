@@ -6,7 +6,7 @@ function getTargetDistance(bot, target) {
     const z_distance = Math.pow(bot.player.entity.position.z - target.position.z, 2)
     const h_distance = Math.sqrt(x_distance + z_distance);
 
-    const y_distance = bot.player.entity.position.y - target.position.y
+    const y_distance = target.position.y - bot.player.entity.position.y;
 
     const distance = Math.sqrt(Math.pow(y_distance, 2) + x_distance + z_distance)
 
@@ -45,14 +45,21 @@ function round(value) {
     return Math.round(value * 100) / 100;
 }
 
-function getVox(Vo, Alfa) {
-    return Vo * Math.cos((Alfa))
+function getVox(Vo, Alfa, Resistance = 0) {
+    return Vo * Math.cos(Alfa) - Resistance;
 }
 
-function getVoy(Vo, Alfa) {
-    return Vo * Math.sin((Alfa))
+function getVoy(Vo, Alfa, Resistance = 0) {
+    return Vo * Math.sin(Alfa) - Resistance;
 }
 
+function getVo(Vox, Voy, G) {
+    return Math.sqrt(Math.pow(Vox, 2) + Math.pow(Voy - G, 2)); // New Total Velocity - Gravity
+}
+
+function getGrades(Vo, Voy, Gravity) {
+    return radians_to_degrees(Math.asin((Voy - Gravity) / Vo));
+}
 
 function incercetp_block(bot, position) {
     block = bot.blockAt(position);
@@ -70,5 +77,9 @@ module.exports = {
     round,
     getTargetDistance,
     getTargetYaw,
-    getTargetPitch
+    getTargetPitch,
+    getVox,
+    getVoy,
+    getVo,
+    getGrades
 }
