@@ -6,7 +6,7 @@ function getTargetDistance(bot, target) {
     const z_distance = Math.pow(bot.player.entity.position.z - target.position.z, 2)
     const h_distance = Math.sqrt(x_distance + z_distance);
 
-    const y_distance = target.position.y - bot.player.entity.position.y + 1;
+    const y_distance = target.position.y - bot.player.entity.position.y;
 
     const distance = Math.sqrt(Math.pow(y_distance, 2) + x_distance + z_distance)
 

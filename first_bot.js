@@ -62,8 +62,7 @@ function shot(bot) {
         if (degrees) {
             shotBow(bot, yaw, degrees_to_radians(degrees));
         } else {
-            console.log("Target can reach!");
-            console.log(distances);
+            console.log("Target can reach!", distances);
         }
     }
 
@@ -73,26 +72,37 @@ function shot(bot) {
 // Calculate how many ticks need from shot to Y = 0 or target Y
 // For parabola of Y you have 2 times for found the Y position if Y original are downside of Y destination
 const gravity = 0.05;
-const factorY = 0.01;; // No son correctas
-const factorH = 0.01; // No son correctas
+const factorY = 0.01; // Factores de resistencia
+const factorH = 0.01; // Factores de resistencia
 const BaseVo = 3;
 
 function getMasterGrade(bot, target) {
-    let grade = 2;
-    let ticks = 0;
+    let grade = -90;
+    let nearestDistance = false;
+    let nearestGrade = false;
 
     const distances = getTargetDistance(bot, target);
     const x_destination = distances.h_distance;
     const y_destination = distances.y_distance;
 
     while (true) {
-        tryG = tryGrade(grade, x_destination, y_destination)
-        if (tryG)
-            return grade;
-        grade = grade + 0.1;
-        console.log(grade);
-        if (grade > 40) {
-            return false;
+        distance = tryGrade(grade, x_destination, y_destination)
+
+        if (nearestDistance > distance) {
+            nearestDistance = distance;
+            nearestGrade = grade;
+        }
+
+        if (nearestDistance === false) {
+            nearestDistance = distance;
+            nearestGrade = grade;
+        }
+
+        grade++;
+
+        if (grade >= 90) {
+            console.log(nearestGrade, nearestDistance);
+            return nearestGrade;
         }
     }
 
@@ -106,15 +116,17 @@ function tryGrade(grade, x_destination, y_destination) {
     let Vx = Vox;
     let ProjectileGrade;
 
+    let nearestDistance = false;
+
     while (true) {
-        if (
-            (Vy - y_destination) > -1 &&
-            (Vy - y_destination) < 2 &&
-            (Vx - x_destination) > -2 &&
-            (Vx - x_destination) < 2
-        ) { // +- 1 aproach
-            console.log("Found grade", grade);
-            return grade;
+        const distance = Math.sqrt(Math.pow(Vy - y_destination, 2) + Math.pow(Vx - x_destination, 2));
+
+        if (nearestDistance > distance) {
+            nearestDistance = distance;
+        }
+
+        if (nearestDistance === false) {
+            nearestDistance = distance;
         }
 
         Vo = equations.getVo(Vox, Voy, gravity);
@@ -126,8 +138,9 @@ function tryGrade(grade, x_destination, y_destination) {
         Vy += Voy;
         Vx += Vox;
 
-        if (Vx > x_destination) {
-            return false;
+        // Arrow passed player OR Voy (arrow is going down and passed player)
+        if (Vx > x_destination || (Voy < 0 && y_destination > Vy)) {
+            return nearestDistance;
         }
     }
 }
