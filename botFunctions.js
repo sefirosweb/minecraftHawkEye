@@ -31,11 +31,12 @@ function shotBow(bot, yaw = null, grade = null) {
         grade = bot.player.entity.grade;
     }
 
-    bot.look(yaw, grade);
-    bot.activateItem();
-    setTimeout(() => {
-        bot.deactivateItem();
-    }, 1200);
+    bot.look(yaw, grade, true, () => {
+        bot.activateItem();
+        setTimeout(() => {
+            bot.deactivateItem();
+        }, 1200);
+    });
 }
 
 module.exports = {

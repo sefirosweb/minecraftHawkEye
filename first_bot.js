@@ -12,13 +12,34 @@ const bot = mineflayer.createBot({
     host: config.host
 })
 
+const botB = mineflayer.createBot({
+    username: config.usernameB,
+    port: config.port,
+    host: config.host
+})
+
+
+botB.on('spawn', function() {
+    botB.chat('Ready!');
+    let lastTime = Date.now();
+
+    botB.on('physicTick', function() {
+        const currentTime = Date.now();
+        if (currentTime - lastTime > 1200) {
+            lastTime = currentTime;
+            shot(botB);
+        }
+    });
+});
+
+
 bot.on('spawn', function() {
     bot.chat('Ready!');
     let lastTime = Date.now();
 
     bot.on('physicTick', function() {
         const currentTime = Date.now();
-        if (currentTime - lastTime > 3000) {
+        if (currentTime - lastTime > 1200) {
             lastTime = currentTime;
             shot(bot);
         }
@@ -47,13 +68,10 @@ function shot(bot) {
     if (!player)
         return false;
 
-    const distances = equations.getTargetDistance(bot, player);
     const yaw = equations.getTargetYaw(bot, player);
-
-    // Pitch / Degrees
-    let degrees = getMasterGrade(bot, player);
-    if (degrees) {
-        shotBow(bot, yaw, degrees_to_radians(degrees));
+    const pitch = getMasterGrade(bot, player);
+    if (pitch) {
+        shotBow(bot, yaw, degrees_to_radians(pitch));
     } else {
         console.log('Cant reach target');
     }
@@ -81,19 +99,21 @@ function getMasterGrade(bot, target) {
 
     precisionShot = getPrecisionShot(grade.nearestGrade_first, x_destination, y_destination, 1);
     precisionShot = getPrecisionShot(precisionShot.nearestGrade, x_destination, y_destination, 2);
+    precisionShot = getPrecisionShot(precisionShot.nearestGrade, x_destination, y_destination, 3);
     if (precisionShot.nearestDistance > 4 && grade.nearestGrade_second !== false) {
         precisionShot = getPrecisionShot(grade.nearestGrade_second, x_destination, y_destination, 1);
         precisionShot = getPrecisionShot(precisionShot.nearestGrade, x_destination, y_destination, 2);
+        precisionShot = getPrecisionShot(precisionShot.nearestGrade, x_destination, y_destination, 3);
     }
 
     console.clear();
     console.log("Grados inicio:", grade);
     console.log("Mas cercano:", precisionShot);
     console.log(distances);
-    console.log("Shot to:", precisionShot.nearestGrade / 100);
+    console.log("Shot to:", precisionShot.nearestGrade / 1000);
     if (precisionShot.nearestDistance > 4)
         return false;
-    return precisionShot.nearestGrade / 100;
+    return precisionShot.nearestGrade / 1000;
 }
 
 
@@ -162,7 +182,7 @@ function getFirstGradeAproax(x_destination, y_destination) {
 }
 
 // Calculate Arrow Trayectory
-function tryGrade(grade, x_destination, y_destination) {
+function tryGrade(grade, x_destination, y_destination, calculateInterceptBlocks = false) {
     let Vo = BaseVo;
     let Voy = equations.getVoy(Vo, equations.degrees_to_radians(grade));
     let Vox = equations.getVox(Vo, equations.degrees_to_radians(grade));
@@ -172,6 +192,8 @@ function tryGrade(grade, x_destination, y_destination) {
 
     let nearestDistance = false;
     let totalTicks = 0;
+
+    let blockInTrayect = false;
 
     while (true) {
         totalTicks++;
