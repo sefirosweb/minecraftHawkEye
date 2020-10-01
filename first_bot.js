@@ -51,21 +51,8 @@ function shot(bot) {
     const yaw = equations.getTargetYaw(bot, player);
 
     // Pitch / Degrees
-    let degrees = 0;
-
-    if (distances.distance <= 20) {
-        degrees = equations.getTargetPitch(bot, player);
-        degrees = radians_to_degrees(degrees);
-        shotBow(bot, yaw, degrees_to_radians(degrees));
-    } else {
-        degrees = getMasterGrade(bot, player);
-        if (degrees) {
-            shotBow(bot, yaw, degrees_to_radians(degrees));
-        } else {
-            console.log("Target can reach!", distances);
-        }
-    }
-
+    let degrees = getMasterGrade(bot, player);
+    shotBow(bot, yaw, degrees_to_radians(degrees));
 }
 
 
@@ -76,38 +63,63 @@ const factorY = 0.01; // Factores de resistencia
 const factorH = 0.01; // Factores de resistencia
 const BaseVo = 3;
 
-function getMasterGrade(bot, target) {
-    let grade = -90;
-    let nearestDistance = false;
-    let nearestGrade = false;
 
+function getMasterGrade(bot, target) {
     const distances = getTargetDistance(bot, target);
     const x_destination = distances.h_distance;
     const y_destination = distances.y_distance;
 
-    while (true) {
-        distance = tryGrade(grade, x_destination, y_destination)
+    grade = getFirstGradeAproax(x_destination, y_destination);
 
-        if (nearestDistance > distance) {
+    let nearestDistance = false;
+    let nearestGrade = false;
+    console.clear();
+
+    for (let iGrade = (grade - 10) * 10; iGrade <= (grade + 10) * 10; iGrade += 1) {
+
+        distance = tryGrade(iGrade / 10, x_destination, y_destination).nearestDistance
+        console.log(iGrade);
+
+        if (nearestDistance > distance || nearestDistance === false) {
             nearestDistance = distance;
-            nearestGrade = grade;
+            nearestGrade = iGrade / 10;
         }
+    }
 
-        if (nearestDistance === false) {
-            nearestDistance = distance;
-            nearestGrade = grade;
+    console.log("Grados inicio:", grade);
+    console.log("Mas cercano:", nearestGrade, nearestDistance);
+    console.log(distances)
+    return nearestGrade;
+}
+
+
+// Calculate the 2 most aproax shots
+// https://es.qwe.wiki/wiki/Trajectory
+function getFirstGradeAproax(x_destination, y_destination) {
+    let grade = -90;
+    let nearestDistance = false;
+
+    let nearestGrade_first = false;
+    let nearestGrade_second = false;
+
+    while (true) {
+        distance = tryGrade(grade, x_destination, y_destination).nearestDistance
+
+        if (nearestDistance > distance || nearestDistance === false) {
+            if (grade)
+                nearestDistance = distance;
+            nearestGrade_first = grade;
         }
 
         grade++;
 
         if (grade >= 90) {
-            console.log(nearestGrade, nearestDistance);
-            return nearestGrade;
+            return nearestGrade_first;
         }
     }
-
 }
 
+// Calculate Arrow Trayectory
 function tryGrade(grade, x_destination, y_destination) {
     let Vo = BaseVo;
     let Voy = equations.getVoy(Vo, equations.degrees_to_radians(grade));
@@ -117,16 +129,15 @@ function tryGrade(grade, x_destination, y_destination) {
     let ProjectileGrade;
 
     let nearestDistance = false;
+    let totalTicks = 0;
 
     while (true) {
+        totalTicks++;
         const distance = Math.sqrt(Math.pow(Vy - y_destination, 2) + Math.pow(Vx - x_destination, 2));
 
-        if (nearestDistance > distance) {
+        if (nearestDistance > distance || nearestDistance === false) {
             nearestDistance = distance;
-        }
-
-        if (nearestDistance === false) {
-            nearestDistance = distance;
+            nearestGrade = grade;
         }
 
         Vo = equations.getVo(Vox, Voy, gravity);
@@ -140,7 +151,10 @@ function tryGrade(grade, x_destination, y_destination) {
 
         // Arrow passed player OR Voy (arrow is going down and passed player)
         if (Vx > x_destination || (Voy < 0 && y_destination > Vy)) {
-            return nearestDistance;
+            return {
+                nearestDistance: nearestDistance,
+                totalTicks: totalTicks
+            };
         }
     }
 }
