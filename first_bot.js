@@ -52,9 +52,17 @@ function shot(bot) {
 
     // Pitch / Degrees
     let degrees = getMasterGrade(bot, player);
-    shotBow(bot, yaw, degrees_to_radians(degrees));
+    if (degrees) {
+        shotBow(bot, yaw, degrees_to_radians(degrees));
+    } else {
+        console.log('Cant reach target');
+    }
 }
 
+Number.prototype.countDecimals = function() {
+    if (Math.floor(this.valueOf()) === this.valueOf()) return 0;
+    return this.toString().split(".")[1].length || 0;
+}
 
 // Calculate how many ticks need from shot to Y = 0 or target Y
 // For parabola of Y you have 2 times for found the Y position if Y original are downside of Y destination
@@ -71,50 +79,88 @@ function getMasterGrade(bot, target) {
 
     grade = getFirstGradeAproax(x_destination, y_destination);
 
-    let nearestDistance = false;
-    let nearestGrade = false;
-    console.clear();
-
-    for (let iGrade = (grade - 10) * 10; iGrade <= (grade + 10) * 10; iGrade += 1) {
-
-        distance = tryGrade(iGrade / 10, x_destination, y_destination).nearestDistance
-        console.log(iGrade);
-
-        if (nearestDistance > distance || nearestDistance === false) {
-            nearestDistance = distance;
-            nearestGrade = iGrade / 10;
-        }
+    precisionShot = getPrecisionShot(grade.nearestGrade_first, x_destination, y_destination, 1);
+    precisionShot = getPrecisionShot(precisionShot.nearestGrade, x_destination, y_destination, 2);
+    if (precisionShot.nearestDistance > 2 && grade.nearestGrade_second !== false) {
+        precisionShot = getPrecisionShot(grade.nearestGrade_second, x_destination, y_destination, 1);
+        precisionShot = getPrecisionShot(precisionShot.nearestGrade, x_destination, y_destination, 2);
     }
 
+    console.clear();
     console.log("Grados inicio:", grade);
-    console.log("Mas cercano:", nearestGrade, nearestDistance);
-    console.log(distances)
-    return nearestGrade;
+    console.log("Mas cercano:", precisionShot);
+    console.log(distances);
+    console.log("Shot to:", precisionShot.nearestGrade / 100);
+    if (precisionShot.nearestDistance > 2)
+        return false;
+    return precisionShot.nearestGrade / 100;
 }
 
 
-// Calculate the 2 most aproax shots
+//Get more precision on shot
+function getPrecisionShot(grade, x_destination, y_destination, decimals) {
+    let nearestDistance = false;
+    let nearestGrade = false;
+    decimals = Math.pow(10, decimals);
+
+    for (let iGrade = (grade * 10) - 10; iGrade <= (grade * 10) + 10; iGrade += 1) {
+
+        distance = tryGrade(iGrade / decimals, x_destination, y_destination).nearestDistance
+
+        if (nearestDistance > distance || nearestDistance === false) {
+            nearestDistance = distance;
+            nearestGrade = iGrade;
+        }
+
+    }
+
+    return {
+        nearestGrade,
+        nearestDistance
+    };
+}
+
+
+// Calculate all 180º first grades
+// Calculate the 2 most aproax shots 
 // https://es.qwe.wiki/wiki/Trajectory
 function getFirstGradeAproax(x_destination, y_destination) {
     let grade = -90;
     let nearestDistance = false;
 
+    let first_found = false;
     let nearestGrade_first = false;
     let nearestGrade_second = false;
 
     while (true) {
-        distance = tryGrade(grade, x_destination, y_destination).nearestDistance
+        const tryGradeShot = tryGrade(grade, x_destination, y_destination);
+
+        distance = tryGradeShot.nearestDistance;
+        totalTicks = tryGradeShot.totalTicks;
+
+        if (nearestDistance < distance && nearestDistance !== false) {
+            first_found = true;
+        }
 
         if (nearestDistance > distance || nearestDistance === false) {
-            if (grade)
-                nearestDistance = distance;
-            nearestGrade_first = grade;
+            nearestDistance = distance;
+
+            if (!first_found) {
+                nearestGrade_first = grade;
+            } else {
+                nearestGrade_second = grade;
+            }
         }
+
+
 
         grade++;
 
         if (grade >= 90) {
-            return nearestGrade_first;
+            return {
+                nearestGrade_first: nearestGrade_first,
+                nearestGrade_second: nearestGrade_second,
+            };
         }
     }
 }
