@@ -81,7 +81,7 @@ function getMasterGrade(bot, target) {
 
     precisionShot = getPrecisionShot(grade.nearestGrade_first, x_destination, y_destination, 1);
     precisionShot = getPrecisionShot(precisionShot.nearestGrade, x_destination, y_destination, 2);
-    if (precisionShot.nearestDistance > 2 && grade.nearestGrade_second !== false) {
+    if (precisionShot.nearestDistance > 4 && grade.nearestGrade_second !== false) {
         precisionShot = getPrecisionShot(grade.nearestGrade_second, x_destination, y_destination, 1);
         precisionShot = getPrecisionShot(precisionShot.nearestGrade, x_destination, y_destination, 2);
     }
@@ -91,7 +91,7 @@ function getMasterGrade(bot, target) {
     console.log("Mas cercano:", precisionShot);
     console.log(distances);
     console.log("Shot to:", precisionShot.nearestGrade / 100);
-    if (precisionShot.nearestDistance > 2)
+    if (precisionShot.nearestDistance > 4)
         return false;
     return precisionShot.nearestGrade / 100;
 }
@@ -102,18 +102,14 @@ function getPrecisionShot(grade, x_destination, y_destination, decimals) {
     let nearestDistance = false;
     let nearestGrade = false;
     decimals = Math.pow(10, decimals);
-
-    for (let iGrade = (grade * 10) - 10; iGrade <= (grade * 10) + 10; iGrade += 1) {
-
+    for (let iGrade = (grade * 10) - 20; iGrade <= (grade * 10) + 20; iGrade += 1) {
         distance = tryGrade(iGrade / decimals, x_destination, y_destination).nearestDistance
-
         if (nearestDistance > distance || nearestDistance === false) {
             nearestDistance = distance;
             nearestGrade = iGrade;
         }
 
     }
-
     return {
         nearestGrade,
         nearestDistance
@@ -156,7 +152,7 @@ function getFirstGradeAproax(x_destination, y_destination) {
 
         grade++;
 
-        if (grade >= 90) {
+        if (grade === 89) {
             return {
                 nearestGrade_first: nearestGrade_first,
                 nearestGrade_second: nearestGrade_second,
