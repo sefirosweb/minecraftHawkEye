@@ -109,10 +109,14 @@ function getMasterGrade(bot, target) {
 
     const grade = getFirstGradeAproax(x_destination, y_destination, yaw);
 
+    if (!grade.nearestGrade_first)
+        return false; // No aviable trayectory
+
+    // Check blocks in trayectory
     let check = tryGrade(grade.nearestGrade_first.grade, x_destination, y_destination, BaseVo, bot, target);
 
-    if (check.blockInTrayect !== true && check.nearestDistance < 4) {
-        gradeShot = grade.nearestGrade_first;
+    if (!check.blockInTrayect && check.nearestDistance < 4) {
+        gradeShot = grade.nearestGrade_first.grade;
     } else {
         if (!grade.nearestGrade_second) {
             return false; // No aviable trayectory
@@ -121,7 +125,7 @@ function getMasterGrade(bot, target) {
         if (check.blockInTrayect === true) {
             return false; // No aviable trayectory
         }
-        gradeShot = grade.nearestGrade_second;
+        gradeShot = grade.nearestGrade_second.grade;
     }
 
     precisionShot = getPrecisionShot(gradeShot, x_destination, y_destination, 1);
