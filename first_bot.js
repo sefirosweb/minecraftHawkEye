@@ -42,7 +42,7 @@ bot.on('spawn', function() {
     bot.chat('Ready!');
 
     bot.chat('/give Archer bow{Enchantments:[{id:unbreaking,lvl:100}]} 1');
-    bot.chat('/give Archer minecraft:arrow 600');
+    bot.chat('/give Archer minecraft:arrow 60');
     bot.chat('/time set day');
 
     let lastTime = Date.now();
@@ -109,21 +109,22 @@ function getMasterGrade(bot, target) {
 
     const grade = getFirstGradeAproax(x_destination, y_destination, yaw);
 
-    let check = tryGrade(grade.nearestGrade_first, x_destination, y_destination, bot, target);
+    let check = tryGrade(grade.nearestGrade_first, x_destination, y_destination, BaseVo, bot, target);
 
     if (check.blockInTrayect !== true) {
-        precisionShot = getPrecisionShot(grade.nearestGrade_first, x_destination, y_destination, 1);
+        gradeShot = grade.nearestGrade_first;
     } else {
         if (!grade.nearestGrade_second) {
             return false;
         }
-        check = tryGrade(grade.nearestGrade_second, x_destination, y_destination, bot, target);
+        check = tryGrade(grade.nearestGrade_second, x_destination, y_destination, BaseVo, bot, target);
         if (check.blockInTrayect === true) {
             return false; // No aviable trayectory
         }
-        precisionShot = getPrecisionShot(grade.nearestGrade_second, x_destination, y_destination, 1);
-
+        gradeShot = grade.nearestGrade_second;
     }
+
+    precisionShot = getPrecisionShot(gradeShot, x_destination, y_destination, 1);
 
     if (precisionShot.nearestDistance > 4) // Too far
         return false;
@@ -140,18 +141,28 @@ function getMasterGrade(bot, target) {
 function getPrecisionShot(grade, x_destination, y_destination, decimals) {
     let nearestDistance = false;
     let nearestGrade = false;
+    let nearestVo = false;
+    let nearestTicks;
     decimals = Math.pow(10, decimals);
-    for (let iGrade = (grade * 10) - 20; iGrade <= (grade * 10) + 20; iGrade += 1) {
-        distance = tryGrade(iGrade / decimals, x_destination, y_destination).nearestDistance
-        if (nearestDistance > distance || nearestDistance === false) {
-            nearestDistance = distance;
+
+    // for (let i = Vo; i >= 1; i--) {
+    for (let iGrade = (grade * 10) - 10; iGrade <= (grade * 10) + 10; iGrade += 1) {
+
+        distance = tryGrade(iGrade / decimals, x_destination, y_destination, BaseVo);
+
+        if ((distance.nearestDistance < nearestDistance) || nearestDistance === false) {
+            nearestDistance = distance.nearestDistance;
             nearestGrade = iGrade;
+            nearestTicks = distance.totalTicks;
         }
 
     }
+    // }
+
     return {
         nearestGrade,
-        nearestDistance
+        nearestDistance,
+        nearestVo
     };
 }
 
@@ -169,7 +180,7 @@ function getFirstGradeAproax(x_destination, y_destination) {
     let prevDistance;
 
     while (true) {
-        const tryGradeShot = tryGrade(grade, x_destination, y_destination);
+        const tryGradeShot = tryGrade(grade, x_destination, y_destination, BaseVo);
 
         distance = tryGradeShot.nearestDistance;
         totalTicks = tryGradeShot.totalTicks;
@@ -201,15 +212,14 @@ function getFirstGradeAproax(x_destination, y_destination) {
         if (grade === 89) {
             return {
                 nearestGrade_first: nearestGrade_first,
-                nearestGrade_second: nearestGrade_second,
+                nearestGrade_second: nearestGrade_second
             };
         }
     }
 }
 
 // Calculate Arrow Trayectory
-function tryGrade(grade, x_destination, y_destination, bot = false, target = false) {
-    let Vo = BaseVo;
+function tryGrade(grade, x_destination, y_destination, Vo, bot = false, target = false) {
     let Voy = equations.getVoy(Vo, equations.degrees_to_radians(grade));
     let Vox = equations.getVox(Vo, equations.degrees_to_radians(grade));
     let Vy = Voy;
