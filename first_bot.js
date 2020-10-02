@@ -109,13 +109,13 @@ function getMasterGrade(bot, target) {
 
     const grade = getFirstGradeAproax(x_destination, y_destination, yaw);
 
-    let check = tryGrade(grade.nearestGrade_first, x_destination, y_destination, BaseVo, bot, target);
+    let check = tryGrade(grade.nearestGrade_first.grade, x_destination, y_destination, BaseVo, bot, target);
 
-    if (check.blockInTrayect !== true) {
+    if (check.blockInTrayect !== true && check.nearestDistance < 4) {
         gradeShot = grade.nearestGrade_first;
     } else {
         if (!grade.nearestGrade_second) {
-            return false;
+            return false; // No aviable trayectory
         }
         check = tryGrade(grade.nearestGrade_second, x_destination, y_destination, BaseVo, bot, target);
         if (check.blockInTrayect === true) {
@@ -142,7 +142,6 @@ function getPrecisionShot(grade, x_destination, y_destination, decimals) {
     let nearestDistance = false;
     let nearestGrade = false;
     let nearestVo = false;
-    let nearestTicks;
     decimals = Math.pow(10, decimals);
 
     // for (let i = Vo; i >= 1; i--) {
@@ -171,51 +170,45 @@ function getPrecisionShot(grade, x_destination, y_destination, decimals) {
 // Calculate the 2 most aproax shots 
 // https://es.qwe.wiki/wiki/Trajectory
 function getFirstGradeAproax(x_destination, y_destination) {
-    let grade = -90;
     let nearestDistance = false;
 
     let first_found = false;
     let nearestGrade_first = false;
     let nearestGrade_second = false;
-    let prevDistance;
 
-    while (true) {
+    let nearGrades = [];
+
+    for (let grade = -89; grade < 90; grade++) {
         const tryGradeShot = tryGrade(grade, x_destination, y_destination, BaseVo);
 
-        distance = tryGradeShot.nearestDistance;
-        totalTicks = tryGradeShot.totalTicks;
-        if (nearestDistance === false) {
-            nearestDistance = distance;
-        }
+        tryGradeShot.grade = grade;
+        if (tryGradeShot.nearestDistance > 4)
+            continue;
 
-        if (first_found && prevDistance > distance && nearestGrade_second === false) {
-            nearestDistance = distance
-        }
+        nearGrades.push(tryGradeShot);
 
-        if (nearestDistance < distance && grade > 30) {
+        if (!nearestGrade_first)
+            nearestGrade_first = tryGradeShot;
+
+        if (tryGradeShot.grade - nearestGrade_first.grade > 10 && first_found === false) {
             first_found = true;
-            prevDistance = distance;
+            nearestGrade_second = tryGradeShot;
         }
 
-        if (nearestDistance >= distance) {
-            nearestDistance = distance;
+        if (nearestGrade_first.nearestDistance > tryGradeShot.nearestDistance && first_found === false)
+            nearestGrade_first = tryGradeShot;
 
-            if (!first_found) {
-                nearestGrade_first = grade;
-            } else {
-                nearestGrade_second = grade;
-            }
-        }
+        if (nearestGrade_second.nearestDistance > tryGradeShot.nearestDistance && first_found)
+            nearestGrade_second = tryGradeShot;
 
-        grade++;
 
-        if (grade === 89) {
-            return {
-                nearestGrade_first: nearestGrade_first,
-                nearestGrade_second: nearestGrade_second
-            };
-        }
+
     }
+
+    return {
+        nearestGrade_first,
+        nearestGrade_second
+    };
 }
 
 // Calculate Arrow Trayectory
@@ -270,7 +263,7 @@ function tryGrade(grade, x_destination, y_destination, Vo, bot = false, target =
             let arrow_current_z = bot.player.entity.position.z;
             let arrow_current_y = bot.player.entity.position.y;
             if (previusArrowPosition === false) {
-                previusArrowPosition = new Vec3(bot.player.entity.position.x, bot.player.entity.position.y, bot.player.entity.position.z);
+                previusArrowPosition = new Vec3(bot.player.entity.position.x, bot.player.entity.position.y + 1.5, bot.player.entity.position.z);
             }
 
             arrow_current_y += Vy;
@@ -289,7 +282,7 @@ function tryGrade(grade, x_destination, y_destination, Vo, bot = false, target =
             const distY = arrowPosition.y - previusArrowPosition.y;
             const distZ = arrowPosition.z - previusArrowPosition.z;
 
-            const maxSteps = Math.ceil(Math.max(Math.abs(distX), Math.abs(distY), Math.abs(distZ)));
+            const maxSteps = 20; // Math.ceil(Math.max(Math.abs(distX), Math.abs(distY), Math.abs(distZ))) * 20;
             const distVector = new Vec3(distX / maxSteps, distY / maxSteps, distZ / maxSteps)
 
             let incercetp;
@@ -298,6 +291,9 @@ function tryGrade(grade, x_destination, y_destination, Vo, bot = false, target =
             for (let i = 0; i < maxSteps; i++) {
                 previusArrowPosition.add(distVector);
                 incercetp = !equations.incercetp_block(bot, previusArrowPosition);
+
+                // console.log(previusArrowPosition);
+
                 if (incercetp) {
                     blockInTrayect = true;
                 }
