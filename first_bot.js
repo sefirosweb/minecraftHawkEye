@@ -121,8 +121,8 @@ function getMasterGrade(bot, target) {
         if (!grade.nearestGrade_second) {
             return false; // No aviable trayectory
         }
-        check = tryGrade(grade.nearestGrade_second, x_destination, y_destination, BaseVo, bot, target);
-        if (check.blockInTrayect === true) {
+        check = tryGrade(grade.nearestGrade_second.grade, x_destination, y_destination, BaseVo, bot, target);
+        if (check.blockInTrayect) {
             return false; // No aviable trayectory
         }
         gradeShot = grade.nearestGrade_second.grade;
