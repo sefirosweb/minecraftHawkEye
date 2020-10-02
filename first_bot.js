@@ -4,14 +4,9 @@ const { pathfinder } = require('mineflayer-pathfinder');
 const { getPlayer, shotBow } = require('./botFunctions');
 const equations = require('./hawkEyeEquations');
 const { radians_to_degrees, degrees_to_radians, getTargetDistance } = require('./hawkEyeEquations');
+const Vec3 = require('vec3');
 
-
-const bot = mineflayer.createBot({
-    username: config.usernameA,
-    port: config.port,
-    host: config.host
-})
-
+/*
 const botB = mineflayer.createBot({
     username: config.usernameB,
     port: config.port,
@@ -23,6 +18,10 @@ botB.on('spawn', function() {
     botB.chat('Ready!');
     let lastTime = Date.now();
 
+    bot.chat('/give Looker bow{Enchantments:[{id:unbreaking,lvl:100}]} 1');
+    bot.chat('/give Looker minecraft:arrow 600');
+
+
     botB.on('physicTick', function() {
         const currentTime = Date.now();
         if (currentTime - lastTime > 1200) {
@@ -31,10 +30,21 @@ botB.on('spawn', function() {
         }
     });
 });
+*/
 
+const bot = mineflayer.createBot({
+    username: config.usernameA,
+    port: config.port,
+    host: config.host
+})
 
 bot.on('spawn', function() {
     bot.chat('Ready!');
+
+    bot.chat('/give Archer bow{Enchantments:[{id:unbreaking,lvl:100}]} 1');
+    bot.chat('/give Archer minecraft:arrow 600');
+    bot.chat('/time set day');
+
     let lastTime = Date.now();
 
     bot.on('physicTick', function() {
@@ -68,10 +78,10 @@ function shot(bot) {
     if (!player)
         return false;
 
-    const yaw = equations.getTargetYaw(bot, player);
-    const pitch = getMasterGrade(bot, player);
-    if (pitch) {
-        shotBow(bot, yaw, degrees_to_radians(pitch));
+
+    const infoShot = getMasterGrade(bot, player);
+    if (infoShot) {
+        shotBow(bot, infoShot.yaw, degrees_to_radians(infoShot.pitch));
     } else {
         console.log('Cant reach target');
     }
@@ -91,29 +101,38 @@ const BaseVo = 3;
 
 
 function getMasterGrade(bot, target) {
+    console.clear();
+    const yaw = equations.getTargetYaw(bot, target);
     const distances = getTargetDistance(bot, target);
     const x_destination = distances.h_distance;
     const y_destination = distances.y_distance;
 
-    grade = getFirstGradeAproax(x_destination, y_destination);
+    const grade = getFirstGradeAproax(x_destination, y_destination, yaw);
 
-    precisionShot = getPrecisionShot(grade.nearestGrade_first, x_destination, y_destination, 1);
-    precisionShot = getPrecisionShot(precisionShot.nearestGrade, x_destination, y_destination, 2);
-    precisionShot = getPrecisionShot(precisionShot.nearestGrade, x_destination, y_destination, 3);
-    if (precisionShot.nearestDistance > 4 && grade.nearestGrade_second !== false) {
+    let check = tryGrade(grade.nearestGrade_first, x_destination, y_destination, bot, target);
+
+    if (check.blockInTrayect !== true) {
+        precisionShot = getPrecisionShot(grade.nearestGrade_first, x_destination, y_destination, 1);
+    } else {
+        if (!grade.nearestGrade_second) {
+            return false;
+        }
+        check = tryGrade(grade.nearestGrade_second, x_destination, y_destination, bot, target);
+        if (check.blockInTrayect === true) {
+            return false; // No aviable trayectory
+        }
         precisionShot = getPrecisionShot(grade.nearestGrade_second, x_destination, y_destination, 1);
-        precisionShot = getPrecisionShot(precisionShot.nearestGrade, x_destination, y_destination, 2);
-        precisionShot = getPrecisionShot(precisionShot.nearestGrade, x_destination, y_destination, 3);
+
     }
 
-    console.clear();
-    console.log("Grados inicio:", grade);
-    console.log("Mas cercano:", precisionShot);
-    console.log(distances);
-    console.log("Shot to:", precisionShot.nearestGrade / 1000);
-    if (precisionShot.nearestDistance > 4)
+    if (precisionShot.nearestDistance > 4) // Too far
         return false;
-    return precisionShot.nearestGrade / 1000;
+
+    console.log(precisionShot);
+    return {
+        pitch: precisionShot.nearestGrade / 10,
+        yaw: yaw
+    }
 }
 
 
@@ -147,18 +166,27 @@ function getFirstGradeAproax(x_destination, y_destination) {
     let first_found = false;
     let nearestGrade_first = false;
     let nearestGrade_second = false;
+    let prevDistance;
 
     while (true) {
         const tryGradeShot = tryGrade(grade, x_destination, y_destination);
 
         distance = tryGradeShot.nearestDistance;
         totalTicks = tryGradeShot.totalTicks;
-
-        if (nearestDistance < distance && nearestDistance !== false) {
-            first_found = true;
+        if (nearestDistance === false) {
+            nearestDistance = distance;
         }
 
-        if (nearestDistance > distance || nearestDistance === false) {
+        if (first_found && prevDistance > distance && nearestGrade_second === false) {
+            nearestDistance = distance
+        }
+
+        if (nearestDistance < distance && grade > 30) {
+            first_found = true;
+            prevDistance = distance;
+        }
+
+        if (nearestDistance >= distance) {
             nearestDistance = distance;
 
             if (!first_found) {
@@ -167,8 +195,6 @@ function getFirstGradeAproax(x_destination, y_destination) {
                 nearestGrade_second = grade;
             }
         }
-
-
 
         grade++;
 
@@ -182,7 +208,7 @@ function getFirstGradeAproax(x_destination, y_destination) {
 }
 
 // Calculate Arrow Trayectory
-function tryGrade(grade, x_destination, y_destination, calculateInterceptBlocks = false) {
+function tryGrade(grade, x_destination, y_destination, bot = false, target = false) {
     let Vo = BaseVo;
     let Voy = equations.getVoy(Vo, equations.degrees_to_radians(grade));
     let Vox = equations.getVox(Vo, equations.degrees_to_radians(grade));
@@ -194,6 +220,7 @@ function tryGrade(grade, x_destination, y_destination, calculateInterceptBlocks 
     let totalTicks = 0;
 
     let blockInTrayect = false;
+    let previusArrowPosition = false;
 
     while (true) {
         totalTicks++;
@@ -214,11 +241,61 @@ function tryGrade(grade, x_destination, y_destination, calculateInterceptBlocks 
         Vx += Vox;
 
         // Arrow passed player OR Voy (arrow is going down and passed player)
-        if (Vx > x_destination || (Voy < 0 && y_destination > Vy)) {
+        if (Vx > x_destination || (Voy < 0 && y_destination > Vy) || blockInTrayect) {
             return {
                 nearestDistance: nearestDistance,
-                totalTicks: totalTicks
+                totalTicks: totalTicks,
+                blockInTrayect: blockInTrayect
             };
         }
+
+        // Check if arrow from previos position to current position can impact to block
+        if (bot && target) {
+
+            // Calculate Arrow XYZ position based on YAW and BOT position
+            const yaw = equations.getTargetYaw(bot, target);
+
+            // Vx = Hipotenusa
+            let arrow_current_x = bot.player.entity.position.x;
+            let arrow_current_z = bot.player.entity.position.z;
+            let arrow_current_y = bot.player.entity.position.y;
+            if (previusArrowPosition === false) {
+                previusArrowPosition = new Vec3(bot.player.entity.position.x, bot.player.entity.position.y, bot.player.entity.position.z);
+            }
+
+            arrow_current_y += Vy;
+
+            // Cateto Opuesto
+            const x_extra = Math.sin(yaw) * Vx;
+            arrow_current_x -= x_extra;
+
+            // Cateto Adjacente
+            const z_extra = x_extra / Math.tan(yaw)
+            arrow_current_z -= z_extra;
+
+            const arrowPosition = new Vec3(arrow_current_x, arrow_current_y, arrow_current_z);
+
+            const distX = arrowPosition.x - previusArrowPosition.x;
+            const distY = arrowPosition.y - previusArrowPosition.y;
+            const distZ = arrowPosition.z - previusArrowPosition.z;
+
+            const maxSteps = Math.ceil(Math.max(Math.abs(distX), Math.abs(distY), Math.abs(distZ)));
+            const distVector = new Vec3(distX / maxSteps, distY / maxSteps, distZ / maxSteps)
+
+            let incercetp;
+
+            // Arrow Speed is to high, calculate prevArrow with current position for detect block in midle of tick position
+            for (let i = 0; i < maxSteps; i++) {
+                previusArrowPosition.add(distVector);
+                incercetp = !equations.incercetp_block(bot, previusArrowPosition);
+                if (incercetp) {
+                    blockInTrayect = true;
+                }
+            }
+
+            previusArrowPosition = arrowPosition;
+        }
+
     }
+
 }
