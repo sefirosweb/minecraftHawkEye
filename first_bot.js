@@ -5,32 +5,7 @@ const { getPlayer, shotBow } = require('./botFunctions');
 const equations = require('./hawkEyeEquations');
 const { radians_to_degrees, degrees_to_radians, getTargetDistance } = require('./hawkEyeEquations');
 const Vec3 = require('vec3');
-
-/*
-const botB = mineflayer.createBot({
-    username: config.usernameB,
-    port: config.port,
-    host: config.host
-})
-
-
-botB.on('spawn', function() {
-    botB.chat('Ready!');
-    let lastTime = Date.now();
-
-    bot.chat('/give Looker bow{Enchantments:[{id:unbreaking,lvl:100}]} 1');
-    bot.chat('/give Looker minecraft:arrow 600');
-
-
-    botB.on('physicTick', function() {
-        const currentTime = Date.now();
-        if (currentTime - lastTime > 1200) {
-            lastTime = currentTime;
-            shot(botB);
-        }
-    });
-});
-*/
+const botB = require('./bot_helper').start();
 
 const bot = mineflayer.createBot({
     username: config.usernameA,
@@ -44,6 +19,7 @@ bot.on('spawn', function() {
     bot.chat('/give Archer bow{Enchantments:[{id:unbreaking,lvl:100}]} 1');
     bot.chat('/give Archer minecraft:arrow 60');
     bot.chat('/time set day');
+    bot.chat('/kill @e[type=minecraft:arrow]');
 
     let lastTime = Date.now();
 
@@ -74,7 +50,7 @@ bot.on('spawn', function() {
 
 
 function shot(bot) {
-    const player = getPlayer(bot);
+    const player = getPlayer(bot, "Looker");
     if (!player)
         return false;
 
@@ -101,7 +77,7 @@ const BaseVo = 3;
 
 
 function getMasterGrade(bot, target) {
-    console.clear();
+    // console.clear();
     const yaw = equations.getTargetYaw(bot, target);
     const distances = getTargetDistance(bot, target);
     const x_destination = distances.h_distance;
@@ -133,7 +109,7 @@ function getMasterGrade(bot, target) {
     if (precisionShot.nearestDistance > 4) // Too far
         return false;
 
-    console.log(precisionShot);
+    // console.log(precisionShot);
     return {
         pitch: precisionShot.nearestGrade / 10,
         yaw: yaw
