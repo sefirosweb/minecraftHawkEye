@@ -20,6 +20,10 @@ function start() {
         goNextPoint(bot, points[point]);
     });
 
+    bot.on('physicTick', function() {
+        //console.log(bot.entity.velocity)
+    });
+
     bot.on('goal_reached', () => {
         point++;
         if (point >= points.length)

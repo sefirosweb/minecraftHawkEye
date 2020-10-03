@@ -6,11 +6,11 @@ Number.prototype.countDecimals = function() {
 }
 
 function getTargetDistance(bot, target) {
-    const x_distance = Math.pow(bot.player.entity.position.x - target.position.x, 2)
-    const z_distance = Math.pow(bot.player.entity.position.z - target.position.z, 2)
+    const x_distance = Math.pow(bot.x - target.x, 2)
+    const z_distance = Math.pow(bot.z - target.z, 2)
     const h_distance = Math.sqrt(x_distance + z_distance);
 
-    const y_distance = target.position.y - bot.player.entity.position.y;
+    const y_distance = target.y - bot.y;
 
     const distance = Math.sqrt(Math.pow(y_distance, 2) + x_distance + z_distance)
 
@@ -26,13 +26,6 @@ function getTargetYaw(bot, target) {
     const z_distance = target.position.z - bot.player.entity.position.z;
     const yaw = Math.atan2(x_distance, z_distance) + Math.PI;
     return yaw;
-}
-
-function getTargetPitch(bot, target) {
-    const distance = getTargetDistance(bot, target);
-    const y_distance = target.position.y - bot.player.entity.position.y;
-    const pitch = Math.atan2(y_distance, distance.h_distance);
-    return pitch;
 }
 
 function degrees_to_radians(degrees) {
@@ -256,25 +249,45 @@ const BaseVo = 3;
 function getMasterGrade(bot, target) {
     // console.clear();
     const yaw = getTargetYaw(bot, target);
-    const distances = getTargetDistance(bot, target);
-    const x_destination = distances.h_distance;
-    const y_destination = distances.y_distance;
 
-    const firstCalculation = geBaseCalculation(x_destination, y_destination, yaw, bot, target);
-
-    if (!firstCalculation)
+    let distances = getTargetDistance(bot.entity.position, target.position);
+    let shotCalculation = geBaseCalculation(distances.h_distance, distances.y_distance, yaw, bot, target);
+    if (!shotCalculation)
         return false;
 
-    precisionShot = getPrecisionShot(gradeShot.grade, x_destination, y_destination, 1);
+    let gradeA = shotCalculation.grade;
+
+    distances = getPremonition(shotCalculation.totalTicks, target, bot);
+    shotCalculation = geBaseCalculation(distances.h_distance, distances.y_distance, yaw, bot, target);
+    if (!shotCalculation)
+        return false;
+
+    let gradeB = shotCalculation.grade;
+
+    // console.log(gradeA, gradeB);
+
+
+    precisionShot = getPrecisionShot(gradeShot.grade, distances.h_distance, distances.y_distance, 1);
 
     if (precisionShot.nearestDistance > 4) // Too far
         return false;
 
-    // console.log(precisionShot);
+    // console.log(precisionShot); 
     return {
-        pitch: precisionShot.nearestGrade / 10,
+        pitch: degrees_to_radians(precisionShot.nearestGrade / 10),
         yaw: yaw
     }
+}
+
+function getPremonition(totalTicks, target, bot) {
+    const velocity = new Vec3(target.velocity);
+    let position = new Vec3(target.position);
+    for (let i = 1; i <= totalTicks; i++) {
+        position.add(velocity);
+    }
+    const distances = getTargetDistance(bot.entity.position, position);
+    // console.log(velocity);
+    return distances;
 }
 
 // For parabola of Y you have 2 times for found the Y position if Y original are downside of Y destination

@@ -22,8 +22,13 @@ bot.on('spawn', function() {
     let prevTime = Date.now();
     let preparingShot = null;
     bot.on('physicTick', function() {
+        console.clear();
+
         const currentTime = Date.now();
         const player = getPlayer(bot, "Looker");
+
+        console.log(player)
+
         if (!player)
             return false;
         if (!preparingShot || preparingShot === null) {
@@ -33,7 +38,7 @@ bot.on('spawn', function() {
         const infoShot = equations.getMasterGrade(bot, player);
         if (!infoShot)
             return false;
-        bot.look(infoShot.yaw, equations.degrees_to_radians(infoShot.pitch));
+        bot.look(infoShot.yaw, infoShot.pitch);
         if (preparingShot && currentTime - prevTime > 1200) {
             bot.deactivateItem();
             prevTime = currentTime;
