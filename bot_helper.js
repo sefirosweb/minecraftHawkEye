@@ -24,7 +24,6 @@ function start() {
         point++;
         if (point >= points.length)
             point = 0;
-        console.log("Done");
         setTimeout(() => {
             goNextPoint(bot, points[point]);
         }, 100);
