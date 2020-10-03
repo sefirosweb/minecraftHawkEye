@@ -18,13 +18,26 @@ bot.on('spawn', function() {
     bot.chat('/time set day');
     bot.chat('/kill @e[type=minecraft:arrow]');
 
-    let lastTime = Date.now();
-
+    // Shot every 1,2 secs
+    let prevTime = Date.now();
+    let preparingShot = null;
     bot.on('physicTick', function() {
         const currentTime = Date.now();
-        if (currentTime - lastTime > 1200) {
-            lastTime = currentTime;
-            shot(bot);
+        const player = getPlayer(bot, "Looker");
+        if (!player)
+            return false;
+        if (!preparingShot || preparingShot === null) {
+            bot.activateItem();
+            preparingShot = true;
+        }
+        const infoShot = equations.getMasterGrade(bot, player);
+        if (!infoShot)
+            return false;
+        bot.look(infoShot.yaw, equations.degrees_to_radians(infoShot.pitch));
+        if (preparingShot && currentTime - prevTime > 1200) {
+            bot.deactivateItem();
+            prevTime = currentTime;
+            preparingShot = false;
         }
     });
 
@@ -44,17 +57,3 @@ bot.on('spawn', function() {
         }
     });
 });
-
-
-function shot(bot) {
-    const player = getPlayer(bot, "Looker");
-    if (!player)
-        return false;
-
-    const infoShot = equations.getMasterGrade(bot, player);
-    if (infoShot) {
-        shotBow(bot, infoShot.yaw, equations.degrees_to_radians(infoShot.pitch));
-    } else {
-        console.log('Cant reach target');
-    }
-}
