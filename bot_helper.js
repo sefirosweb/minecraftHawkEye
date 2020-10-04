@@ -37,24 +37,24 @@ bot.on('goal_reached', () => {
 
 const points = [];
 points.push({
-    x: 40,
+    x: 70,
     y: 4,
-    z: 40
+    z: 70
 });
 points.push({
-    x: -40,
+    x: -70,
     y: 4,
-    z: 40
+    z: 70
 });
 points.push({
-    x: -40,
+    x: -70,
     y: 4,
-    z: -40
+    z: -70
 });
 points.push({
-    x: 40,
+    x: 70,
     y: 4,
-    z: -40
+    z: -70
 });
 
 function goNextPoint(bot, goal) {

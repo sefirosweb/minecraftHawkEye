@@ -73,12 +73,14 @@ bot.on('spawn', function() {
             bot.activateItem();
             preparingShot = true;
         }
+        //console.time('arrow')
         const infoShot = equations.getMasterGrade(bot, player, speed);
+        //console.timeEnd('arrow')
+
         if (!infoShot)
             return false;
         bot.look(infoShot.yaw, infoShot.pitch);
         if (preparingShot && currentTime - prevTime > 1200) {
-            console.log(infoShot.target)
             bot.deactivateItem();
             prevTime = currentTime;
             preparingShot = false;
