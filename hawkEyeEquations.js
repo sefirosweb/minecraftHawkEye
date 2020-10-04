@@ -280,6 +280,7 @@ function getMasterGrade(bot, target, speed) {
 }
 
 function getPremonition(totalTicks, target, bot, speed) {
+    totalTicks = totalTicks + Math.ceil(totalTicks / 10)
     const velocity = new Vec3(speed);
     // const velocity = new Vec3(0, 0, 0);
     let position = new Vec3(target.position);
