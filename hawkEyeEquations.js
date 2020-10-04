@@ -22,8 +22,8 @@ function getTargetDistance(bot, target) {
 }
 
 function getTargetYaw(bot, target) {
-    const x_distance = target.position.x - bot.player.entity.position.x;
-    const z_distance = target.position.z - bot.player.entity.position.z;
+    const x_distance = target.x - bot.x;
+    const z_distance = target.z - bot.z;
     const yaw = Math.atan2(x_distance, z_distance) + Math.PI;
     return yaw;
 }
@@ -119,7 +119,7 @@ function tryGrade(grade, x_destination, y_destination, Vo, bot = false, target =
         if (bot && target) {
 
             // Calculate Arrow XYZ position based on YAW and BOT position
-            const yaw = getTargetYaw(bot, target);
+            const yaw = getTargetYaw(bot.player.entity.position, target.position);
 
             // Vx = Hipotenusa
             let arrow_current_x = bot.player.entity.position.x;
@@ -246,53 +246,57 @@ function getFirstGradeAproax(x_destination, y_destination) {
 // Base start force
 const BaseVo = 3;
 
-function getMasterGrade(bot, target) {
-    // console.clear();
-    const yaw = getTargetYaw(bot, target);
-
+function getMasterGrade(bot, target, speed) {
+    // Check the first best trayectory
     let distances = getTargetDistance(bot.entity.position, target.position);
-    let shotCalculation = geBaseCalculation(distances.h_distance, distances.y_distance, yaw, bot, target);
+    let shotCalculation = geBaseCalculation(distances.h_distance, distances.y_distance, bot, target);
     if (!shotCalculation)
         return false;
 
-    let gradeA = shotCalculation.grade;
+    // Recalculate the new target based on speed + first trayectory
+    const premonition = getPremonition(shotCalculation.totalTicks, target, bot, speed);
+    distances = premonition.distances;
+    const newTarget = premonition.position;
 
-    distances = getPremonition(shotCalculation.totalTicks, target, bot);
-    shotCalculation = geBaseCalculation(distances.h_distance, distances.y_distance, yaw, bot, target);
+    // Recalculate the trayectory based on new target location
+    shotCalculation = geBaseCalculation(distances.h_distance, distances.y_distance, bot, target);
     if (!shotCalculation)
         return false;
 
-    let gradeB = shotCalculation.grade;
-
-    // console.log(gradeA, gradeB);
-
-
+    // Get more precision on shot
     precisionShot = getPrecisionShot(gradeShot.grade, distances.h_distance, distances.y_distance, 1);
+
+    // Calculate yaw
+    const yaw = getTargetYaw(bot.entity.position, newTarget);
 
     if (precisionShot.nearestDistance > 4) // Too far
         return false;
 
-    // console.log(precisionShot); 
     return {
         pitch: degrees_to_radians(precisionShot.nearestGrade / 10),
-        yaw: yaw
+        yaw: yaw,
+        target: newTarget
     }
 }
 
-function getPremonition(totalTicks, target, bot) {
-    const velocity = new Vec3(target.velocity);
+function getPremonition(totalTicks, target, bot, speed) {
+    const velocity = new Vec3(speed);
+    // const velocity = new Vec3(0, 0, 0);
     let position = new Vec3(target.position);
     for (let i = 1; i <= totalTicks; i++) {
         position.add(velocity);
     }
     const distances = getTargetDistance(bot.entity.position, position);
-    // console.log(velocity);
-    return distances;
+
+    return {
+        distances,
+        position
+    };
 }
 
 // For parabola of Y you have 2 times for found the Y position if Y original are downside of Y destination
-function geBaseCalculation(x_destination, y_destination, yaw, bot, target) {
-    const grade = getFirstGradeAproax(x_destination, y_destination, yaw);
+function geBaseCalculation(x_destination, y_destination, bot, target) {
+    const grade = getFirstGradeAproax(x_destination, y_destination);
 
     if (!grade.nearestGrade_first)
         return false; // No aviable trayectory
