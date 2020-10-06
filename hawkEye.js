@@ -20,12 +20,12 @@ function attack(targetToAttack) {
 }
 
 function stop() {
+    bot.deactivateItem();
     bot.removeListener('physicTick', autoCalc);
 }
 
 function autoCalc() {
     if (target === undefined || target === false || !target.isValid) {
-        bot.deactivateItem();
         stop();
         return false;
     }
