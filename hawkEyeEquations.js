@@ -321,8 +321,4 @@ function geBaseCalculation(x_destination, y_destination, bot, target) {
     return gradeShot;
 }
 
-module.exports = {
-    degrees_to_radians,
-    radians_to_degrees,
-    getMasterGrade
-}
+module.exports = getMasterGrade
