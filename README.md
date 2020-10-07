@@ -3,47 +3,58 @@ Minecraft bot for equations when shooting an arrow
 
 This program / bot is based on <a href="https://github.com/PrismarineJS/mineflayer" target="_blank">mineflayer</a> repository
 
-Todo:
-- When you have clear data to obtain the "gravity" equation for arrows
-- Make simply bot can attack players on huge distance
-
-Done
-- Bot can shoot an arrow
-- Bot shoot arrows and get start / end points and time
-- Get huge data from every shot.
-- Get the data of the parabolic arrow (all parabollic data)
-
 Install:
 - Install Novde version 10+
-- Install Git
-- git clone https://github.com/sefirosweb/minecraftHawkEye.git
-- cd minecraftHawkEye
-- npm install
-- node index.js
+- npm i minecrafthawkeye
 
-Usage:
 
-Please change config.js data for access to your server,
+Usage: file.js server port username password
+
+```
+example.js youserver.es 12345
+```
 
 ```js
-module.exports = {
-    port: 22222,
-    host: 'XXXX',
-    usernameA: 'Archer',
-    usernameB: "Looker"
-};
+// file: example.js
+
+const mineflayer = require('mineflayer');
+const { hawkEye, getPlayer } = require('minecrafthawkeye');
+
+const bot = mineflayer.createBot({
+    host: process.argv[2],
+    port: parseInt(process.argv[3]),
+    username: process.argv[4] ? process.argv[4] : 'Archer',
+    password: process.argv[5]
+})
+
+hawkEye.load(bot);
+
+bot.on('spawn', function() {
+    bot.chat('/give Archer bow{Enchantments:[{id:unbreaking,lvl:100}]} 1');
+    bot.chat('/give Archer minecraft:arrow 300');
+    bot.chat('/time set day');
+    bot.chat('/kill @e[type=minecraft:arrow]');
+
+    bot.chat('Ready!');
+
+    let target = getPlayer(bot);
+    if (!target)
+        return false;
+
+    // Auto attack every 1,2 secs until target is dead or is to far away
+    hawkEye.attack(target);
+
+    // If you force stop attack use:
+    // hawkEye.stop();
+});
+
 ```
-Go to:
-X=> 0
-Y=> 3
-Z=> 0
-
-Clear area or use a plain world (see screenshots)
-
-- node index.js
 
 In world give a bow + arrows: \
 /give Archer bow{Enchantments:[{id:unbreaking,lvl:100}]} 1 \
 /give Archer minecraft:arrow 6000
 
-And done, the bots fires automatically and change the grade of 0,01 every shot until 90º the they reset to 0º
+All is done, when is attack mode they get best posibilty for impact, and shot arrow every 1,2 secs (max power)
+
+I'm glad I can help you, do we help each other?
+

@@ -80,5 +80,6 @@ function autoCalc() {
 
 module.exports = {
     load,
-    attack
+    attack,
+    stop
 }
