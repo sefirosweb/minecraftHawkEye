@@ -18,7 +18,7 @@ bot.on('spawn', function() {
 
     bot.chat('Ready!');
 
-    let target = getPlayer(bot, "Looker");
+    let target = getPlayer(bot);
     if (!target)
         return false;
 
