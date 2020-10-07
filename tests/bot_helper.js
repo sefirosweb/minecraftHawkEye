@@ -1,4 +1,4 @@
-const config = require('./config');
+const config = require('../config');
 const mineflayer = require('mineflayer');
 const { pathfinder, Movements } = require('mineflayer-pathfinder');
 const { GoalNear } = require('mineflayer-pathfinder').goals;
