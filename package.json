@@ -1,11 +1,10 @@
 {
     "name": "minecrafthawkeye",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Minecraft bot for equations when shooting an arrow",
     "main": "index.js",
     "dependencies": {
-        "mineflayer": "^2.28.1",
-        "mineflayer-pathfinder": "^1.0.10"
+        "mineflayer": "^2.28.1"
     },
     "devDependencies": {},
     "scripts": {
