@@ -8,10 +8,10 @@ Install:
 - npm i minecrafthawkeye
 
 
-Usage: file.js server port username password
+Usage: node file.js server port username password
 
 ```
-example.js youserver.es 12345
+node example.js youserver.es 12345
 ```
 
 ```js
