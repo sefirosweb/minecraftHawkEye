@@ -16,9 +16,8 @@ node example.js youserver.es 12345
 
 ```js
 // file: example.js
-
 const mineflayer = require('mineflayer');
-const { hawkEye, getPlayer } = require('minecrafthawkeye');
+const hawkEyePlugin = require('minecrafthawkeye');
 
 const bot = mineflayer.createBot({
     host: process.argv[2],
@@ -26,8 +25,8 @@ const bot = mineflayer.createBot({
     username: process.argv[4] ? process.argv[4] : 'Archer',
     password: process.argv[5]
 })
-
-hawkEye.load(bot);
+// Load bot has plugin
+bot.loadPlugin(minecraftHawkEye);
 
 bot.on('spawn', function() {
     bot.chat('/give Archer bow{Enchantments:[{id:unbreaking,lvl:100}]} 1');
@@ -37,18 +36,35 @@ bot.on('spawn', function() {
 
     bot.chat('Ready!');
 
-    let target = getPlayer(bot);
+    // Get target for block position, use whatever you need
+    const target = bot.hawkEye.getPlayer(); 
+    console.log(target);
     if (!target) {
         return false;
     }
 
     // Auto attack every 1,2 secs until target is dead or is to far away
-    hawkEye.attack(target);
-
+    bot.hawkEye.autoAttack(target);
     // If you force stop attack use:
     // hawkEye.stop();
-});
 
+    // Use one shot time with calc:
+    // bot.hawkEye.oneShot(target);
+
+    // If you want to shot in XYZ position:
+    /*
+        const blockPosition = {
+                position: {
+                    x: 244.5,
+                    y: 75.5,
+                    z: -220
+                },
+                isValid: true // Fake to is "alive"
+            }
+            // bot.hawkEye.oneShot(blockPosition);
+        bot.hawkEye.autoAttack(blockPosition);
+    */
+});
 ```
 
 In world give a bow + arrows: \

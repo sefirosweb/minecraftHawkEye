@@ -18,6 +18,7 @@ bot.on('spawn', function() {
 
     bot.chat('Ready!');
 
+    // Get target for block position, use whatever you need
     const target = bot.hawkEye.getPlayer();
     console.log(target);
     if (!target) {
