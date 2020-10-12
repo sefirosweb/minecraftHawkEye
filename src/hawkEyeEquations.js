@@ -63,7 +63,7 @@ function incercetp_block(bot, position) {
     block = bot.blockAt(position);
     if (!block)
         return false
-    if (block.name !== 'air') {
+    if (block.boundingBox !== 'empty') { // OLD check  block.name !== 'air'
         return false
     }
     return true;
@@ -87,6 +87,8 @@ function tryGrade(grade, x_destination, y_destination, Vo, bot = false, target =
 
     let blockInTrayect = false;
     let previusArrowPosition = false;
+
+    let calcBlockInTrayect;
 
     while (true) {
         totalTicks++;
@@ -115,57 +117,69 @@ function tryGrade(grade, x_destination, y_destination, Vo, bot = false, target =
             };
         }
 
-        // Check if arrow from previos position to current position can impact to block
+
         if (bot && target) {
-
-            // Calculate Arrow XYZ position based on YAW and BOT position
-            const yaw = getTargetYaw(bot.player.entity.position, target.position);
-
-            // Vx = Hipotenusa
-            let arrow_current_x = bot.player.entity.position.x;
-            let arrow_current_z = bot.player.entity.position.z;
-            let arrow_current_y = bot.player.entity.position.y;
-            if (previusArrowPosition === false) {
-                previusArrowPosition = new Vec3(bot.player.entity.position.x, bot.player.entity.position.y + 1.5, bot.player.entity.position.z);
-            }
-
-            arrow_current_y += Vy;
-
-            // Cateto Opuesto
-            const x_extra = Math.sin(yaw) * Vx;
-            arrow_current_x -= x_extra;
-
-            // Cateto Adjacente
-            const z_extra = x_extra / Math.tan(yaw)
-            arrow_current_z -= z_extra;
-
-            // Current arrow position
-            const arrowPosition = new Vec3(arrow_current_x, arrow_current_y, arrow_current_z);
-
-            const distX = arrowPosition.x - previusArrowPosition.x;
-            const distY = arrowPosition.y - previusArrowPosition.y;
-            const distZ = arrowPosition.z - previusArrowPosition.z;
-
-            const maxSteps = 20; // Math.ceil(Math.max(Math.abs(distX), Math.abs(distY), Math.abs(distZ))) * 20;
-            const distVector = new Vec3(distX / maxSteps, distY / maxSteps, distZ / maxSteps)
-
-            let incercetp;
-
-            // Arrow Speed is to high, calculate prevArrow with current position for detect block in midle of tick position
-            for (let i = 0; i < maxSteps; i++) {
-                previusArrowPosition.add(distVector);
-                incercetp = !incercetp_block(bot, previusArrowPosition);
-
-                // console.log(previusArrowPosition);
-
-                if (incercetp) {
-                    blockInTrayect = true;
-                }
-            }
-
-            previusArrowPosition = arrowPosition;
+            calcBlockInTrayect = calculateBlockInTrayectory(bot, target, previusArrowPosition, Vy, Vx);
+            blockInTrayect = calcBlockInTrayect.intercept;
+            previusArrowPosition = calcBlockInTrayect.arrowPosition;
         }
 
+    }
+}
+
+function calculateBlockInTrayectory(bot, target, previusArrowPosition, Vy, Vx) {
+    const maxSteps = 20;
+
+    // Calculate Arrow XYZ position based on YAW and BOT position
+    const yaw = getTargetYaw(bot.player.entity.position, target.position);
+
+    // Vx = Hipotenusa
+    let arrow_current_x = bot.player.entity.position.x;
+    let arrow_current_z = bot.player.entity.position.z;
+    let arrow_current_y = bot.player.entity.position.y;
+    if (previusArrowPosition === false) {
+        previusArrowPosition = new Vec3(bot.player.entity.position.x, bot.player.entity.position.y + 1.5, bot.player.entity.position.z);
+    }
+
+    arrow_current_y += Vy;
+
+    // Cateto Opuesto
+    const x_extra = Math.sin(yaw) * Vx;
+    arrow_current_x -= x_extra;
+
+    // Cateto Adjacente
+    const z_extra = x_extra / Math.tan(yaw)
+    arrow_current_z -= z_extra;
+
+    // Current arrow position
+    const arrowPosition = new Vec3(arrow_current_x, arrow_current_y, arrow_current_z);
+
+    const distX = arrowPosition.x - previusArrowPosition.x;
+    const distY = arrowPosition.y - previusArrowPosition.y;
+    const distZ = arrowPosition.z - previusArrowPosition.z;
+
+    const distVector = new Vec3(distX / maxSteps, distY / maxSteps, distZ / maxSteps)
+
+    let incercetp;
+
+    // Arrow Speed is to high, calculate prevArrow with current position for detect block in midle of tick position
+    for (let i = 0; i < maxSteps; i++) {
+        previusArrowPosition.add(distVector);
+        incercetp = !incercetp_block(bot, previusArrowPosition);
+
+        // console.log(previusArrowPosition);
+
+        if (incercetp) {
+            return {
+                arrowPosition,
+                intercept: true
+            }
+        }
+    }
+
+    return {
+        arrowPosition,
+        intercept: false
     }
 }
 
@@ -175,27 +189,20 @@ function tryGrade(grade, x_destination, y_destination, Vo, bot = false, target =
 function getPrecisionShot(grade, x_destination, y_destination, decimals) {
     let nearestDistance = false;
     let nearestGrade = false;
-    let nearestVo = false;
     decimals = Math.pow(10, decimals);
 
-    // for (let i = Vo; i >= 1; i--) {
     for (let iGrade = (grade * 10) - 10; iGrade <= (grade * 10) + 10; iGrade += 1) {
-
         distance = tryGrade(iGrade / decimals, x_destination, y_destination, BaseVo);
-
         if ((distance.nearestDistance < nearestDistance) || nearestDistance === false) {
             nearestDistance = distance.nearestDistance;
             nearestGrade = iGrade;
             nearestTicks = distance.totalTicks;
         }
-
     }
-    // }
 
     return {
         nearestGrade,
-        nearestDistance,
-        nearestVo
+        nearestDistance
     };
 }
 
@@ -275,7 +282,9 @@ function getMasterGrade(bot, target, speed) {
     return {
         pitch: degrees_to_radians(precisionShot.nearestGrade / 10),
         yaw: yaw,
-        target: newTarget
+        grade: precisionShot.nearestGrade / 10,
+        nearestDistance: precisionShot.nearestDistance,
+        target: newTarget,
     }
 }
 

@@ -74,6 +74,7 @@ function autoCalc() {
             bot.deactivateItem();
             prevTime = currentTime;
             preparingShot = false;
+            // console.log(infoShot) TODO BORRAR
         }
     }
 }
