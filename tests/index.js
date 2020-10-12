@@ -31,4 +31,21 @@ bot.on('spawn', function() {
 
     // Use one shot time with calc:
     // bot.hawkEye.oneShot(target);
+
+    // If you want to shot in XYZ position:
+    /*
+        const blockPosition = {
+                position: {
+                    x: 244.5,
+                    y: 75.5,
+                    z: -220
+                },
+                isValid: true // Fake to is "alive"
+            }
+            // bot.hawkEye.oneShot(blockPosition);
+        bot.hawkEye.autoAttack(blockPosition);
+    */
+
+
+
 });
