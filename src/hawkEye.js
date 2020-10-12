@@ -74,8 +74,6 @@ function autoCalc() {
             bot.deactivateItem();
             prevTime = currentTime;
             preparingShot = false;
-            console.log(infoShot) // TODO BORRAR
-                // /tp 205.61 64.00 -246.40
         }
     }
 }

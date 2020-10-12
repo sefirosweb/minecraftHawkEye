@@ -198,9 +198,6 @@ function calculateBlockInTrayectory(previusArrowPosition, Vy, Vx) {
     for (let i = 0; i < maxSteps; i++) {
         previusArrowPosition.add(distVector);
         incercetp = !incercetp_block(previusArrowPosition);
-
-        // console.log(previusArrowPosition);
-
         if (incercetp) {
             return {
                 arrowPosition,
