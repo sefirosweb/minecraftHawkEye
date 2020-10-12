@@ -1,21 +1,29 @@
 const getMasterGrade = require('./hawkEyeEquations');
+const { simplyShot } = require('./botFunctions');
 
 let target;
 let bot;
 let preparingShot
 let preparingShotTime;
 let prevPlayerPositions = [];
+let oneShot;
 
 function load(botToLoad) {
     bot = botToLoad;
 }
 
-function attack(targetToAttack) {
+function autoAttack(targetToAttack, isOneShot = false) {
+    if (!targetToAttack) {
+        return false;
+    }
+    oneShot = isOneShot
+
     target = targetToAttack;
     preparingShot = false;
     prevPlayerPositions = [];
 
     bot.on('physicTick', autoCalc);
+    return true;
 }
 
 function stop() {
@@ -73,6 +81,9 @@ function autoCalc() {
         if (preparingShot && currentTime - preparingShotTime > 1200) {
             bot.deactivateItem();
             preparingShot = false;
+            if (oneShot) {
+                stop();
+            }
         }
     }
 }
@@ -83,6 +94,6 @@ function checkHandleBow() {
 
 module.exports = {
     load,
-    attack,
+    autoAttack,
     stop
 }

@@ -14,7 +14,6 @@ function getPlayer(bot, playername = null) {
 
 function getEntityArrow(bot) {
     for (const entity of Object.values(bot.entities)) {
-        //if (entity.type === 'player') {
         if (entity.type === 'object' && entity.objectType === 'Arrow') {
             return entity;
         }
@@ -22,8 +21,7 @@ function getEntityArrow(bot) {
     return false;
 }
 
-
-function shotBow(bot, yaw = null, grade = null) {
+function simplyShot(bot, yaw = null, grade = null) {
     if (yaw === null) {
         yaw = bot.player.entity.yaw;
     }
@@ -42,5 +40,5 @@ function shotBow(bot, yaw = null, grade = null) {
 module.exports = {
     getPlayer,
     getEntityArrow,
-    shotBow
+    simplyShot
 }

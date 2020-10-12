@@ -1,6 +1,6 @@
 const mineflayer = require('mineflayer');
-// const { hawkEye, getPlayer } = require('minecrafthawkeye');
-const { hawkEye, getPlayer } = require('../index');
+// const hawkEyePlugin = require('minecrafthawkeye');
+const minecraftHawkEye = require('../index');
 
 const bot = mineflayer.createBot({
     host: process.argv[2],
@@ -8,8 +8,7 @@ const bot = mineflayer.createBot({
     username: process.argv[4] ? process.argv[4] : 'Archer',
     password: process.argv[5]
 })
-
-hawkEye.load(bot);
+bot.loadPlugin(minecraftHawkEye);
 
 bot.on('spawn', function() {
     bot.chat('/give Archer bow{Enchantments:[{id:unbreaking,lvl:100}]} 1');
@@ -19,14 +18,17 @@ bot.on('spawn', function() {
 
     bot.chat('Ready!');
 
-    let target = getPlayer(bot);
+    const target = bot.hawkEye.getPlayer();
+    console.log(target);
     if (!target) {
         return false;
     }
 
     // Auto attack every 1,2 secs until target is dead or is to far away
-    hawkEye.attack(target);
-
+    bot.hawkEye.autoAttack(target);
     // If you force stop attack use:
     // hawkEye.stop();
+
+    // Use one shot time with calc:
+    // bot.hawkEye.oneShot(target);
 });
