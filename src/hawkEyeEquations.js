@@ -72,15 +72,17 @@ function incercetp_block(position) {
     return true;
 }
 
-// Base Minecraft Factros for simulate Arrow
-const gravity = 0.05;
-const factorY = 0.01; // Factores de resistencia
-const factorH = 0.01; // Factores de resistencia
+// Physics factors 
+const gravity = 0.05; // Arrow Gravity // Only for arrow for other entities have different gravity
+const factorY = 0.01; // Arrow "Air resistance" // In water must be changed
+const factorH = 0.01; // Arrow "Air resistance" // In water must be changed
 
 // Simulate Arrow Trayectory
 function tryGrade(grade, x_destination, y_destination, Vo, tryIntercetpBlock = false) {
-    let Voy = getVoy(Vo, degrees_to_radians(grade));
-    let Vox = getVox(Vo, degrees_to_radians(grade));
+    // Vo => Vector total velocity (X,Y,Z)
+    // For arrow trayectory only need the horizontal discante (X,Z) and verticla (Y)
+    let Voy = getVoy(Vo, degrees_to_radians(grade)); // Vector Y
+    let Vox = getVox(Vo, degrees_to_radians(grade)); // Vector X
     let Vy = Voy;
     let Vx = Vox;
     let ProjectileGrade;
@@ -89,16 +91,22 @@ function tryGrade(grade, x_destination, y_destination, Vo, tryIntercetpBlock = f
     let totalTicks = 0;
 
     let blockInTrayect = false;
-    let previusArrowPosition = false;
+    let previusArrowPositionIntercept = false;
 
-    let calcBlockInTrayect;
+    const maxSteps = 20;
+
 
     while (true) {
         totalTicks++;
-        const distance = Math.sqrt(Math.pow(Vy - y_destination, 2) + Math.pow(Vx - x_destination, 2));
+        const firstDistance = Math.sqrt(Math.pow(Vy - y_destination, 2) + Math.pow(Vx - x_destination, 2));
 
-        if (nearestDistance > distance || nearestDistance === false) {
-            nearestDistance = distance;
+        if (nearestDistance === false) {
+            nearestDistance = firstDistance;
+            nearestGrade = grade;
+        }
+
+        if (firstDistance < nearestDistance) {
+            nearestDistance = firstDistance;
             nearestGrade = grade;
         }
 
@@ -107,6 +115,29 @@ function tryGrade(grade, x_destination, y_destination, Vo, tryIntercetpBlock = f
 
         Voy = getVoy(Vo, degrees_to_radians(ProjectileGrade), Voy * factorY);
         Vox = getVox(Vo, degrees_to_radians(ProjectileGrade), Vox * factorH);
+
+        // Some times the arrow is too fast (3 block per tick) this cause a wrong calculate
+        // Calculate trayectory between each tick when is very near
+        /*
+        if (firstDistance < 4) {
+            const Vx_steps = Vox / maxSteps;
+            const Vy_steps = Voy / maxSteps;
+
+            let Vx_newpos = Vx;
+            let Vy_newpos = Vy
+
+            for (let i = 0; i < maxSteps; i++) {
+                const distance = Math.sqrt(Math.pow(Vy_newpos - y_destination, 2) + Math.pow(Vx_newpos - x_destination, 2));
+
+                if (distance < nearestDistance) {
+                    nearestDistance = firstDistance;
+                    nearestGrade = grade;
+                }
+
+                Vx_newpos += Vx_steps;
+                Vy_newpos += Vy_steps
+            }
+        }*/
 
         Vy += Voy;
         Vx += Vox;
@@ -121,9 +152,9 @@ function tryGrade(grade, x_destination, y_destination, Vo, tryIntercetpBlock = f
         }
 
         if (tryIntercetpBlock) {
-            calcBlockInTrayect = calculateBlockInTrayectory(previusArrowPosition, Vy, Vx);
+            const calcBlockInTrayect = calculateBlockInTrayectory(previusArrowPositionIntercept, Vy, Vx);
             blockInTrayect = calcBlockInTrayect.intercept;
-            previusArrowPosition = calcBlockInTrayect.arrowPosition;
+            previusArrowPositionIntercept = calcBlockInTrayect.arrowPosition;
         }
     }
 }
@@ -137,9 +168,9 @@ function calculateBlockInTrayectory(previusArrowPosition, Vy, Vx) {
     // Vx = Hipotenusa
     let arrow_current_x = bot.player.entity.position.x;
     let arrow_current_z = bot.player.entity.position.z;
-    let arrow_current_y = bot.player.entity.position.y;
+    let arrow_current_y = bot.player.entity.position.y + 1.4;
     if (previusArrowPosition === false) {
-        previusArrowPosition = new Vec3(bot.player.entity.position.x, bot.player.entity.position.y + 1.5, bot.player.entity.position.z);
+        previusArrowPosition = new Vec3(bot.player.entity.position.x, bot.player.entity.position.y + 1.4, bot.player.entity.position.z);
     }
 
     arrow_current_y += Vy;
