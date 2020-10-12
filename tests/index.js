@@ -1,13 +1,14 @@
-const config = require('../config');
 const mineflayer = require('mineflayer');
-const { getPlayer } = require('../src/botFunctions');
-const hawkEye = require('../src/hawkEye');
+// const { hawkEye, getPlayer } = require('minecrafthawkeye');
+const { hawkEye, getPlayer } = require('../index');
 
 const bot = mineflayer.createBot({
-    username: config.usernameA,
-    port: config.port,
-    host: config.host
+    host: process.argv[2],
+    port: parseInt(process.argv[3]),
+    username: process.argv[4] ? process.argv[4] : 'Archer',
+    password: process.argv[5]
 })
+
 hawkEye.load(bot);
 
 bot.on('spawn', function() {
@@ -22,5 +23,9 @@ bot.on('spawn', function() {
     if (!target)
         return false;
 
+    // Auto attack every 1,2 secs until target is dead or is to far away
     hawkEye.attack(target);
+
+    // If you force stop attack use:
+    // hawkEye.stop();
 });
