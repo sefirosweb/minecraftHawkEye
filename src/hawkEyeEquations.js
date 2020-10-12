@@ -1,16 +1,19 @@
 const Vec3 = require('vec3');
+let bot;
+let target;
+let speed;
 
 Number.prototype.countDecimals = function() {
     if (Math.floor(this.valueOf()) === this.valueOf()) return 0;
     return this.toString().split(".")[1].length || 0;
 }
 
-function getTargetDistance(bot, target) {
-    const x_distance = Math.pow(bot.x - target.x, 2)
-    const z_distance = Math.pow(bot.z - target.z, 2)
+function getTargetDistance(origin, destination) {
+    const x_distance = Math.pow(origin.x - destination.x, 2)
+    const z_distance = Math.pow(origin.z - destination.z, 2)
     const h_distance = Math.sqrt(x_distance + z_distance);
 
-    const y_distance = target.y - bot.y;
+    const y_distance = destination.y - origin.y;
 
     const distance = Math.sqrt(Math.pow(y_distance, 2) + x_distance + z_distance)
 
@@ -21,9 +24,9 @@ function getTargetDistance(bot, target) {
     }
 }
 
-function getTargetYaw(bot, target) {
-    const x_distance = target.x - bot.x;
-    const z_distance = target.z - bot.z;
+function getTargetYaw(origin, destination) {
+    const x_distance = destination.x - origin.x;
+    const z_distance = destination.z - origin.z;
     const yaw = Math.atan2(x_distance, z_distance) + Math.PI;
     return yaw;
 }
@@ -59,7 +62,7 @@ function getGrades(Vo, Voy, Gravity) {
 }
 
 // Check block position impact
-function incercetp_block(bot, position) {
+function incercetp_block(position) {
     block = bot.blockAt(position);
     if (!block)
         return false
@@ -75,7 +78,7 @@ const factorY = 0.01; // Factores de resistencia
 const factorH = 0.01; // Factores de resistencia
 
 // Simulate Arrow Trayectory
-function tryGrade(grade, x_destination, y_destination, Vo, bot = false, target = false) {
+function tryGrade(grade, x_destination, y_destination, Vo, tryIntercetpBlock = false) {
     let Voy = getVoy(Vo, degrees_to_radians(grade));
     let Vox = getVox(Vo, degrees_to_radians(grade));
     let Vy = Voy;
@@ -117,17 +120,15 @@ function tryGrade(grade, x_destination, y_destination, Vo, bot = false, target =
             };
         }
 
-
-        if (bot && target) {
-            calcBlockInTrayect = calculateBlockInTrayectory(bot, target, previusArrowPosition, Vy, Vx);
+        if (tryIntercetpBlock) {
+            calcBlockInTrayect = calculateBlockInTrayectory(previusArrowPosition, Vy, Vx);
             blockInTrayect = calcBlockInTrayect.intercept;
             previusArrowPosition = calcBlockInTrayect.arrowPosition;
         }
-
     }
 }
 
-function calculateBlockInTrayectory(bot, target, previusArrowPosition, Vy, Vx) {
+function calculateBlockInTrayectory(previusArrowPosition, Vy, Vx) {
     const maxSteps = 20;
 
     // Calculate Arrow XYZ position based on YAW and BOT position
@@ -165,7 +166,7 @@ function calculateBlockInTrayectory(bot, target, previusArrowPosition, Vy, Vx) {
     // Arrow Speed is to high, calculate prevArrow with current position for detect block in midle of tick position
     for (let i = 0; i < maxSteps; i++) {
         previusArrowPosition.add(distVector);
-        incercetp = !incercetp_block(bot, previusArrowPosition);
+        incercetp = !incercetp_block(previusArrowPosition);
 
         // console.log(previusArrowPosition);
 
@@ -191,11 +192,11 @@ function getPrecisionShot(grade, x_destination, y_destination, decimals) {
     let nearestGrade = false;
     decimals = Math.pow(10, decimals);
 
-    for (let iGrade = (grade * 10) - 10; iGrade <= (grade * 10) + 10; iGrade += 1) {
-        distance = tryGrade(iGrade / decimals, x_destination, y_destination, BaseVo);
+    for (let i_grade = (grade * 10) - 10; i_grade <= (grade * 10) + 10; i_grade += 1) {
+        distance = tryGrade(i_grade / decimals, x_destination, y_destination, BaseVo);
         if ((distance.nearestDistance < nearestDistance) || nearestDistance === false) {
             nearestDistance = distance.nearestDistance;
-            nearestGrade = iGrade;
+            nearestGrade = i_grade;
             nearestTicks = distance.totalTicks;
         }
     }
@@ -253,20 +254,24 @@ function getFirstGradeAproax(x_destination, y_destination) {
 // Base start force
 const BaseVo = 3;
 
-function getMasterGrade(bot, target, speed) {
+function getMasterGrade(botIn, targetIn, speedIn) {
+    bot = botIn;
+    target = targetIn;
+    speed = speedIn;
+
     // Check the first best trayectory
     let distances = getTargetDistance(bot.entity.position, target.position);
-    let shotCalculation = geBaseCalculation(distances.h_distance, distances.y_distance, bot, target);
+    let shotCalculation = geBaseCalculation(distances.h_distance, distances.y_distance);
     if (!shotCalculation)
         return false;
 
     // Recalculate the new target based on speed + first trayectory
-    const premonition = getPremonition(shotCalculation.totalTicks, target, bot, speed);
+    const premonition = getPremonition(shotCalculation.totalTicks, speed);
     distances = premonition.distances;
-    const newTarget = premonition.position;
+    const newTarget = premonition.newTarget;
 
     // Recalculate the trayectory based on new target location
-    shotCalculation = geBaseCalculation(distances.h_distance, distances.y_distance, bot, target);
+    shotCalculation = geBaseCalculation(distances.h_distance, distances.y_distance);
     if (!shotCalculation)
         return false;
 
@@ -288,31 +293,30 @@ function getMasterGrade(bot, target, speed) {
     }
 }
 
-function getPremonition(totalTicks, target, bot, speed) {
+function getPremonition(totalTicks, speed) {
     totalTicks = totalTicks + Math.ceil(totalTicks / 10)
     const velocity = new Vec3(speed);
-    // const velocity = new Vec3(0, 0, 0);
-    let position = new Vec3(target.position);
+    let newTarget = new Vec3(target.position);
     for (let i = 1; i <= totalTicks; i++) {
-        position.add(velocity);
+        newTarget.add(velocity);
     }
-    const distances = getTargetDistance(bot.entity.position, position);
+    const distances = getTargetDistance(bot.entity.position, newTarget);
 
     return {
         distances,
-        position
+        newTarget
     };
 }
 
 // For parabola of Y you have 2 times for found the Y position if Y original are downside of Y destination
-function geBaseCalculation(x_destination, y_destination, bot, target) {
+function geBaseCalculation(x_destination, y_destination) {
     const grade = getFirstGradeAproax(x_destination, y_destination);
 
     if (!grade.nearestGrade_first)
         return false; // No aviable trayectory
 
     // Check blocks in trayectory
-    let check = tryGrade(grade.nearestGrade_first.grade, x_destination, y_destination, BaseVo, bot, target);
+    let check = tryGrade(grade.nearestGrade_first.grade, x_destination, y_destination, BaseVo, true);
 
     if (!check.blockInTrayect && check.nearestDistance < 4) {
         gradeShot = grade.nearestGrade_first;
@@ -320,7 +324,7 @@ function geBaseCalculation(x_destination, y_destination, bot, target) {
         if (!grade.nearestGrade_second) {
             return false; // No aviable trayectory
         }
-        check = tryGrade(grade.nearestGrade_second.grade, x_destination, y_destination, BaseVo, bot, target);
+        check = tryGrade(grade.nearestGrade_second.grade, x_destination, y_destination, BaseVo, true);
         if (check.blockInTrayect) {
             return false; // No aviable trayectory
         }
