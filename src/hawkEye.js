@@ -2,8 +2,8 @@ const getMasterGrade = require('./hawkEyeEquations');
 
 let target;
 let bot;
-let prevTime;
 let preparingShot
+let preparingShotTime;
 let prevPlayerPositions = [];
 
 function load(botToLoad) {
@@ -12,7 +12,6 @@ function load(botToLoad) {
 
 function attack(targetToAttack) {
     target = targetToAttack;
-    prevTime = Date.now();
     preparingShot = false;
     prevPlayerPositions = [];
 
@@ -62,6 +61,7 @@ function autoCalc() {
     if (!preparingShot) {
         bot.activateItem();
         preparingShot = true;
+        preparingShotTime = Date.now();
     }
 
     const infoShot = getMasterGrade(bot, target, speed);
@@ -70,12 +70,15 @@ function autoCalc() {
         bot.look(infoShot.yaw, infoShot.pitch);
 
         const currentTime = Date.now();
-        if (preparingShot && currentTime - prevTime > 1200) {
+        if (preparingShot && currentTime - preparingShotTime > 1200) {
             bot.deactivateItem();
-            prevTime = currentTime;
             preparingShot = false;
         }
     }
+}
+
+function checkHandleBow() {
+
 }
 
 module.exports = {
