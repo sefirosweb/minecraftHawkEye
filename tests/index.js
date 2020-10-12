@@ -20,8 +20,9 @@ bot.on('spawn', function() {
     bot.chat('Ready!');
 
     let target = getPlayer(bot);
-    if (!target)
+    if (!target) {
         return false;
+    }
 
     // Auto attack every 1,2 secs until target is dead or is to far away
     hawkEye.attack(target);
