@@ -1,5 +1,3 @@
-const equations = require('./hawkEyeEquations');
-
 function getPlayer(bot, playername = null) {
     for (const entity of Object.values(bot.entities)) {
         if (entity.type === 'player') {
@@ -7,15 +5,6 @@ function getPlayer(bot, playername = null) {
                 return entity;
             if (entity.username === playername)
                 return entity;
-        }
-    }
-    return false;
-}
-
-function getEntityArrow(bot) {
-    for (const entity of Object.values(bot.entities)) {
-        if (entity.type === 'object' && entity.objectType === 'Arrow') {
-            return entity;
         }
     }
     return false;
@@ -39,6 +28,5 @@ function simplyShot(bot, yaw = null, grade = null) {
 
 module.exports = {
     getPlayer,
-    getEntityArrow,
     simplyShot
 }

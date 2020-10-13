@@ -15,9 +15,13 @@ function inject(bot) {
     bot.hawkEye.oneShot = function(targetToAttack) {
         return autoAttack(targetToAttack, true);
     };
-    bot.hawkEye.getMasterGrade = getMasterGrade;
+    bot.hawkEye.getMasterGrade = function(targetToAttack, speed) {
+        return getMasterGrade(bot, targetToAttack, speed);
+    };
+    bot.hawkEye.simplyShot = function(yaw = null, grade = null) {
+        return simplyShot(bot, yaw = null, grade = null);
+    };
     bot.hawkEye.stop = stop;
-    bot.hawkEye.simplyShot = simplyShot;
 }
 
 module.exports = inject;
