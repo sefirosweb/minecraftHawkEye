@@ -11,8 +11,8 @@ const bot = mineflayer.createBot({
 bot.loadPlugin(minecraftHawkEye)
 
 bot.on('spawn', function () {
-  bot.chat('/give Archer bow{Enchantments:[{id:unbreaking,lvl:100}]} 1')
-  bot.chat('/give Archer minecraft:arrow 300')
+  bot.chat('/give ' + bot.username + ' bow{Enchantments:[{id:unbreaking,lvl:100}]} 1')
+  bot.chat('/give ' + bot.username + ' minecraft:arrow 300')
   bot.chat('/time set day')
   bot.chat('/kill @e[type=minecraft:arrow]')
 
@@ -35,15 +35,15 @@ bot.on('spawn', function () {
 
   // If you want to shot in XYZ position:
   /*
-        const blockPosition = {
-                position: {
-                    x: 244.5,
-                    y: 75.5,
-                    z: -220
-                },
-                isValid: true // Fake to is "alive"
-            }
-            // bot.hawkEye.oneShot(blockPosition);
-        bot.hawkEye.autoAttack(blockPosition);
-    */
+          const blockPosition = {
+                  position: {
+                      x: 244.5,
+                      y: 75.5,
+                      z: -220
+                  },
+                  isValid: true // Fake to is "alive"
+              }
+          // bot.hawkEye.oneShot(blockPosition);
+          // bot.hawkEye.autoAttack(blockPosition);
+      */
 })
