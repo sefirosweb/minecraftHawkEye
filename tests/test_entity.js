@@ -8,6 +8,7 @@ const bot = mineflayer.createBot({
   username: process.argv[4] ? process.argv[4] : 'Archer',
   password: process.argv[5]
 })
+
 bot.loadPlugin(minecraftHawkEye)
 
 bot.on('spawn', function () {
@@ -20,6 +21,7 @@ bot.on('spawn', function () {
 
   // Get target for block position, use whatever you need
   const target = bot.hawkEye.getPlayer()
+  console.log(target)
   // console.log(target);
   if (target) {
     bot.hawkEye.autoAttack(target)
@@ -50,18 +52,20 @@ bot.on('spawn', function () {
   searchSpiders()
 })
 
-function searchSpiders () {
+function searchSpiders() {
+  const mcData = require("minecraft-data")(bot.version)
+
   const entities = Object.keys(bot.entities)
     .map(id => bot.entities[id])
     .filter(function (entity) {
       return (entity.type === 'mob') && bot.entity.position.distanceTo(entity.position) < 16
     })
 
-  console.clear()
+  // Get height mob
   entities
     .map(function (entity) {
-      console.log(entity.username ? entity.username : entity.name, entity.height)
-    })
+      console.log(entity.username ? entity.username : entity.name, mcData.mobs[entity.entityType].height)
+    }, mcData)
 
   setTimeout(() => {
     searchSpiders()
