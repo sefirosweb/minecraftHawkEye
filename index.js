@@ -19,7 +19,7 @@ function inject (bot) {
     return getMasterGrade(bot, targetToAttack, speed)
   }
   bot.hawkEye.simplyShot = function (yaw = null, grade = null) {
-    return simplyShot(bot, yaw = null, grade = null)
+    return simplyShot(bot, yaw, grade)
   }
   bot.hawkEye.stop = stop
 }

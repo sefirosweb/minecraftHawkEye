@@ -258,8 +258,7 @@ function getMasterGrade (botIn, targetIn, speedIn) {
   // Calculate yaw
   const yaw = getTargetYaw(bot.entity.position, newTarget)
 
-  if (precisionShot.nearestDistance > 4) // Too far
-  { return false }
+  if (precisionShot.nearestDistance > 4) { return false } // Too far
 
   return {
     pitch: degreesToRadians(precisionShot.nearestGrade / 10),

@@ -34,7 +34,7 @@ bot.on('spawn', function () {
   // bot.hawkEye.oneShot(target);
 
   // If you want to shot in XYZ position:
-
+  /*
   const blockPosition = {
     position: {
       x: -10,
@@ -43,6 +43,7 @@ bot.on('spawn', function () {
     },
     isValid: true // Fake to is "alive"
   }
+  */
   // bot.hawkEye.oneShot(blockPosition);
   // bot.hawkEye.autoAttack(blockPosition)
 
@@ -56,11 +57,11 @@ function searchSpiders () {
       return (entity.type === 'mob') && bot.entity.position.distanceTo(entity.position) < 16
     })
 
-  /* console.clear()
+  console.clear()
   entities
     .map(function (entity) {
       console.log(entity.username ? entity.username : entity.name, entity.height)
-    }) */
+    })
 
   setTimeout(() => {
     searchSpiders()
