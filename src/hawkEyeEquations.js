@@ -8,61 +8,61 @@ Number.prototype.countDecimals = function () {
   return this.toString().split('.')[1].length || 0
 }
 
-function getTargetDistance (origin, destination) {
-  const x_distance = Math.pow(origin.x - destination.x, 2)
-  const z_distance = Math.pow(origin.z - destination.z, 2)
-  const h_distance = Math.sqrt(x_distance + z_distance)
+function getTargetDistance(origin, destination) {
+  const xDistance = Math.pow(origin.x - destination.x, 2)
+  const zDistance = Math.pow(origin.z - destination.z, 2)
+  const hDistance = Math.sqrt(xDistance + zDistance)
 
   const y_distance = destination.y - origin.y
 
-  const distance = Math.sqrt(Math.pow(y_distance, 2) + x_distance + z_distance)
+  const distance = Math.sqrt(Math.pow(y_distance, 2) + xDistance + zDistance)
 
   return {
     distance,
-    h_distance,
+    hDistance,
     y_distance
   }
 }
 
-function getTargetYaw (origin, destination) {
-  const x_distance = destination.x - origin.x
-  const z_distance = destination.z - origin.z
-  const yaw = Math.atan2(x_distance, z_distance) + Math.PI
+function getTargetYaw(origin, destination) {
+  const xDistance = destination.x - origin.x
+  const zDistance = destination.z - origin.z
+  const yaw = Math.atan2(xDistance, zDistance) + Math.PI
   return yaw
 }
 
-function degrees_to_radians (degrees) {
+function degrees_to_radians(degrees) {
   var pi = Math.PI
   return degrees * (pi / 180)
 }
 
-function radians_to_degrees (radians) {
+function radians_to_degrees(radians) {
   var pi = Math.PI
   return radians * (180 / pi)
 }
 
-function round (value) {
+function round(value) {
   return Math.round(value * 100) / 100
 }
 
-function getVox (Vo, Alfa, Resistance = 0) {
+function getVox(Vo, Alfa, Resistance = 0) {
   return Vo * Math.cos(Alfa) - Resistance
 }
 
-function getVoy (Vo, Alfa, Resistance = 0) {
+function getVoy(Vo, Alfa, Resistance = 0) {
   return Vo * Math.sin(Alfa) - Resistance
 }
 
-function getVo (Vox, Voy, G) {
+function getVo(Vox, Voy, G) {
   return Math.sqrt(Math.pow(Vox, 2) + Math.pow(Voy - G, 2)) // New Total Velocity - Gravity
 }
 
-function getGrades (Vo, Voy, Gravity) {
+function getGrades(Vo, Voy, Gravity) {
   return radians_to_degrees(Math.asin((Voy - Gravity) / Vo))
 }
 
 // Check block position impact
-function incercetp_block (position) {
+function incercetp_block(position) {
   block = bot.blockAt(position)
   if (!block) { return false }
   if (block.boundingBox !== 'empty') { // OLD check  block.name !== 'air'
@@ -77,7 +77,7 @@ const factorY = 0.01 // Arrow "Air resistance" // In water must be changed
 const factorH = 0.01 // Arrow "Air resistance" // In water must be changed
 
 // Simulate Arrow Trayectory
-function tryGrade (grade, x_destination, y_destination, Vo, tryIntercetpBlock = false) {
+function tryGrade(grade, x_destination, y_destination, Vo, tryIntercetpBlock = false) {
   // Vo => Vector total velocity (X,Y,Z)
   // For arrow trayectory only need the horizontal discante (X,Z) and verticla (Y)
   let Voy = getVoy(Vo, degrees_to_radians(grade)) // Vector Y
@@ -157,7 +157,7 @@ function tryGrade (grade, x_destination, y_destination, Vo, tryIntercetpBlock = 
   }
 }
 
-function calculateBlockInTrayectory (previusArrowPosition, Vy, Vx) {
+function calculateBlockInTrayectory(previusArrowPosition, Vy, Vx) {
   const maxSteps = 20
 
   // Calculate Arrow XYZ position based on YAW and BOT position
@@ -211,7 +211,7 @@ function calculateBlockInTrayectory (previusArrowPosition, Vy, Vx) {
 }
 
 // Get more precision on shot
-function getPrecisionShot (grade, x_destination, y_destination, decimals) {
+function getPrecisionShot(grade, x_destination, y_destination, decimals) {
   let nearestDistance = false
   let nearestGrade = false
   decimals = Math.pow(10, decimals)
@@ -234,7 +234,7 @@ function getPrecisionShot (grade, x_destination, y_destination, decimals) {
 // Calculate all 180º first grades
 // Calculate the 2 most aproax shots
 // https://es.qwe.wiki/wiki/Trajectory
-function getFirstGradeAproax (x_destination, y_destination) {
+function getFirstGradeAproax(x_destination, y_destination) {
   const nearestDistance = false
 
   let first_found = false
@@ -272,14 +272,14 @@ function getFirstGradeAproax (x_destination, y_destination) {
 // Base start force
 const BaseVo = 3
 
-function getMasterGrade (botIn, targetIn, speedIn) {
+function getMasterGrade(botIn, targetIn, speedIn) {
   bot = botIn
   target = targetIn
   speed = speedIn
 
   // Check the first best trayectory
   let distances = getTargetDistance(bot.entity.position, target.position)
-  let shotCalculation = geBaseCalculation(distances.h_distance, distances.y_distance)
+  let shotCalculation = geBaseCalculation(distances.hDistance, distances.y_distance)
   if (!shotCalculation) { return false }
 
   // Recalculate the new target based on speed + first trayectory
@@ -288,11 +288,11 @@ function getMasterGrade (botIn, targetIn, speedIn) {
   const newTarget = premonition.newTarget
 
   // Recalculate the trayectory based on new target location
-  shotCalculation = geBaseCalculation(distances.h_distance, distances.y_distance)
+  shotCalculation = geBaseCalculation(distances.hDistance, distances.y_distance)
   if (!shotCalculation) { return false }
 
   // Get more precision on shot
-  precisionShot = getPrecisionShot(gradeShot.grade, distances.h_distance, distances.y_distance, 1)
+  precisionShot = getPrecisionShot(gradeShot.grade, distances.hDistance, distances.y_distance, 1)
 
   // Calculate yaw
   const yaw = getTargetYaw(bot.entity.position, newTarget)
@@ -309,7 +309,7 @@ function getMasterGrade (botIn, targetIn, speedIn) {
   }
 }
 
-function getPremonition (totalTicks, speed) {
+function getPremonition(totalTicks, speed) {
   totalTicks = totalTicks + Math.ceil(totalTicks / 10)
   const velocity = new Vec3(speed)
   const newTarget = new Vec3(target.position)
@@ -325,7 +325,7 @@ function getPremonition (totalTicks, speed) {
 }
 
 // For parabola of Y you have 2 times for found the Y position if Y original are downside of Y destination
-function geBaseCalculation (x_destination, y_destination) {
+function geBaseCalculation(x_destination, y_destination) {
   const grade = getFirstGradeAproax(x_destination, y_destination)
 
   if (!grade.nearestGrade_first) { return false } // No aviable trayectory

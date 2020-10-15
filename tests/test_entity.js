@@ -19,14 +19,14 @@ bot.on('spawn', function () {
   bot.chat('Ready!')
 
   // Get target for block position, use whatever you need
-  // const target = bot.hawkEye.getPlayer()
+  const target = bot.hawkEye.getPlayer()
   // console.log(target);
-  /* if (!target) {
-          return false
-      } */
+  if (target) {
+    bot.hawkEye.autoAttack(target)
+  }
 
   // Auto attack every 1,2 secs until target is dead or is to far away
-  // bot.hawkEye.autoAttack(target)
+  // 
   // If you force stop attack use:
   // hawkEye.stop();
 
@@ -44,23 +44,23 @@ bot.on('spawn', function () {
     isValid: true // Fake to is "alive"
   }
   // bot.hawkEye.oneShot(blockPosition);
-  bot.hawkEye.autoAttack(blockPosition)
+  // bot.hawkEye.autoAttack(blockPosition)
 
   searchSpiders()
 })
 
-function searchSpiders () {
+function searchSpiders() {
   const entities = Object.keys(bot.entities)
     .map(id => bot.entities[id])
     .filter(function (entity) {
       return (entity.type === 'mob') && bot.entity.position.distanceTo(entity.position) < 16
     })
 
-  console.clear()
+  /*console.clear()
   entities
     .map(function (entity) {
-      console.log(entity.username ? entity.username : entity.name, entity)
-    })
+      console.log(entity.username ? entity.username : entity.name, entity.height)
+    })*/
 
   setTimeout(() => {
     searchSpiders()
