@@ -3,24 +3,19 @@ let bot
 let target
 let speed
 
-Number.prototype.countDecimals = function () {
-  if (Math.floor(this.valueOf()) === this.valueOf()) return 0
-  return this.toString().split('.')[1].length || 0
-}
-
 function getTargetDistance(origin, destination) {
   const xDistance = Math.pow(origin.x - destination.x, 2)
   const zDistance = Math.pow(origin.z - destination.z, 2)
   const hDistance = Math.sqrt(xDistance + zDistance)
 
-  const y_distance = destination.y - origin.y
+  const yDistance = destination.y - origin.y
 
-  const distance = Math.sqrt(Math.pow(y_distance, 2) + xDistance + zDistance)
+  const distance = Math.sqrt(Math.pow(yDistance, 2) + xDistance + zDistance)
 
   return {
     distance,
     hDistance,
-    y_distance
+    yDistance
   }
 }
 
@@ -36,13 +31,9 @@ function degreesToRadians(degrees) {
   return degrees * (pi / 180)
 }
 
-function radians_to_degrees(radians) {
+function radiansToDegrees(radians) {
   var pi = Math.PI
   return radians * (180 / pi)
-}
-
-function round(value) {
-  return Math.round(value * 100) / 100
 }
 
 function getVox(Vo, Alfa, Resistance = 0) {
@@ -58,11 +49,11 @@ function getVo(Vox, Voy, G) {
 }
 
 function getGrades(Vo, Voy, Gravity) {
-  return radians_to_degrees(Math.asin((Voy - Gravity) / Vo))
+  return radiansToDegrees(Math.asin((Voy - Gravity) / Vo))
 }
 
 // Check block position impact
-function incercetp_block(position) {
+function incercetpBlock(position) {
   const block = bot.blockAt(position)
   if (!block) { return false }
   if (block.boundingBox !== 'empty') { // OLD check  block.name !== 'air'
@@ -86,6 +77,7 @@ function tryGrade(grade, xDestination, yDestination, Vo, tryIntercetpBlock = fal
   let Vx = Vox
   let ProjectileGrade
 
+  let nearestGrade
   let nearestDistance = false
   let totalTicks = 0
 
@@ -139,25 +131,25 @@ function calculateBlockInTrayectory(previusArrowPosition, Vy, Vx) {
   const yaw = getTargetYaw(bot.player.entity.position, target.position)
 
   // Vx = Hipotenusa
-  let arrow_current_x = bot.player.entity.position.x
-  let arrow_current_z = bot.player.entity.position.z
-  let arrow_current_y = bot.player.entity.position.y + 1.4
+  let arrowCurrentX = bot.player.entity.position.x
+  let arrowCurrentZ = bot.player.entity.position.z
+  let arrowCurrentY = bot.player.entity.position.y + 1.4
   if (previusArrowPosition === false) {
     previusArrowPosition = new Vec3(bot.player.entity.position.x, bot.player.entity.position.y + 1.4, bot.player.entity.position.z)
   }
 
-  arrow_current_y += Vy
+  arrowCurrentY += Vy
 
   // Cateto Opuesto
-  const x_extra = Math.sin(yaw) * Vx
-  arrow_current_x -= x_extra
+  const xExtra = Math.sin(yaw) * Vx
+  arrowCurrentX -= xExtra
 
   // Cateto Adjacente
-  const z_extra = x_extra / Math.tan(yaw)
-  arrow_current_z -= z_extra
+  const z_extra = xExtra / Math.tan(yaw)
+  arrowCurrentZ -= z_extra
 
   // Current arrow position
-  const arrowPosition = new Vec3(arrow_current_x, arrow_current_y, arrow_current_z)
+  const arrowPosition = new Vec3(arrowCurrentX, arrowCurrentY, arrowCurrentZ)
 
   const distX = arrowPosition.x - previusArrowPosition.x
   const distY = arrowPosition.y - previusArrowPosition.y
@@ -170,7 +162,7 @@ function calculateBlockInTrayectory(previusArrowPosition, Vy, Vx) {
   // Arrow Speed is to high, calculate prevArrow with current position for detect block in midle of tick position
   for (let i = 0; i < maxSteps; i++) {
     previusArrowPosition.add(distVector)
-    incercetp = !incercetp_block(previusArrowPosition)
+    incercetp = !incercetpBlock(previusArrowPosition)
     if (incercetp) {
       return {
         arrowPosition,
@@ -192,7 +184,7 @@ function getPrecisionShot(grade, xDestination, yDestination, decimals) {
   decimals = Math.pow(10, decimals)
 
   for (let iGrade = (grade * 10) - 10; iGrade <= (grade * 10) + 10; iGrade += 1) {
-    distance = tryGrade(iGrade / decimals, xDestination, yDestination, BaseVo)
+    const distance = tryGrade(iGrade / decimals, xDestination, yDestination, BaseVo)
     if ((distance.nearestDistance < nearestDistance) || nearestDistance === false) {
       nearestDistance = distance.nearestDistance
       nearestGrade = iGrade
@@ -212,9 +204,9 @@ function getPrecisionShot(grade, xDestination, yDestination, decimals) {
 function getFirstGradeAproax(xDestination, yDestination) {
   const nearestDistance = false
 
-  let first_found = false
-  let nearestGrade_first = false
-  let nearestGrade_second = false
+  let firstFound = false
+  let nearestGradeFirst = false
+  let nearestGradeSecond = false
 
   const nearGrades = []
 
@@ -226,21 +218,21 @@ function getFirstGradeAproax(xDestination, yDestination) {
 
     nearGrades.push(tryGradeShot)
 
-    if (!nearestGrade_first) { nearestGrade_first = tryGradeShot }
+    if (!nearestGradeFirst) { nearestGradeFirst = tryGradeShot }
 
-    if (tryGradeShot.grade - nearestGrade_first.grade > 10 && first_found === false) {
-      first_found = true
-      nearestGrade_second = tryGradeShot
+    if (tryGradeShot.grade - nearestGradeFirst.grade > 10 && firstFound === false) {
+      firstFound = true
+      nearestGradeSecond = tryGradeShot
     }
 
-    if (nearestGrade_first.nearestDistance > tryGradeShot.nearestDistance && first_found === false) { nearestGrade_first = tryGradeShot }
+    if (nearestGradeFirst.nearestDistance > tryGradeShot.nearestDistance && firstFound === false) { nearestGradeFirst = tryGradeShot }
 
-    if (nearestGrade_second.nearestDistance > tryGradeShot.nearestDistance && first_found) { nearestGrade_second = tryGradeShot }
+    if (nearestGradeSecond.nearestDistance > tryGradeShot.nearestDistance && firstFound) { nearestGradeSecond = tryGradeShot }
   }
 
   return {
-    nearestGrade_first,
-    nearestGrade_second
+    nearestGradeFirst,
+    nearestGradeSecond
   }
 }
 
@@ -254,7 +246,7 @@ function getMasterGrade(botIn, targetIn, speedIn) {
 
   // Check the first best trayectory
   let distances = getTargetDistance(bot.entity.position, target.position)
-  let shotCalculation = geBaseCalculation(distances.hDistance, distances.y_distance)
+  let shotCalculation = geBaseCalculation(distances.hDistance, distances.yDistance)
   if (!shotCalculation) { return false }
 
   // Recalculate the new target based on speed + first trayectory
@@ -263,11 +255,11 @@ function getMasterGrade(botIn, targetIn, speedIn) {
   const newTarget = premonition.newTarget
 
   // Recalculate the trayectory based on new target location
-  shotCalculation = geBaseCalculation(distances.hDistance, distances.y_distance)
+  shotCalculation = geBaseCalculation(distances.hDistance, distances.yDistance)
   if (!shotCalculation) { return false }
 
   // Get more precision on shot
-  precisionShot = getPrecisionShot(gradeShot.grade, distances.hDistance, distances.y_distance, 1)
+  const precisionShot = getPrecisionShot(gradeShot.grade, distances.hDistance, distances.yDistance, 1)
 
   // Calculate yaw
   const yaw = getTargetYaw(bot.entity.position, newTarget)
@@ -303,22 +295,22 @@ function getPremonition(totalTicks, speed) {
 function geBaseCalculation(xDestination, yDestination) {
   const grade = getFirstGradeAproax(xDestination, yDestination)
 
-  if (!grade.nearestGrade_first) { return false } // No aviable trayectory
+  if (!grade.nearestGradeFirst) { return false } // No aviable trayectory
 
   // Check blocks in trayectory
-  let check = tryGrade(grade.nearestGrade_first.grade, xDestination, yDestination, BaseVo, true)
+  let check = tryGrade(grade.nearestGradeFirst.grade, xDestination, yDestination, BaseVo, true)
 
   if (!check.blockInTrayect && check.nearestDistance < 4) {
-    gradeShot = grade.nearestGrade_first
+    gradeShot = grade.nearestGradeFirst
   } else {
-    if (!grade.nearestGrade_second) {
+    if (!grade.nearestGradeSecond) {
       return false // No aviable trayectory
     }
-    check = tryGrade(grade.nearestGrade_second.grade, xDestination, yDestination, BaseVo, true)
+    check = tryGrade(grade.nearestGradeSecond.grade, xDestination, yDestination, BaseVo, true)
     if (check.blockInTrayect) {
       return false // No aviable trayectory
     }
-    gradeShot = grade.nearestGrade_second
+    gradeShot = grade.nearestGradeSecond
   }
 
   return gradeShot
