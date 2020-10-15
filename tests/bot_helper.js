@@ -53,7 +53,7 @@ points.push({
   z: -70
 })
 
-function goNextPoint (bot, goal) {
+function goNextPoint(bot, goal) {
   const mcData = require('minecraft-data')(bot.version)
   const defaultMove = new Movements(bot, mcData)
   bot.pathfinder.setMovements(defaultMove)
