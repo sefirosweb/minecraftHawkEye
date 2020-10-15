@@ -8,16 +8,39 @@ Install:
 - npm i minecrafthawkeye
 
 
-Usage: node file.js server port username password
+Usage: 
 
+First load mineflayer and minecrafthawkeye, and load plugin into mineflayer
+```js
+const mineflayer = require('mineflayer')
+const minecraftHawkEye = require('minecrafthawkeye');
+bot.loadPlugin(minecraftHawkEye)
 ```
-node example.js youserver.es 12345
+
+Now you can request functions
+```js
+// Get an a player entity:
+const playerEntity = bot.hawkEye.getPlayer(playername) // If emtpy return first player found
+// Auto attack every 1,2 secs to target
+bot.hawkEye.autoAttack(target) // You can put blockPosition, see example,
+// Stop auto attack
+bot.hawkEye.stop()
+// One Shot
+bot.hawkEye.autoAttack(target)
+
+// Get Yaw and Pitch
+bot.hawkEye.getMasterGrade(target, speed) // speed (Vec3) if optional, but this is use for calc the intersection between arrow and new target position
+
+// Simple one shot to Yaw and Pitch
+bot.hawkEye.simplyShot = function (yaw, pitch) // Pitch = Grades in radians
 ```
+
+A simply example in one file:
 
 ```js
 // file: example.js
 const mineflayer = require('mineflayer')
-const hawkEyePlugin = require('minecrafthawkeye');
+const minecraftHawkEye = require('minecrafthawkeye');
 
 const bot = mineflayer.createBot({
     host: process.argv[2],
