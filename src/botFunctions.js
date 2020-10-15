@@ -1,4 +1,4 @@
-function getPlayer(bot, playername = null) {
+function getPlayer (bot, playername = null) {
   const playerEntity = Object.keys(bot.entities)
     .map(id => bot.entities[id])
     .find(function (entity) {
@@ -6,12 +6,12 @@ function getPlayer(bot, playername = null) {
         if (playername === null) { return true }
         if (entity.username === playername) { return true }
       }
-      return false;
+      return false
     })
-  return playerEntity;
+  return playerEntity
 }
 
-function simplyShot(bot, yaw = null, grade = null) {
+function simplyShot (bot, yaw = null, grade = null) {
   if (yaw === null) {
     yaw = bot.player.entity.yaw
   }

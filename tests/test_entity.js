@@ -16,58 +16,23 @@ bot.on('spawn', function () {
   bot.chat('/give Archer minecraft:arrow 300')
   bot.chat('/time set day')
   bot.chat('/kill @e[type=minecraft:arrow]')
-
   bot.chat('Ready!')
+  fire()
+})
 
-  // Get target for block position, use whatever you need
-  const target = bot.hawkEye.getPlayer()
+function fire () {
+  const target = Object.keys(bot.entities)
+    .map(id => bot.entities[id])
+    .find(function (e) {
+      return e.type === 'mob' && bot.entity.position.distanceTo(e.position) < 14
+    })
   console.log(target)
   // console.log(target);
   if (target) {
-    bot.hawkEye.autoAttack(target)
+    bot.hawkEye.oneShot(target)
   }
-
-  // Auto attack every 1,2 secs until target is dead or is to far away
-  //
-  // If you force stop attack use:
-  // hawkEye.stop();
-
-  // Use one shot time with calc:
-  // bot.hawkEye.oneShot(target);
-
-  // If you want to shot in XYZ position:
-  /*
-  const blockPosition = {
-    position: {
-      x: -10,
-      y: 62,
-      z: 0.5
-    },
-    isValid: true // Fake to is "alive"
-  }
-  */
-  // bot.hawkEye.oneShot(blockPosition);
-  // bot.hawkEye.autoAttack(blockPosition)
-
-  searchSpiders()
-})
-
-function searchSpiders() {
-  const mcData = require("minecraft-data")(bot.version)
-
-  const entities = Object.keys(bot.entities)
-    .map(id => bot.entities[id])
-    .filter(function (entity) {
-      return (entity.type === 'mob') && bot.entity.position.distanceTo(entity.position) < 16
-    })
-
-  // Get height mob
-  entities
-    .map(function (entity) {
-      console.log(entity.username ? entity.username : entity.name, mcData.mobs[entity.entityType].height)
-    }, mcData)
 
   setTimeout(() => {
-    searchSpiders()
+    fire()
   }, 2000)
 }

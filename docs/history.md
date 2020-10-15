@@ -1,3 +1,8 @@
+## 1.0.8
+* Fixed bug on "small" targets (spiders), if the target is mob or player calculates the height and shot in the middle
+* Fixed small bug from start arrow position, this cause some times wrong targets
+
+
 ## 1.0.7
 * Added docs/history.md
 * No fixed bugs and methods

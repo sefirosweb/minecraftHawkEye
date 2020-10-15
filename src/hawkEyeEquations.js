@@ -1,7 +1,11 @@
 const Vec3 = require('vec3')
+let mcData
+
 let bot
 let target
 let speed
+let startPosition
+let targetPosition
 
 function getTargetDistance (origin, destination) {
   const xDistance = Math.pow(origin.x - destination.x, 2)
@@ -125,14 +129,14 @@ function calculateBlockInTrayectory (previusArrowPosition, Vy, Vx) {
   const maxSteps = 20
 
   // Calculate Arrow XYZ position based on YAW and BOT position
-  const yaw = getTargetYaw(bot.player.entity.position, target.position)
+  const yaw = getTargetYaw(startPosition, targetPosition)
 
   // Vx = Hipotenusa
-  let arrowCurrentX = bot.player.entity.position.x
-  let arrowCurrentZ = bot.player.entity.position.z
-  let arrowCurrentY = bot.player.entity.position.y + 1.4
+  let arrowCurrentX = startPosition.x
+  let arrowCurrentZ = startPosition.z
+  let arrowCurrentY = startPosition.y
   if (previusArrowPosition === false) {
-    previusArrowPosition = new Vec3(bot.player.entity.position.x, bot.player.entity.position.y + 1.4, bot.player.entity.position.z)
+    previusArrowPosition = new Vec3(startPosition.x, startPosition.y, startPosition.z)
   }
 
   arrowCurrentY += Vy
@@ -237,9 +241,22 @@ function getMasterGrade (botIn, targetIn, speedIn) {
   bot = botIn
   target = targetIn
   speed = speedIn
+  mcData = require('minecraft-data')(bot.version)
+
+  startPosition = bot.entity.position.offset(0, 1.4, 0) // 1.4 Bow offset position
+
+  // Calculate target Height, for shot in the heart  =P
+  let targetHeight = 0
+  if (target.type === 'player') {
+    targetHeight = target.height
+  }
+  if (target.type === 'mob') {
+    targetHeight = mcData.mobs[target.entityType].height
+  }
+  targetPosition = new Vec3(target.position).offset(0, targetHeight / 2, 0)
 
   // Check the first best trayectory
-  let distances = getTargetDistance(bot.entity.position, target.position)
+  let distances = getTargetDistance(startPosition, targetPosition)
   let shotCalculation = geBaseCalculation(distances.hDistance, distances.yDistance)
   if (!shotCalculation) { return false }
 
@@ -256,7 +273,7 @@ function getMasterGrade (botIn, targetIn, speedIn) {
   const precisionShot = getPrecisionShot(shotCalculation.grade, distances.hDistance, distances.yDistance, 1)
 
   // Calculate yaw
-  const yaw = getTargetYaw(bot.entity.position, newTarget)
+  const yaw = getTargetYaw(startPosition, newTarget)
 
   if (precisionShot.nearestDistance > 4) { return false } // Too far
 
@@ -272,11 +289,11 @@ function getMasterGrade (botIn, targetIn, speedIn) {
 function getPremonition (totalTicks, speed) {
   totalTicks = totalTicks + Math.ceil(totalTicks / 10)
   const velocity = new Vec3(speed)
-  const newTarget = new Vec3(target.position)
+  const newTarget = new Vec3(targetPosition)
   for (let i = 1; i <= totalTicks; i++) {
     newTarget.add(velocity)
   }
-  const distances = getTargetDistance(bot.entity.position, newTarget)
+  const distances = getTargetDistance(startPosition, newTarget)
 
   return {
     distances,
