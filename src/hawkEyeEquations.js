@@ -77,7 +77,6 @@ function tryGrade(grade, xDestination, yDestination, Vo, tryIntercetpBlock = fal
   let Vx = Vox
   let ProjectileGrade
 
-  let nearestGrade
   let nearestDistance = false
   let totalTicks = 0
 
@@ -90,12 +89,10 @@ function tryGrade(grade, xDestination, yDestination, Vo, tryIntercetpBlock = fal
 
     if (nearestDistance === false) {
       nearestDistance = firstDistance
-      nearestGrade = grade
     }
 
     if (firstDistance < nearestDistance) {
       nearestDistance = firstDistance
-      nearestGrade = grade
     }
 
     Vo = getVo(Vox, Voy, gravity)
@@ -145,8 +142,8 @@ function calculateBlockInTrayectory(previusArrowPosition, Vy, Vx) {
   arrowCurrentX -= xExtra
 
   // Cateto Adjacente
-  const z_extra = xExtra / Math.tan(yaw)
-  arrowCurrentZ -= z_extra
+  const zExtra = xExtra / Math.tan(yaw)
+  arrowCurrentZ -= zExtra
 
   // Current arrow position
   const arrowPosition = new Vec3(arrowCurrentX, arrowCurrentY, arrowCurrentZ)
@@ -181,6 +178,7 @@ function calculateBlockInTrayectory(previusArrowPosition, Vy, Vx) {
 function getPrecisionShot(grade, xDestination, yDestination, decimals) {
   let nearestDistance = false
   let nearestGrade = false
+  let nearestTicks = false
   decimals = Math.pow(10, decimals)
 
   for (let iGrade = (grade * 10) - 10; iGrade <= (grade * 10) + 10; iGrade += 1) {
@@ -259,7 +257,7 @@ function getMasterGrade(botIn, targetIn, speedIn) {
   if (!shotCalculation) { return false }
 
   // Get more precision on shot
-  const precisionShot = getPrecisionShot(gradeShot.grade, distances.hDistance, distances.yDistance, 1)
+  const precisionShot = getPrecisionShot(shotCalculation.grade, distances.hDistance, distances.yDistance, 1)
 
   // Calculate yaw
   const yaw = getTargetYaw(bot.entity.position, newTarget)
@@ -294,6 +292,7 @@ function getPremonition(totalTicks, speed) {
 // For parabola of Y you have 2 times for found the Y position if Y original are downside of Y destination
 function geBaseCalculation(xDestination, yDestination) {
   const grade = getFirstGradeAproax(xDestination, yDestination)
+  let gradeShot
 
   if (!grade.nearestGradeFirst) { return false } // No aviable trayectory
 
