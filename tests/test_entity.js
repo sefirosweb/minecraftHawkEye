@@ -26,7 +26,7 @@ bot.on('spawn', function () {
   }
 
   // Auto attack every 1,2 secs until target is dead or is to far away
-  // 
+  //
   // If you force stop attack use:
   // hawkEye.stop();
 
@@ -49,18 +49,18 @@ bot.on('spawn', function () {
   searchSpiders()
 })
 
-function searchSpiders() {
+function searchSpiders () {
   const entities = Object.keys(bot.entities)
     .map(id => bot.entities[id])
     .filter(function (entity) {
       return (entity.type === 'mob') && bot.entity.position.distanceTo(entity.position) < 16
     })
 
-  /*console.clear()
+  /* console.clear()
   entities
     .map(function (entity) {
       console.log(entity.username ? entity.username : entity.name, entity.height)
-    })*/
+    }) */
 
   setTimeout(() => {
     searchSpiders()
