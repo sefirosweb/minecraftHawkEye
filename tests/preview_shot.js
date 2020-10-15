@@ -56,10 +56,10 @@ let preview = 0;
 bot.on('goal_reached', () => {
     bot.chat('Rdy!');
     let chargeBowTimer = Date.now();
-    let = bowIsCharged = false;
+    let bowIsCharged = false;
     bot.deactivateItem();
 
-    bot.on('physicTick', function() {
+    bot.on('physicTick', function () {
         // bot.lookAt(headTo); <-- don't use this no have enough accuracy
         // Look by Yaw & Pitch /* Pitch == Radians */ 
         // 3.1385715147451663 => default look to Z
@@ -97,7 +97,7 @@ botChecker.on('goal_reached', () => {
     let counPosition = 0;
     let timeToImpact = 0;
 
-    botChecker.on('physicTick', function() {
+    botChecker.on('physicTick', function () {
         let allArrows = getAllArrows(botChecker);
         allArrows.forEach(arrow => {
             if (!currentArrows.includes(arrow.id)) {
@@ -242,7 +242,7 @@ function save(data, file) {
             const json2csvParser = new Parser({ delimiter: ';', header: false });
             const csv = json2csvParser.parse(data) + newLine;
 
-            fs.appendFile(file, csv, function(err) {
+            fs.appendFile(file, csv, function (err) {
                 if (err) throw err;
             });
 
@@ -251,7 +251,7 @@ function save(data, file) {
             const json2csvParser = new Parser({ delimiter: ';', header: true });
             const csv = json2csvParser.parse(data) + newLine;
 
-            fs.writeFile(file, csv, function(err) {
+            fs.writeFile(file, csv, function (err) {
                 if (err) throw err;
             });
         }
