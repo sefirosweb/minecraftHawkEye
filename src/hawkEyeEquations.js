@@ -67,18 +67,25 @@ function incercetpBlock(position) {
 }
 
 // Physics factors
-const gravity = 0.05 // Arrow Gravity // Only for arrow for other entities have different gravity
-const factorY = 0.01 // Arrow "Air resistance" // In water must be changed
-const factorH = 0.01 // Arrow "Air resistance" // In water must be changed
+const GRAVITY = 0.05 // Arrow Gravity // Only for arrow for other entities have different gravity
+const FACTOR_Y = 0.01 // Arrow "Air resistance" // In water must be changed
+const FACTOR_H = 0.01 // Arrow "Air resistance" // In water must be changed
 
 // Simulate Arrow Trayectory
-function tryGrade(grade, xDestination, yDestination, Vo, tryIntercetpBlock = false) {
+function tryGrade(grade, xDestination, yDestination, VoIn, tryIntercetpBlock = false) {
+  const precisionFactor = 1 // More precision + Slower! (20 is fine)
+
+  let Vo = VoIn
+  const gravity = GRAVITY / precisionFactor
+  const factorY = FACTOR_Y / precisionFactor
+  const factorH = FACTOR_H / precisionFactor
+
   // Vo => Vector total velocity (X,Y,Z)
   // For arrow trayectory only need the horizontal discante (X,Z) and verticla (Y)
   let Voy = getVoy(Vo, degreesToRadians(grade)) // Vector Y
   let Vox = getVox(Vo, degreesToRadians(grade)) // Vector X
-  let Vy = Voy
-  let Vx = Vox
+  let Vy = Voy / precisionFactor
+  let Vx = Vox / precisionFactor
   let ProjectileGrade
 
   let nearestDistance = false
@@ -105,8 +112,9 @@ function tryGrade(grade, xDestination, yDestination, Vo, tryIntercetpBlock = fal
     Voy = getVoy(Vo, degreesToRadians(ProjectileGrade), Voy * factorY)
     Vox = getVox(Vo, degreesToRadians(ProjectileGrade), Vox * factorH)
 
-    Vy += Voy
-    Vx += Vox
+
+    Vy += Voy / precisionFactor
+    Vx += Vox / precisionFactor
 
     // Arrow passed player OR Voy (arrow is going down and passed player)
     if (Vx > xDestination || (Voy < 0 && yDestination > Vy) || blockInTrayect) {
@@ -206,7 +214,7 @@ function getFirstGradeAproax(xDestination, yDestination) {
   let nearestGradeFirst = false
   let nearestGradeSecond = false
 
-  const nearGrades = []
+  // const nearGrades = []
 
   for (let grade = -89; grade < 90; grade++) {
     const tryGradeShot = tryGrade(grade, xDestination, yDestination, BaseVo)
@@ -214,7 +222,7 @@ function getFirstGradeAproax(xDestination, yDestination) {
     tryGradeShot.grade = grade
     if (tryGradeShot.nearestDistance > 4) { continue }
 
-    nearGrades.push(tryGradeShot)
+    // nearGrades.push(tryGradeShot)
 
     if (!nearestGradeFirst) { nearestGradeFirst = tryGradeShot }
 
@@ -228,7 +236,8 @@ function getFirstGradeAproax(xDestination, yDestination) {
     if (nearestGradeSecond.nearestDistance > tryGradeShot.nearestDistance && firstFound) { nearestGradeSecond = tryGradeShot }
   }
 
-  if (true) {
+  /* Test best grades calc
+ 
     console.clear();
     console.log(nearestGradeFirst.grade, nearestGradeFirst.nearestDistance)
     console.log(nearestGradeSecond.grade, nearestGradeSecond.nearestDistance)
@@ -237,7 +246,8 @@ function getFirstGradeAproax(xDestination, yDestination) {
 
     const nearestGrades = nearGrades.slice(0, 3);
     console.log(nearestGrades)
-  }
+
+  */
 
   return {
     nearestGradeFirst,

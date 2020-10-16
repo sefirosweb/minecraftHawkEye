@@ -20,7 +20,7 @@ bot.on('spawn', function () {
   fire()
 })
 
-function fire () {
+function fire() {
   const target = Object.keys(bot.entities)
     .map(id => bot.entities[id])
     .find(function (e) {

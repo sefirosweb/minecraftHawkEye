@@ -33,5 +33,5 @@ function fire() {
 
   setTimeout(() => {
     fire();
-  }, 2000);
+  }, 10000);
 }
