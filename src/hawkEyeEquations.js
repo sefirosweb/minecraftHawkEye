@@ -73,12 +73,12 @@ const FACTOR_H = 0.01 // Arrow "Air resistance" // In water must be changed
 
 // Simulate Arrow Trayectory
 function tryGrade(grade, xDestination, yDestination, VoIn, tryIntercetpBlock = false) {
-  const precisionFactor = 1 // More precision + Slower! (20 is fine)
+  let precisionFactor = 1 // !Danger More precision increse the calc! =>  !More Slower!
 
   let Vo = VoIn
-  const gravity = GRAVITY / precisionFactor
-  const factorY = FACTOR_Y / precisionFactor
-  const factorH = FACTOR_H / precisionFactor
+  let gravity = GRAVITY / precisionFactor
+  let factorY = FACTOR_Y / precisionFactor
+  let factorH = FACTOR_H / precisionFactor
 
   // Vo => Vector total velocity (X,Y,Z)
   // For arrow trayectory only need the horizontal discante (X,Z) and verticla (Y)
@@ -95,7 +95,6 @@ function tryGrade(grade, xDestination, yDestination, VoIn, tryIntercetpBlock = f
   let previusArrowPositionIntercept = false
 
   while (true) {
-    totalTicks++
     const firstDistance = Math.sqrt(Math.pow(Vy - yDestination, 2) + Math.pow(Vx - xDestination, 2))
 
     if (nearestDistance === false) {
@@ -105,6 +104,18 @@ function tryGrade(grade, xDestination, yDestination, VoIn, tryIntercetpBlock = f
     if (firstDistance < nearestDistance) {
       nearestDistance = firstDistance
     }
+
+    if (nearestDistance < 4) {
+      precisionFactor = 5 // Dynamic Precission, when arrow is near target increse * the precission !Danger with this number
+    } // Increse precission when arrow is near over target,
+    if (nearestDistance > 4) {
+      precisionFactor = 1
+    }
+
+    totalTicks += (1 / precisionFactor)
+    gravity = GRAVITY / precisionFactor
+    factorY = FACTOR_Y / precisionFactor
+    factorH = FACTOR_H / precisionFactor
 
     Vo = getVo(Vox, Voy, gravity)
     ProjectileGrade = getGrades(Vo, Voy, gravity)
@@ -134,7 +145,7 @@ function tryGrade(grade, xDestination, yDestination, VoIn, tryIntercetpBlock = f
 }
 
 function calculateBlockInTrayectory(previusArrowPosition, Vy, Vx) {
-  const maxSteps = 20
+  const maxSteps = 10 // Used fo calc block between tick & tick
 
   // Calculate Arrow XYZ position based on YAW and BOT position
   const yaw = getTargetYaw(startPosition, targetPosition)
@@ -268,17 +279,17 @@ function getMasterGrade(botIn, targetIn, speedIn) {
   speed = speedIn
   mcData = require('minecraft-data')(bot.version)
 
-  startPosition = bot.entity.position.offset(0, 1.4, 0) // 1.4 Bow offset position
+  startPosition = bot.entity.position.offset(0, 1.6, 0) // Bow offset position
 
   // Calculate target Height, for shot in the heart  =P
   let targetHeight = 0
   if (target.type === 'player') {
-    targetHeight = target.height
+    targetHeight = 1.6
   }
   if (target.type === 'mob') {
     targetHeight = mcData.mobs[target.entityType].height
   }
-  targetPosition = new Vec3(target.position).offset(0, targetHeight / 2, 0)
+  targetPosition = new Vec3(target.position).offset(0, targetHeight, 0)
 
   // Check the first best trayectory
   let distances = getTargetDistance(startPosition, targetPosition)

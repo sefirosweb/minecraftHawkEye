@@ -71,9 +71,9 @@ function autoCalc() {
   }
 
 
-  console.time("getMasterGrade");
+  // console.time("getMasterGrade");
   const infoShot = getMasterGrade(bot, target, speed)
-  console.timeEnd("getMasterGrade");
+  // console.timeEnd("getMasterGrade");
 
   if (infoShot) {
     bot.look(infoShot.yaw, infoShot.pitch)
