@@ -7,11 +7,11 @@ let preparingShotTime
 let prevPlayerPositions = []
 let oneShot
 
-function load(botToLoad) {
+function load (botToLoad) {
   bot = botToLoad
 }
 
-function autoAttack(targetToAttack, isOneShot = false) {
+function autoAttack (targetToAttack, isOneShot = false) {
   if (!targetToAttack) {
     return false
   }
@@ -25,12 +25,12 @@ function autoAttack(targetToAttack, isOneShot = false) {
   return true
 }
 
-function stop() {
+function stop () {
   bot.deactivateItem()
   bot.removeListener('physicTick', autoCalc)
 }
 
-function autoCalc() {
+function autoCalc () {
   if (target === undefined || target === false || !target.isValid) {
     stop()
     return false
@@ -69,7 +69,6 @@ function autoCalc() {
     preparingShot = true
     preparingShotTime = Date.now()
   }
-
 
   // console.time("getMasterGrade");
   const infoShot = getMasterGrade(bot, target, speed)

@@ -9,7 +9,7 @@ const bot = mineflayer.createBot({
 })
 
 bot.loadPlugin(minecraftHawkEye)
-let shooting = false;
+let shooting = false
 
 bot.on('spawn', function () {
   bot.chat('/give ' + bot.username + ' bow{Enchantments:[{id:unbreaking,lvl:100}]} 1')
@@ -23,7 +23,7 @@ bot.on('spawn', function () {
   }
 })
 
-function fire() {
+function fire () {
   const target = bot.hawkEye.getPlayer()
   if (!target) {
     return false
@@ -32,6 +32,6 @@ function fire() {
   bot.hawkEye.oneShot(target)
 
   setTimeout(() => {
-    fire();
-  }, 10000);
+    fire()
+  }, 10000)
 }
