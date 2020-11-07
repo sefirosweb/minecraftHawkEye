@@ -28,7 +28,7 @@ bot.on('spawn', function () {
   // Auto attack every 1,2 secs until target is dead or is to far away
   bot.hawkEye.autoAttack(target)
   // If you force stop attack use:
-  // hawkEye.stop();
+  // bot.hawkEye.stop();
 
   // Use one shot time with calc:
   // bot.hawkEye.oneShot(target);
@@ -46,4 +46,28 @@ bot.on('spawn', function () {
           // bot.hawkEye.oneShot(blockPosition);
           // bot.hawkEye.autoAttack(blockPosition);
       */
+})
+
+bot.on('chat', (username, chat) => {
+  if (chat === 'stop') {
+    bot.hawkEye.stop()
+  }
+
+  if (chat === 'fire') {
+    const target = bot.hawkEye.getPlayer()
+    console.log(target)
+    if (!target) {
+      return false
+    }
+    bot.hawkEye.autoAttack(target)
+  }
+
+  if (chat === 'one') {
+    const target = bot.hawkEye.getPlayer()
+    console.log(target)
+    if (!target) {
+      return false
+    }
+    bot.hawkEye.oneShot(target);
+  }
 })
