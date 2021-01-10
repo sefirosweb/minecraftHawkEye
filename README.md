@@ -97,3 +97,8 @@ All is done, when is attack mode they get best posibilty for impact, and shot ar
 
 I'm glad I can help you, do we help each other?
 
+# TODOs
+- Add support for crossbow
+- Add support for snowballs
+- Add support for enderpelds
+
