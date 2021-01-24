@@ -4,7 +4,7 @@ Minecraft bot for equations when shooting an arrow
 This program / bot is based on <a href="https://github.com/PrismarineJS/mineflayer" target="_blank">mineflayer</a> repository
 
 Install:
-- Install Novde version 10+
+- Install nodejs >= 14 from nodejs.org
 - npm i minecrafthawkeye
 
 
@@ -101,6 +101,6 @@ I'm glad I can help you, do we help each other?
 
 # TODOs
 - Add support for snowballs
-- Add support for enderpelds ( Coming soon for minecraftlegion => https://www.youtube.com/watch?v=s9ZVdMUUSGE )
+- Add support for enderpelds ( Coming soon for <a href="https://github.com/sefirosweb/minecraftLegion" target="_blank">minecraftLegion</a> => https://www.youtube.com/watch?v=s9ZVdMUUSGE )
 - Pending to fix check crossbow ready
 
