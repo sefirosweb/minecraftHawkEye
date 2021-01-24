@@ -8,11 +8,11 @@ let prevPlayerPositions = []
 let oneShot
 let weapon = 'bow'
 
-function load (botToLoad) {
+function load(botToLoad) {
   bot = botToLoad
 }
 
-function autoAttack (targetToAttack, inputWeapon = 'bow', isOneShot = false) {
+function autoAttack(targetToAttack, inputWeapon = 'bow', isOneShot = false) {
   if (!targetToAttack) {
     return false
   }
@@ -27,12 +27,12 @@ function autoAttack (targetToAttack, inputWeapon = 'bow', isOneShot = false) {
   return true
 }
 
-function stop () {
+function stop() {
   bot.deactivateItem()
   bot.removeListener('physicTick', autoCalc)
 }
 
-function autoCalc () {
+function autoCalc() {
   let waitTime = 1200 // bow
   if (weapon === 'crossbow') {
     waitTime = 1300
@@ -89,7 +89,7 @@ function autoCalc () {
       }
 
       if (weapon === 'crossbow') {
-        if (
+        if ( // Pending to fix check crossbow ready
           bot.heldItem.nbt.value.ChargedProjectiles &&
           bot.heldItem.nbt.value.ChargedProjectiles.value.value[0] &&
           bot.heldItem.nbt.value.ChargedProjectiles.value.value[0].id.value

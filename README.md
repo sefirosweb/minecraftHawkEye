@@ -102,4 +102,5 @@ I'm glad I can help you, do we help each other?
 # TODOs
 - Add support for snowballs
 - Add support for enderpelds ( Coming soon for minecraftlegion => https://www.youtube.com/watch?v=s9ZVdMUUSGE )
+- Pending to fix check crossbow ready
 
