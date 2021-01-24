@@ -1,3 +1,9 @@
+## 1.1
+* Important: Now getMasterGrade need a weapon for calculate! from: bot.hawkEye.getMasterGrade(bot, target, speed) to  bot.hawkEye.getMasterGrade(bot, target, speed, weapon)
+* Adding crossbow support!
+* Added example for use with crossbow
+* Added in in autoAttack & oneShot default weapon bow (this must be use of example)
+
 ## 1.0.8
 * Fixed bug on "small" targets (spiders), if the target is mob or player calculates the height and shot in the middle
 * Fixed small bug from start arrow position, this cause some times wrong targets

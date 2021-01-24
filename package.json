@@ -6,9 +6,12 @@
     "dependencies": {
         "mineflayer": "^2.30.0"
     },
-    "devDependencies": {},
+    "devDependencies": {
+        "standard": "^16.0.3"
+    },
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "standard": "standard --fix"
     },
     "repository": {
         "type": "git",

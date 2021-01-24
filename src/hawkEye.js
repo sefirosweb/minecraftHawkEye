@@ -6,12 +6,13 @@ let preparingShot
 let preparingShotTime
 let prevPlayerPositions = []
 let oneShot
+let weapon = 'bow'
 
 function load (botToLoad) {
   bot = botToLoad
 }
 
-function autoAttack (targetToAttack, isOneShot = false) {
+function autoAttack (targetToAttack, inputWeapon = 'bow', isOneShot = false) {
   if (!targetToAttack) {
     return false
   }
@@ -20,6 +21,7 @@ function autoAttack (targetToAttack, isOneShot = false) {
   target = targetToAttack
   preparingShot = false
   prevPlayerPositions = []
+  weapon = inputWeapon
 
   bot.on('physicTick', autoCalc)
   return true
@@ -31,6 +33,11 @@ function stop () {
 }
 
 function autoCalc () {
+  let waitTime = 1200 // bow
+  if (weapon === 'crossbow') {
+    waitTime = 1300
+  }
+
   if (target === undefined || target === false || !target.isValid) {
     stop()
     return false
@@ -70,16 +77,31 @@ function autoCalc () {
     preparingShotTime = Date.now()
   }
 
-  // console.time("getMasterGrade");
-  const infoShot = getMasterGrade(bot, target, speed)
-  // console.timeEnd("getMasterGrade");
+  const infoShot = getMasterGrade(bot, target, speed, weapon)
 
   if (infoShot) {
     bot.look(infoShot.yaw, infoShot.pitch)
 
     const currentTime = Date.now()
-    if (preparingShot && currentTime - preparingShotTime > 1200) {
-      bot.deactivateItem()
+    if (preparingShot && currentTime - preparingShotTime > waitTime) {
+      if (weapon === 'bow') {
+        bot.deactivateItem()
+      }
+
+      if (weapon === 'crossbow') {
+        if (
+          bot.heldItem.nbt.value.ChargedProjectiles &&
+          bot.heldItem.nbt.value.ChargedProjectiles.value.value[0] &&
+          bot.heldItem.nbt.value.ChargedProjectiles.value.value[0].id.value
+        ) { // Detects if crossbow is charged
+          bot.activateItem()
+        } else {
+          // Disable click for charge the bow
+          bot.deactivateItem()
+          return // Wait until next physicTick for shot
+        }
+      }
+
       preparingShot = false
       if (oneShot) {
         stop()

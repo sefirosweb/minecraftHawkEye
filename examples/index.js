@@ -68,6 +68,6 @@ bot.on('chat', (username, chat) => {
     if (!target) {
       return false
     }
-    bot.hawkEye.oneShot(target);
+    bot.hawkEye.oneShot(target)
   }
 })

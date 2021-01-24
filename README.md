@@ -15,6 +15,7 @@ First load mineflayer and minecrafthawkeye, and load plugin into mineflayer
 const mineflayer = require('mineflayer')
 const minecraftHawkEye = require('minecrafthawkeye');
 bot.loadPlugin(minecraftHawkEye)
+const weapon = 'bow' // Weapon for calculation (must be: bow, crossbow)
 ```
 
 Now you can request functions
@@ -22,16 +23,16 @@ Now you can request functions
 // Get an a player entity:
 const playerEntity = bot.hawkEye.getPlayer(playername) // If emtpy return first player found
 // Auto attack every 1,2 secs to target
-bot.hawkEye.autoAttack(target) // You can put blockPosition, see example,
+bot.hawkEye.autoAttack(target, weapon) // You can put blockPosition, see example,
 // Stop auto attack
 bot.hawkEye.stop()
 // One Shot
-bot.hawkEye.autoAttack(target)
+bot.hawkEye.oneshot(target, weapon)
 
 // Get Yaw and Pitch
-bot.hawkEye.getMasterGrade(target, speed) // speed (Vec3) if optional, but this is use for calc the intersection between arrow and new target position
+bot.hawkEye.getMasterGrade(target, speed, weapon) // speed (Vec3) if optional, but this is use for calc the intersection between arrow and new target position
 
-// Simple one shot to Yaw and Pitch
+// Simple one shot you need to put manually Yaw and Pitch
 bot.hawkEye.simplyShot = function (yaw, pitch) // Pitch = Grades in radians
 ```
 
@@ -65,8 +66,9 @@ bot.on('spawn', function() {
         return false
     }
 
+    weapon = 'bow'
     // Auto attack every 1,2 secs until target is dead or is to far away
-    bot.hawkEye.autoAttack(target)
+    bot.hawkEye.autoAttack(target, weapon)
         // If you force stop attack use:
         // hawkEye.stop();
 
@@ -98,7 +100,6 @@ All is done, when is attack mode they get best posibilty for impact, and shot ar
 I'm glad I can help you, do we help each other?
 
 # TODOs
-- Add support for crossbow
 - Add support for snowballs
-- Add support for enderpelds
+- Add support for enderpelds ( Coming soon for minecraftlegion => https://www.youtube.com/watch?v=s9ZVdMUUSGE )
 

@@ -31,12 +31,12 @@ function getTargetYaw (origin, destination) {
 }
 
 function degreesToRadians (degrees) {
-  var pi = Math.PI
+  const pi = Math.PI
   return degrees * (pi / 180)
 }
 
 function radiansToDegrees (radians) {
-  var pi = Math.PI
+  const pi = Math.PI
   return radians * (180 / pi)
 }
 
@@ -234,8 +234,6 @@ function getFirstGradeAproax (xDestination, yDestination) {
     tryGradeShot.grade = grade
     if (tryGradeShot.nearestDistance > 4) { continue }
 
-    // nearGrades.push(tryGradeShot)
-
     if (!nearestGradeFirst) { nearestGradeFirst = tryGradeShot }
 
     if (tryGradeShot.grade - nearestGradeFirst.grade > 10 && firstFound === false) {
@@ -248,29 +246,29 @@ function getFirstGradeAproax (xDestination, yDestination) {
     if (nearestGradeSecond.nearestDistance > tryGradeShot.nearestDistance && firstFound) { nearestGradeSecond = tryGradeShot }
   }
 
-  /* Test best grades calc
-
-    console.clear();
-    console.log(nearestGradeFirst.grade, nearestGradeFirst.nearestDistance)
-    console.log(nearestGradeSecond.grade, nearestGradeSecond.nearestDistance)
-    console.log(nearGrades[6])
-    nearGrades.sort((a, b) => a.nearestDistance - b.nearestDistance)
-
-    const nearestGrades = nearGrades.slice(0, 3);
-    console.log(nearestGrades)
-
-  */
-
   return {
     nearestGradeFirst,
     nearestGradeSecond
   }
 }
 
-// Base start force
-const BaseVo = 3
+let BaseVo
 
-function getMasterGrade (botIn, targetIn, speedIn) {
+function getMasterGrade (botIn, targetIn, speedIn, weapon) {
+  const validWeapons = ['bow', 'crossbow']
+  if (!validWeapons.includes(weapon)) {
+    throw new Error(`"${weapon}" is not valid weapon for calculate the grade!`)
+  }
+
+  switch (weapon) {
+    case 'bow':
+      BaseVo = 3
+      break
+    case 'crossbow':
+      BaseVo = 3.15
+      break
+  }
+
   bot = botIn
   target = targetIn
   speed = speedIn
