@@ -282,7 +282,7 @@ function getMasterGrade (botIn, targetIn, speedIn, weapon) {
     targetHeight = 1.6
   }
   if (target.type === 'mob') {
-    targetHeight = mcData.mobs[target.entityType].height
+    targetHeight = target.height
   }
   targetPosition = new Vec3(target.position).offset(0, targetHeight, 0)
 
