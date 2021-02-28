@@ -1,3 +1,6 @@
+## 1.2.3
+* Fixed bug with crossbow enchant
+
 ## 1.2.2
 * Fixed oneShot (break from 1.2.1)
 * Adding more supports!

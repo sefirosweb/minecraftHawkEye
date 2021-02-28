@@ -154,9 +154,9 @@ function shotCrossbow () {
     stop()
     return
   }
-  const isEnchanted = bot.heldItem.nbt.value.Enchantments.value.value.find(enchant => {
+  const isEnchanted = bot.heldItem.nbt.value.Enchantments ? bot.heldItem.nbt.value.Enchantments.value.value.find(enchant => {
     return enchant.id.value === 'quick_charge'
-  })
+  }) : undefined
 
   const shotIn = 1250 - ((isEnchanted ? isEnchanted.lvl.value : 0) * 250)
 
