@@ -1,3 +1,8 @@
+## 1.2.2
+* Fixed oneShot (break from 1.2.1)
+* Adding snowball & ender_pearl supports
+    * Added examples example
+
 ## 1.2.1
 * Optimized crossbow speed, with enchant3 now is a machine gun!
 * Optimized autoattack, now have 2 events separatly for optimize getGrades and Calculate if bow/crossbow is ready to shot

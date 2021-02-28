@@ -1,6 +1,4 @@
 const Vec3 = require('vec3')
-let mcData
-
 let bot
 let target
 let speed
@@ -65,11 +63,6 @@ function incercetpBlock (position) {
   }
   return true
 }
-
-// Physics factors
-const GRAVITY = 0.05 // Arrow Gravity // Only for arrow for other entities have different gravity
-const FACTOR_Y = 0.01 // Arrow "Air resistance" // In water must be changed
-const FACTOR_H = 0.01 // Arrow "Air resistance" // In water must be changed
 
 // Simulate Arrow Trayectory
 function tryGrade (grade, xDestination, yDestination, VoIn, tryIntercetpBlock = false) {
@@ -252,12 +245,16 @@ function getFirstGradeAproax (xDestination, yDestination) {
   }
 }
 
-let BaseVo
+// Physics factors
+let BaseVo // Power of shot
+let GRAVITY = 0.05 // Arrow Gravity // Only for arrow for other entities have different gravity
+const FACTOR_Y = 0.01 // Arrow "Air resistance" // In water must be changed
+const FACTOR_H = 0.01 // Arrow "Air resistance" // In water must be changed
 
 function getMasterGrade (botIn, targetIn, speedIn, weapon) {
-  const validWeapons = ['bow', 'crossbow']
+  const validWeapons = ['bow', 'crossbow', 'snowball', 'ender_pearl']
   if (!validWeapons.includes(weapon)) {
-    throw new Error(`"${weapon}" is not valid weapon for calculate the grade!`)
+    throw new Error(`${weapon} is not valid weapon for calculate the grade!`)
   }
 
   switch (weapon) {
@@ -267,12 +264,24 @@ function getMasterGrade (botIn, targetIn, speedIn, weapon) {
     case 'crossbow':
       BaseVo = 3.15
       break
+    case 'ender_pearl':
+    case 'snowball':
+      BaseVo = 1.5
+      GRAVITY = 0.03
+      break
   }
 
   bot = botIn
   target = targetIn
-  speed = speedIn
-  mcData = require('minecraft-data')(bot.version)
+  if (speedIn == null) {
+    speed = {
+      x: 0,
+      y: 0,
+      z: 0
+    }
+  } else {
+    speed = speedIn
+  }
 
   startPosition = bot.entity.position.offset(0, 1.6, 0) // Bow offset position
 

@@ -10,11 +10,11 @@ let chargingArrow
 let weapon = 'bow'
 let infoShot
 
-function load(botToLoad) {
+function load (botToLoad) {
   bot = botToLoad
 }
 
-function autoAttack(targetToAttack, inputWeapon = 'bow', isOneShot = false) {
+function autoAttack (targetToAttack, inputWeapon = 'bow', isOneShot = false) {
   if (!targetToAttack) {
     return false
   }
@@ -30,13 +30,13 @@ function autoAttack(targetToAttack, inputWeapon = 'bow', isOneShot = false) {
   return true
 }
 
-function stop() {
+function stop () {
   bot.deactivateItem()
   bot.removeListener('physicTick', getGrades)
   bot.removeListener('physicTick', autoCalc)
 }
 
-function getGrades() {
+function getGrades () {
   if (target === undefined || target === false || !target.isValid) {
     stop()
     return false
@@ -73,11 +73,42 @@ function getGrades() {
   infoShot = getMasterGrade(bot, target, speed, weapon)
 }
 
-function autoCalc() {
-  let waitTime = 1200 // Wait Time is for Bow Only
+async function autoCalc () {
+  let waitTime
+  switch (weapon) {
+    case 'bow':
+      waitTime = 1200
+      break
+    case 'snowball':
+    case 'ender_pearl':
+      waitTime = 150
+      break
+    default:
+      waitTime = 1200
+  }
+
+  const slotID = bot.getEquipmentDestSlot('hand')
+  if (bot.inventory.slots[slotID] === null || bot.inventory.slots[slotID].name !== weapon) {
+    const weaponFound = bot.inventory.items().find(item => item.name === weapon)
+    if (weaponFound) {
+      try {
+        await bot.equip(weaponFound, 'hand')
+        return
+      } catch (err) {
+        await sleep(500)
+        return
+      }
+    } else {
+      console.log('No weapon in inventory')
+      stop()
+      return
+    }
+  }
 
   if (!preparingShot) {
-    bot.activateItem()
+    if (['bow', 'crossbow'].includes(weapon)) {
+      bot.activateItem()
+    }
     preparingShot = true
     preparingShotTime = Date.now()
   }
@@ -86,29 +117,34 @@ function autoCalc() {
     bot.look(infoShot.yaw, infoShot.pitch)
 
     if (preparingShot) {
-
       if (weapon === 'bow' && Date.now() - preparingShotTime > waitTime) {
         bot.deactivateItem()
         preparingShot = false
+        if (oneShot) { stop() }
+      }
+
+      if (['snowball', 'ender_pearl'].includes(weapon) && Date.now() - preparingShotTime > waitTime) {
+        bot.swingArm()
+        bot.activateItem()
+        bot.deactivateItem()
+        preparingShot = false
+        if (oneShot) { stop() }
       }
 
       if (weapon === 'crossbow') {
         shotCrossbow()
       }
-
-      if (oneShot) {
-        stop()
-      }
     }
   }
 }
 
-function shotCrossbow() {
+function shotCrossbow () {
   if (chargingArrow) {
     bot.activateItem()
     bot.deactivateItem()
     chargingArrow = false
     preparingShot = false
+    if (oneShot) { stop() }
     return
   }
 
@@ -125,8 +161,11 @@ function shotCrossbow() {
   if (weapon === 'crossbow' && !chargingArrow && Date.now() - preparingShotTime > shotIn) {
     bot.deactivateItem()
     chargingArrow = true
-    return
   }
+}
+
+function sleep (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 module.exports = {
