@@ -1,6 +1,10 @@
 ## 1.2.2
 * Fixed oneShot (break from 1.2.1)
-* Adding snowball & ender_pearl supports
+* Adding more supports!
+    * Add snowball
+    * Add ender pearl
+    * Add splash potions
+    * Add eggs
     * Added examples example
 
 ## 1.2.1

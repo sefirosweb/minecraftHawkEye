@@ -7,7 +7,6 @@ Install:
 - Install nodejs >= 14 from nodejs.org
 - npm i minecrafthawkeye
 
-
 Usage: 
 
 First load mineflayer and minecrafthawkeye, and load plugin into mineflayer
@@ -15,7 +14,7 @@ First load mineflayer and minecrafthawkeye, and load plugin into mineflayer
 const mineflayer = require('mineflayer')
 const minecraftHawkEye = require('minecrafthawkeye');
 bot.loadPlugin(minecraftHawkEye)
-const weapon = 'bow' // Weapon for calculation (must be: bow, crossbow)
+const weapon = 'bow'
 ```
 
 Now you can request functions
@@ -97,10 +96,15 @@ In world give a bow + arrows: \
 
 All is done, when is attack mode they get best posibilty for impact, and shot arrow every 1,2 secs (max power)
 
+## Valid weapons or items for calculate the grades:
+```js
+const validWeapons = ['bow', 'crossbow', 'snowball', 'ender_pearl', 'egg', 'splash_potion']
+```
+
 I'm glad I can help you, do we help each other?
 
 # TODOs
-- Add support for snowballs
-- Add support for enderpelds ( Coming soon for <a href="https://github.com/sefirosweb/minecraftLegion" target="_blank">minecraftLegion</a> => https://www.youtube.com/watch?v=s9ZVdMUUSGE )
-- Pending to fix check crossbow ready
+No TODOs!
+Anyone have more ideas? :D
+* Maybe create a best documentation =P
 
