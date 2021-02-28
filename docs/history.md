@@ -1,3 +1,6 @@
+## 1.2
+* Update packages dependency
+
 ## 1.1.0
 * Important: Now getMasterGrade need a weapon for calculate! from: bot.hawkEye.getMasterGrade(bot, target, speed) to  bot.hawkEye.getMasterGrade(bot, target, speed, weapon)
 * Adding crossbow support!
