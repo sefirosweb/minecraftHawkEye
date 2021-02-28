@@ -9,34 +9,42 @@ const bot = mineflayer.createBot({
 })
 
 bot.loadPlugin(minecraftHawkEye)
-let shooting = false
 
 bot.on('spawn', function () {
   bot.chat('/kill @e[type=minecraft:arrow]')
-  bot.chat(`/give ${bot.username} crossbow{Enchantments:[{id:unbreaking,lvl:100}]} 1`)
+  // bot.chat(`/give ${bot.username} crossbow{Enchantments:[{id:unbreaking,lvl:3}]} 1`)
+  bot.chat(`/give ${bot.username} crossbow{Enchantments:[{id:quick_charge,lvl:3},{id:unbreaking,lvl:100}]} 1`)
   bot.chat(`/give ${bot.username} minecraft:arrow 300`)
   bot.chat('/time set day')
   bot.chat('Ready!')
-  if (!shooting) {
-    shooting = true
-    fire()
-  }
+  fire()
 })
 
-function fire () {
+bot.on('die', () => {
+  bot.hawkEye.stop()
+})
+
+async function fire() {
   // bot.chat('/kill @e[type=minecraft:arrow]')
 
-  // const target = Object.keys(bot.entities) // Fire to mob
-  //   .map(id => bot.entities[id])
-  //   .find(function (e) {
-  //     return e.type === 'mob' && bot.entity.position.distanceTo(e.position) < 14
-  //   })
+  const slotID = bot.getEquipmentDestSlot('hand')
 
-  const target = bot.hawkEye.getPlayer() // Fire to nearest player
-  if (target) {
-    // console.log(bot.entity.position.distanceTo(target.position))
-    bot.hawkEye.oneShot(target, 'crossbow')
+  if (bot.inventory.slots[slotID] === null || bot.inventory.slots[slotID].name !== 'crossbow') {
+    const crossbow = bot.inventory.items().find(item => item.name.includes('crossbow'))
+    if (crossbow) {
+      await bot.equip(crossbow, 'hand')
+    }
   }
 
-  setTimeout(fire, 4000)
+  const target = bot.hawkEye.getPlayer() // Fire to nearest player
+  if (target && bot.inventory.slots[slotID] !== null && bot.inventory.slots[slotID].name === 'crossbow') {
+    // console.log(bot.entity.position.distanceTo(target.position))
+    // bot.hawkEye.oneShot(target, 'crossbow')
+    bot.hawkEye.autoAttack(target, 'crossbow')
+    console.log('shooting')
+  } else {
+    setTimeout(() => {
+      fire()
+    }, 500);
+  }
 }

@@ -6,7 +6,9 @@ let preparingShot
 let preparingShotTime
 let prevPlayerPositions = []
 let oneShot
+let chargingArrow
 let weapon = 'bow'
+let infoShot
 
 function load(botToLoad) {
   bot = botToLoad
@@ -23,21 +25,18 @@ function autoAttack(targetToAttack, inputWeapon = 'bow', isOneShot = false) {
   prevPlayerPositions = []
   weapon = inputWeapon
 
+  bot.on('physicTick', getGrades)
   bot.on('physicTick', autoCalc)
   return true
 }
 
 function stop() {
   bot.deactivateItem()
+  bot.removeListener('physicTick', getGrades)
   bot.removeListener('physicTick', autoCalc)
 }
 
-function autoCalc() {
-  let waitTime = 1200 // bow
-  if (weapon === 'crossbow') {
-    waitTime = 1300
-  }
-
+function getGrades() {
   if (target === undefined || target === false || !target.isValid) {
     stop()
     return false
@@ -71,42 +70,62 @@ function autoCalc() {
   speed.y = speed.y / prevPlayerPositions.length
   speed.z = speed.z / prevPlayerPositions.length
 
+  infoShot = getMasterGrade(bot, target, speed, weapon)
+}
+
+function autoCalc() {
+  let waitTime = 1200 // Wait Time is for Bow Only
+
   if (!preparingShot) {
     bot.activateItem()
     preparingShot = true
     preparingShotTime = Date.now()
   }
 
-  const infoShot = getMasterGrade(bot, target, speed, weapon)
-
   if (infoShot) {
     bot.look(infoShot.yaw, infoShot.pitch)
 
-    const currentTime = Date.now()
-    if (preparingShot && currentTime - preparingShotTime > waitTime) {
-      if (weapon === 'bow') {
+    if (preparingShot) {
+
+      if (weapon === 'bow' && Date.now() - preparingShotTime > waitTime) {
         bot.deactivateItem()
+        preparingShot = false
       }
 
       if (weapon === 'crossbow') {
-        if ( // Pending to fix check crossbow ready
-          bot.heldItem.nbt.value.ChargedProjectiles &&
-          bot.heldItem.nbt.value.ChargedProjectiles.value.value[0] &&
-          bot.heldItem.nbt.value.ChargedProjectiles.value.value[0].id.value
-        ) { // Detects if crossbow is charged
-          bot.activateItem()
-        } else {
-          // Disable click for charge the bow
-          bot.deactivateItem()
-          return // Wait until next physicTick for shot
-        }
+        shotCrossbow()
       }
 
-      preparingShot = false
       if (oneShot) {
         stop()
       }
     }
+  }
+}
+
+function shotCrossbow() {
+  if (chargingArrow) {
+    bot.activateItem()
+    bot.deactivateItem()
+    chargingArrow = false
+    preparingShot = false
+    return
+  }
+
+  if (bot.heldItem === null) {
+    stop()
+    return
+  }
+  const isEnchanted = bot.heldItem.nbt.value.Enchantments.value.value.find(enchant => {
+    return enchant.id.value === 'quick_charge'
+  })
+
+  const shotIn = 1250 - ((isEnchanted ? isEnchanted.lvl.value : 0) * 250)
+
+  if (weapon === 'crossbow' && !chargingArrow && Date.now() - preparingShotTime > shotIn) {
+    bot.deactivateItem()
+    chargingArrow = true
+    return
   }
 }
 

@@ -1,3 +1,9 @@
+## 1.2.1
+* Optimized crossbow speed, with enchant3 now is a machine gun!
+* Optimized autoattack, now have 2 events separatly for optimize getGrades and Calculate if bow/crossbow is ready to shot
+* Added crossbow example with enchant 3
+    * Caution max echant lvl is 5 because more than 5 the time is negative! Formula => 1250 - ((lvl ? lvl : 0) * 250)
+
 ## 1.2
 * Update packages dependency
 
