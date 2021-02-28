@@ -9,9 +9,11 @@ const bot = mineflayer.createBot({
 })
 
 bot.loadPlugin(minecraftHawkEye)
+const ball = 'snowball' // snowball / egg / splash_potion
 
 bot.on('spawn', function () {
-  bot.chat(`/give ${bot.username} minecraft:snowball 300`)
+  bot.chat(`/give ${bot.username} minecraft:${ball} 300`)
+  // bot.chat(`/give ${bot.username} splash_potion{Potion:"minecraft:strong_regeneration"} 30`)
   bot.chat('/time set day')
   bot.chat('Ready!')
   fire()
@@ -22,18 +24,9 @@ bot.on('die', () => {
 })
 
 async function fire () {
-  /*
-  if (bot.inventory.slots[slotID] === null || bot.inventory.slots[slotID].name !== 'crossbow') {
-    const crossbow = bot.inventory.items().find(item => item.name.includes('crossbow'))
-    if (crossbow) {
-      await bot.equip(crossbow, 'hand')
-    }
-  }
-  */
-
-  const target = bot.hawkEye.getPlayer() // Fire to nearest player
+  const target = bot.hawkEye.getPlayer()
   if (target) {
-    bot.hawkEye.autoAttack(target, 'snowball')
+    bot.hawkEye.autoAttack(target, ball)
     console.log('shooting')
   } else {
     setTimeout(() => {

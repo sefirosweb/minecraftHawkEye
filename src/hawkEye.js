@@ -81,6 +81,8 @@ async function autoCalc () {
       break
     case 'snowball':
     case 'ender_pearl':
+    case 'egg':
+    case 'splash_potion':
       waitTime = 150
       break
     default:
@@ -123,7 +125,7 @@ async function autoCalc () {
         if (oneShot) { stop() }
       }
 
-      if (['snowball', 'ender_pearl'].includes(weapon) && Date.now() - preparingShotTime > waitTime) {
+      if (['snowball', 'ender_pearl', 'egg', 'splash_potion'].includes(weapon) && Date.now() - preparingShotTime > waitTime) {
         bot.swingArm()
         bot.activateItem()
         bot.deactivateItem()

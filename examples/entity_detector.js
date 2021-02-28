@@ -22,8 +22,16 @@ bot.once('spawn', () => {
     const target = Object.keys(bot.entities)
       .map(id => bot.entities[id])
       .find(function (e) {
-        return e.name === 'arrow'
+        return e.name === 'potion'
       })
+
+    // const itemsInMap = Object.keys(bot.entities)
+    //   .map(id => bot.entities[id])
+    //   .filter(function (e) {
+    //     return e.type !== 'mob'
+    //   })
+
+    // console.log(itemsInMap)
 
     if (target) {
       totalelocity = Math.sqrt(Math.pow(target.velocity.x, 2) + Math.pow(target.velocity.y, 2) + Math.pow(target.velocity.z, 2))
