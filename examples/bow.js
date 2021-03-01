@@ -13,7 +13,7 @@ let shooting = false
 
 bot.on('spawn', function () {
   bot.chat('/kill @e[type=minecraft:arrow]')
-  bot.chat(`/give ${bot.username} bow{Enchantments:[{id:unbreaking,lvl:100}]} 1`)
+  bot.chat(`/give ${bot.username} bow{Enchantments:[{id:unbreaking,lvl:3}]} 1`)
   bot.chat(`/give ${bot.username} minecraft:arrow 300`)
   bot.chat('/time set day')
   bot.chat('Ready!')
@@ -34,7 +34,6 @@ function fire () {
 
   const target = bot.hawkEye.getPlayer() // Fire to nearest player
   if (target) {
-    // console.log(bot.entity.position.distanceTo(target.position))
     bot.hawkEye.oneShot(target, 'bow')
   }
 
