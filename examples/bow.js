@@ -9,33 +9,25 @@ const bot = mineflayer.createBot({
 })
 
 bot.loadPlugin(minecraftHawkEye)
-let shooting = false
-
-bot.on('spawn', function () {
+let intervalShot
+bot.on('spawn', () => {
   bot.chat('/kill @e[type=minecraft:arrow]')
   bot.chat(`/give ${bot.username} bow{Enchantments:[{id:unbreaking,lvl:3}]} 1`)
   bot.chat(`/give ${bot.username} minecraft:arrow 300`)
   bot.chat('/time set day')
   bot.chat('Ready!')
-  if (!shooting) {
-    shooting = true
-    fire()
-  }
+  intervalShot = setInterval(fire, 1300);
 })
 
-function fire () {
+bot.on('die', () => {
+  clearInterval(intervalShot)
+})
+
+function fire() {
   // bot.chat('/kill @e[type=minecraft:arrow]')
 
-  // const target = Object.keys(bot.entities) // Fire to mob
-  //   .map(id => bot.entities[id])
-  //   .find(function (e) {
-  //     return e.type === 'mob' && bot.entity.position.distanceTo(e.position) < 14
-  //   })
-
-  const target = bot.hawkEye.getPlayer() // Fire to nearest player
+  const target = bot.hawkEye.getPlayer()
   if (target) {
     bot.hawkEye.oneShot(target, 'bow')
   }
-
-  setTimeout(fire, 4000)
 }
