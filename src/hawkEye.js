@@ -44,11 +44,7 @@ function getGrades () {
 
   if (prevPlayerPositions.length > 10) { prevPlayerPositions.shift() }
 
-  const position = {
-    x: target.position.x,
-    y: target.position.y,
-    z: target.position.z
-  }
+  const position = target.position.clone()
 
   prevPlayerPositions.push(position)
 
