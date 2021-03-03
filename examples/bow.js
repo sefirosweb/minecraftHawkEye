@@ -33,9 +33,9 @@ function fire () {
 
   const target = bot.hawkEye.getPlayer()
   if (target) {
-    bot.viewer.erase('arrowTrayectoryPoints')
+    bot.viewer.erase('arrowTrajectoryPoints')
     bot.hawkEye.oneShot(target, 'bow')
-    const arrowTrayectoryPoints = bot.hawkEye.getMasterGrade(target, null, 'bow').arrowTrayectoryPoints
-    bot.viewer.drawPoints('arrowTrayectoryPoints', arrowTrayectoryPoints, 0xff0000, 5)
+    const arrowTrajectoryPoints = bot.hawkEye.getMasterGrade(target, null, 'bow').arrowTrajectoryPoints
+    bot.viewer.drawPoints('arrowTrajectoryPoints', arrowTrajectoryPoints, 0xff0000, 5)
   }
 }

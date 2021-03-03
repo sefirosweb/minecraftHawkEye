@@ -86,7 +86,7 @@ function tryGrade (grade, xDestination, yDestination, VoIn, tryIntercetpBlock = 
 
   let blockInTrayect = false
   let previusArrowPositionIntercept = false
-  const arrowTrayectoryPoints = []
+  const arrowTrajectoryPoints = []
   const yaw = getTargetYaw(startPosition, targetPosition)
 
   while (true) {
@@ -127,7 +127,7 @@ function tryGrade (grade, xDestination, yDestination, VoIn, tryIntercetpBlock = 
     const z = startPosition.z - (Math.sin(yaw) * Vx / Math.tan(yaw))
     const y = startPosition.y + Vy
 
-    arrowTrayectoryPoints.push({ x, y, z })
+    arrowTrajectoryPoints.push({ x, y, z })
 
     // Arrow passed player OR Voy (arrow is going down and passed player)
     if (Vx > xDestination || (Voy < 0 && yDestination > Vy) || blockInTrayect) {
@@ -135,7 +135,7 @@ function tryGrade (grade, xDestination, yDestination, VoIn, tryIntercetpBlock = 
         nearestDistance: nearestDistance,
         totalTicks: totalTicks,
         blockInTrayect: blockInTrayect,
-        arrowTrayectoryPoints
+        arrowTrajectoryPoints
       }
     }
 
@@ -204,7 +204,7 @@ function calculateBlockInTrayectory (previusArrowPosition, Vy, Vx) {
 function getPrecisionShot (grade, xDestination, yDestination, decimals) {
   let nearestDistance = false
   let nearestGrade = false
-  let arrowTrayectoryPoints
+  let arrowTrajectoryPoints
   decimals = Math.pow(10, decimals)
 
   for (let iGrade = (grade * 10) - 10; iGrade <= (grade * 10) + 10; iGrade += 1) {
@@ -212,14 +212,14 @@ function getPrecisionShot (grade, xDestination, yDestination, decimals) {
     if ((distance.nearestDistance < nearestDistance) || nearestDistance === false) {
       nearestDistance = distance.nearestDistance
       nearestGrade = iGrade
-      arrowTrayectoryPoints = distance.arrowTrayectoryPoints
+      arrowTrajectoryPoints = distance.arrowTrajectoryPoints
     }
   }
 
   return {
     nearestGrade,
     nearestDistance,
-    arrowTrayectoryPoints
+    arrowTrajectoryPoints
   }
 }
 
@@ -340,7 +340,7 @@ function getMasterGrade (botIn, targetIn, speedIn, weapon) {
     grade: precisionShot.nearestGrade / 10,
     nearestDistance: precisionShot.nearestDistance,
     target: newTarget,
-    arrowTrayectoryPoints: precisionShot.arrowTrayectoryPoints
+    arrowTrajectoryPoints: precisionShot.arrowTrajectoryPoints
   }
 }
 

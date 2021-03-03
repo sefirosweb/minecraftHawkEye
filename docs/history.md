@@ -1,5 +1,8 @@
+## 1.2.5
+* Fix grammar
+
 ## 1.2.4
-* Added a arrowTrayectoryPoints in the result of getMasterGrade function
+* Added a arrowTrajectoryPoints in the result of getMasterGrade function
 * Added example of arrow trayecotry preview on bow.js example
 
 ## 1.2.3
