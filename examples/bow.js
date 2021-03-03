@@ -1,4 +1,5 @@
 const mineflayer = require('mineflayer')
+const mineflayerViewer = require('prismarine-viewer').mineflayer
 const minecraftHawkEye = require('../index')
 
 const bot = mineflayer.createBot({
@@ -16,18 +17,25 @@ bot.on('spawn', () => {
   bot.chat(`/give ${bot.username} minecraft:arrow 300`)
   bot.chat('/time set day')
   bot.chat('Ready!')
-  intervalShot = setInterval(fire, 1300);
+  intervalShot = setInterval(fire, 1300)
 })
 
 bot.on('die', () => {
   clearInterval(intervalShot)
 })
 
-function fire() {
+bot.once('spawn', () => {
+  mineflayerViewer(bot, { port: 4001, viewDistance: 4 })
+})
+
+function fire () {
   // bot.chat('/kill @e[type=minecraft:arrow]')
 
   const target = bot.hawkEye.getPlayer()
   if (target) {
+    bot.viewer.erase('arrowTrayectoryPoints')
     bot.hawkEye.oneShot(target, 'bow')
+    const arrowTrayectoryPoints = bot.hawkEye.getMasterGrade(target, null, 'bow').arrowTrayectoryPoints
+    bot.viewer.drawPoints('arrowTrayectoryPoints', arrowTrayectoryPoints, 0xff0000, 5)
   }
 }

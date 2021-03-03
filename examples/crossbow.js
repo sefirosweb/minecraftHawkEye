@@ -24,7 +24,7 @@ bot.on('die', () => {
   bot.hawkEye.stop()
 })
 
-async function fire() {
+async function fire () {
   bot.chat('/kill @e[type=minecraft:arrow]')
 
   const target = bot.hawkEye.getPlayer() // Fire to nearest player
