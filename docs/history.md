@@ -1,3 +1,7 @@
+## 1.2.6
+* Great improve CPU optimization
+    * Add prismarine-world for use a iterator function, check a raycast between each arrow position
+    * Added in bow.js example with drawing raycast of each tick arrow position and blockcolision with iterator
 ## 1.2.5
 * Fix grammar
 

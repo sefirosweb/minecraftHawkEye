@@ -4,6 +4,7 @@ let target
 let speed
 let startPosition
 let targetPosition
+let intercept
 
 function getTargetDistance (origin, destination) {
   const xDistance = Math.pow(origin.x - destination.x, 2)
@@ -54,16 +55,6 @@ function getGrades (Vo, Voy, Gravity) {
   return radiansToDegrees(Math.asin((Voy - Gravity) / Vo))
 }
 
-// Check block position impact
-function incercetpBlock (position) {
-  const block = bot.blockAt(position)
-  if (!block) { return false }
-  if (block.boundingBox !== 'empty') { // OLD check  block.name !== 'air'
-    return false
-  }
-  return true
-}
-
 // Simulate Arrow Trayectory
 function tryGrade (grade, xDestination, yDestination, VoIn, tryIntercetpBlock = false) {
   let precisionFactor = 1 // !Danger More precision increse the calc! =>  !More Slower!
@@ -85,7 +76,6 @@ function tryGrade (grade, xDestination, yDestination, VoIn, tryIntercetpBlock = 
   let totalTicks = 0
 
   let blockInTrayect = false
-  let previusArrowPositionIntercept = false
   const arrowTrajectoryPoints = []
   const yaw = getTargetYaw(startPosition, targetPosition)
 
@@ -127,10 +117,15 @@ function tryGrade (grade, xDestination, yDestination, VoIn, tryIntercetpBlock = 
     const z = startPosition.z - (Math.sin(yaw) * Vx / Math.tan(yaw))
     const y = startPosition.y + Vy
 
-    arrowTrajectoryPoints.push({ x, y, z })
+    const currentArrowPosition = new Vec3(x, y, z)
+    arrowTrajectoryPoints.push(currentArrowPosition)
+    const previusArrowPositionIntercept = arrowTrajectoryPoints[arrowTrajectoryPoints.length === 1 ? 0 : arrowTrajectoryPoints.length - 2]
+    if (tryIntercetpBlock) {
+      blockInTrayect = intercept.check(previusArrowPositionIntercept, currentArrowPosition).block
+    }
 
-    // Arrow passed player OR Voy (arrow is going down and passed player)
-    if (Vx > xDestination || (Voy < 0 && yDestination > Vy) || blockInTrayect) {
+    // Arrow passed player || Voy (arrow is going down and passed player) || Detected solid block
+    if (Vx > xDestination || (Voy < 0 && yDestination > Vy) || blockInTrayect !== false) {
       return {
         nearestDistance: nearestDistance,
         totalTicks: totalTicks,
@@ -138,65 +133,6 @@ function tryGrade (grade, xDestination, yDestination, VoIn, tryIntercetpBlock = 
         arrowTrajectoryPoints
       }
     }
-
-    if (tryIntercetpBlock) {
-      const calcBlockInTrayect = calculateBlockInTrayectory(previusArrowPositionIntercept, Vy, Vx)
-      blockInTrayect = calcBlockInTrayect.intercept
-      previusArrowPositionIntercept = calcBlockInTrayect.arrowPosition
-    }
-  }
-}
-
-function calculateBlockInTrayectory (previusArrowPosition, Vy, Vx) {
-  const maxSteps = 10 // Used fo calc block between tick & tick
-
-  // Calculate Arrow XYZ position based on YAW and BOT position
-  const yaw = getTargetYaw(startPosition, targetPosition)
-
-  // Vx = Hipotenusa
-  let arrowCurrentX = startPosition.x
-  let arrowCurrentZ = startPosition.z
-  let arrowCurrentY = startPosition.y
-  if (previusArrowPosition === false) {
-    previusArrowPosition = new Vec3(startPosition.x, startPosition.y, startPosition.z)
-  }
-
-  arrowCurrentY += Vy
-
-  // Cateto Opuesto
-  const xExtra = Math.sin(yaw) * Vx
-  arrowCurrentX -= xExtra
-
-  // Cateto Adjacente
-  const zExtra = xExtra / Math.tan(yaw)
-  arrowCurrentZ -= zExtra
-
-  // Current arrow position
-  const arrowPosition = new Vec3(arrowCurrentX, arrowCurrentY, arrowCurrentZ)
-
-  const distX = arrowPosition.x - previusArrowPosition.x
-  const distY = arrowPosition.y - previusArrowPosition.y
-  const distZ = arrowPosition.z - previusArrowPosition.z
-
-  const distVector = new Vec3(distX / maxSteps, distY / maxSteps, distZ / maxSteps)
-
-  let incercetp
-
-  // Arrow Speed is to high, calculate prevArrow with current position for detect block in midle of tick position
-  for (let i = 0; i < maxSteps; i++) {
-    previusArrowPosition.add(distVector)
-    incercetp = !incercetpBlock(previusArrowPosition)
-    if (incercetp) {
-      return {
-        arrowPosition,
-        intercept: true
-      }
-    }
-  }
-
-  return {
-    arrowPosition,
-    intercept: false
   }
 }
 
@@ -204,22 +140,24 @@ function calculateBlockInTrayectory (previusArrowPosition, Vy, Vx) {
 function getPrecisionShot (grade, xDestination, yDestination, decimals) {
   let nearestDistance = false
   let nearestGrade = false
-  let arrowTrajectoryPoints
+  let arrowTrajectoryPoints, blockInTrayect
   decimals = Math.pow(10, decimals)
 
   for (let iGrade = (grade * 10) - 10; iGrade <= (grade * 10) + 10; iGrade += 1) {
-    const distance = tryGrade(iGrade / decimals, xDestination, yDestination, BaseVo)
+    const distance = tryGrade(iGrade / decimals, xDestination, yDestination, BaseVo, true)
     if ((distance.nearestDistance < nearestDistance) || nearestDistance === false) {
       nearestDistance = distance.nearestDistance
       nearestGrade = iGrade
       arrowTrajectoryPoints = distance.arrowTrajectoryPoints
+      blockInTrayect = distance.blockInTrayect
     }
   }
 
   return {
     nearestGrade,
     nearestDistance,
-    arrowTrajectoryPoints
+    arrowTrajectoryPoints,
+    blockInTrayect
   }
 }
 
@@ -289,6 +227,7 @@ function getMasterGrade (botIn, targetIn, speedIn, weapon) {
   }
 
   bot = botIn
+  intercept = require('./intercept')(bot)
   target = targetIn
   if (speedIn == null) {
     speed = {
@@ -328,19 +267,21 @@ function getMasterGrade (botIn, targetIn, speedIn, weapon) {
 
   // Get more precision on shot
   const precisionShot = getPrecisionShot(shotCalculation.grade, distances.hDistance, distances.yDistance, 1)
+  const { arrowTrajectoryPoints, blockInTrayect, nearestDistance, nearestGrade } = precisionShot
 
   // Calculate yaw
   const yaw = getTargetYaw(startPosition, newTarget)
 
-  if (precisionShot.nearestDistance > 4) { return false } // Too far
+  if (nearestDistance > 4) { return false } // Too far
 
   return {
-    pitch: degreesToRadians(precisionShot.nearestGrade / 10),
+    pitch: degreesToRadians(nearestGrade / 10),
     yaw: yaw,
-    grade: precisionShot.nearestGrade / 10,
-    nearestDistance: precisionShot.nearestDistance,
+    grade: nearestGrade / 10,
+    nearestDistance,
     target: newTarget,
-    arrowTrajectoryPoints: precisionShot.arrowTrajectoryPoints
+    arrowTrajectoryPoints,
+    blockInTrayect
   }
 }
 

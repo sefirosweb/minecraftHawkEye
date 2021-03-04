@@ -1,10 +1,11 @@
 {
     "name": "minecrafthawkeye",
-    "version": "1.2.5",
+    "version": "1.2.6",
     "description": "Minecraft bot for equations when shooting an arrow",
     "main": "index.js",
     "dependencies": {
-        "mineflayer": "^3.2.0"
+        "mineflayer": "^3.2.0",
+        "prismarine-world": "^3.5.0"
     },
     "devDependencies": {
         "prismarine-viewer": "^1.15.1",
