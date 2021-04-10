@@ -11,7 +11,7 @@ const bot = mineflayer.createBot({
 bot.loadPlugin(minecraftHawkEye)
 
 bot.on('spawn', function () {
-  // bot.chat(`/give ${bot.username} trident{Enchantments:[{id:loyalty,lvl:3}]} 1`)
+  bot.chat(`/give ${bot.username} trident{Enchantments:[{id:loyalty,lvl:3}]} 1`)
   bot.chat('/time set day')
   bot.chat('Ready!')
   fire()
