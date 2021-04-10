@@ -202,7 +202,7 @@ const FACTOR_Y = 0.01 // Arrow "Air resistance" // In water must be changed
 const FACTOR_H = 0.01 // Arrow "Air resistance" // In water must be changed
 
 function getMasterGrade (botIn, targetIn, speedIn, weapon) {
-  const validWeapons = ['bow', 'crossbow', 'snowball', 'ender_pearl', 'egg', 'splash_potion']
+  const validWeapons = ['bow', 'crossbow', 'snowball', 'ender_pearl', 'egg', 'splash_potion', 'trident']
   if (!validWeapons.includes(weapon)) {
     throw new Error(`${weapon} is not valid weapon for calculate the grade!`)
   }
@@ -213,6 +213,9 @@ function getMasterGrade (botIn, targetIn, speedIn, weapon) {
       break
     case 'crossbow':
       BaseVo = 3.15
+      break
+    case 'trident':
+      BaseVo = 2.5
       break
     case 'ender_pearl':
     case 'snowball':

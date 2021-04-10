@@ -73,6 +73,7 @@ async function autoCalc () {
   let waitTime
   switch (weapon) {
     case 'bow':
+    case 'trident':
       waitTime = 1200
       break
     case 'snowball':
@@ -104,7 +105,7 @@ async function autoCalc () {
   }
 
   if (!preparingShot) {
-    if (['bow', 'crossbow'].includes(weapon)) {
+    if (['bow', 'crossbow', 'trident'].includes(weapon)) {
       bot.activateItem()
     }
     preparingShot = true
@@ -115,7 +116,7 @@ async function autoCalc () {
     bot.look(infoShot.yaw, infoShot.pitch)
 
     if (preparingShot) {
-      if (weapon === 'bow' && Date.now() - preparingShotTime > waitTime) {
+      if (['bow', 'trident'].includes(weapon) && Date.now() - preparingShotTime > waitTime) {
         bot.deactivateItem()
         preparingShot = false
         if (oneShot) { stop() }

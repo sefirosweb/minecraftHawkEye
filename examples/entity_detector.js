@@ -22,7 +22,8 @@ bot.once('spawn', () => {
     const target = Object.keys(bot.entities)
       .map(id => bot.entities[id])
       .find(function (e) {
-        return e.name === 'potion'
+        // return e.name === 'potion'
+        return e.name === 'trident'
       })
 
     // const itemsInMap = Object.keys(bot.entities)
