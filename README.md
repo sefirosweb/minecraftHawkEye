@@ -51,11 +51,10 @@ const bot = mineflayer.createBot({
 bot.loadPlugin(minecraftHawkEye)
 
 bot.on('spawn', function() {
-    bot.chat('/give ' + bot.username + ' bow{Enchantments:[{id:unbreaking,lvl:100}]} 1')
+    bot.chat('/give ' + bot.username + ' bow{Enchantments:[{id:unbreaking,lvl:3}]} 1')
     bot.chat('/give ' + bot.username + ' minecraft:arrow 300')
     bot.chat('/time set day')
     bot.chat('/kill @e[type=minecraft:arrow]')
-
     bot.chat('Ready!')
 
     // Get target for block position, use whatever you need
@@ -96,9 +95,9 @@ In world give a bow + arrows: \
 
 All is done, when is attack mode they get best posibilty for impact, and shot arrow every 1,2 secs (max power)
 
-## Valid weapons or items for calculate the grades:
+## Valid list of weapons or items that can calculate the perfect shot or launch it directly
 ```js
-const validWeapons = ['bow', 'crossbow', 'snowball', 'ender_pearl', 'egg', 'splash_potion']
+const validWeapons = ['bow', 'crossbow', 'snowball', 'ender_pearl', 'egg', 'splash_potion', 'trident']
 ```
 
 I'm glad I can help you, do we help each other?
