@@ -1,10 +1,4 @@
 const Vec3 = require('vec3')
-let bot
-let target
-let speed
-let startPosition
-let targetPosition
-let intercept
 
 function getTargetDistance (origin, destination) {
   const xDistance = Math.pow(origin.x - destination.x, 2)
@@ -56,7 +50,7 @@ function getGrades (Vo, Voy, Gravity) {
 }
 
 // Simulate Arrow Trayectory
-function tryGrade (grade, xDestination, yDestination, VoIn, tryIntercetpBlock = false) {
+function tryGrade (grade, xDestination, yDestination, VoIn, startPosition, targetPosition, tryIntercetpBlock = false) {
   let precisionFactor = 1 // !Danger More precision increse the calc! =>  !More Slower!
 
   let Vo = VoIn
@@ -137,14 +131,14 @@ function tryGrade (grade, xDestination, yDestination, VoIn, tryIntercetpBlock = 
 }
 
 // Get more precision on shot
-function getPrecisionShot (grade, xDestination, yDestination, decimals) {
+function getPrecisionShot (grade, xDestination, yDestination, decimals, startPosition, targetPosition) {
   let nearestDistance = false
   let nearestGrade = false
   let arrowTrajectoryPoints, blockInTrayect
   decimals = Math.pow(10, decimals)
 
   for (let iGrade = (grade * 10) - 10; iGrade <= (grade * 10) + 10; iGrade += 1) {
-    const distance = tryGrade(iGrade / decimals, xDestination, yDestination, BaseVo, true)
+    const distance = tryGrade(iGrade / decimals, xDestination, yDestination, BaseVo, startPosition, targetPosition, true)
     if ((distance.nearestDistance < nearestDistance) || nearestDistance === false) {
       nearestDistance = distance.nearestDistance
       nearestGrade = iGrade
@@ -164,7 +158,7 @@ function getPrecisionShot (grade, xDestination, yDestination, decimals) {
 // Calculate all 180º first grades
 // Calculate the 2 most aproax shots
 // https://es.qwe.wiki/wiki/Trajectory
-function getFirstGradeAproax (xDestination, yDestination) {
+function getFirstGradeAproax (xDestination, yDestination, startPosition, targetPosition) {
   let firstFound = false
   let nearestGradeFirst = false
   let nearestGradeSecond = false
@@ -172,7 +166,7 @@ function getFirstGradeAproax (xDestination, yDestination) {
   // const nearGrades = []
 
   for (let grade = -89; grade < 90; grade++) {
-    const tryGradeShot = tryGrade(grade, xDestination, yDestination, BaseVo)
+    const tryGradeShot = tryGrade(grade, xDestination, yDestination, BaseVo, startPosition, targetPosition)
 
     tryGradeShot.grade = grade
     if (tryGradeShot.nearestDistance > 4) { continue }
@@ -201,7 +195,7 @@ let GRAVITY = 0.05 // Arrow Gravity // Only for arrow for other entities have di
 const FACTOR_Y = 0.01 // Arrow "Air resistance" // In water must be changed
 const FACTOR_H = 0.01 // Arrow "Air resistance" // In water must be changed
 
-function getMasterGrade (botIn, targetIn, speedIn, weapon) {
+function getMasterGrade (bot, target, speed, weapon) {
   const validWeapons = ['bow', 'crossbow', 'snowball', 'ender_pearl', 'egg', 'splash_potion', 'trident']
   if (!validWeapons.includes(weapon)) {
     throw new Error(`${weapon} is not valid weapon for calculate the grade!`)
@@ -229,20 +223,16 @@ function getMasterGrade (botIn, targetIn, speedIn, weapon) {
       break
   }
 
-  bot = botIn
-  intercept = require('./intercept')(bot)
-  target = targetIn
-  if (speedIn == null) {
+  let intercept = require('./intercept')(bot)
+  if (speed == null) {
     speed = {
       x: 0,
       y: 0,
       z: 0
     }
-  } else {
-    speed = speedIn
   }
 
-  startPosition = bot.entity.position.offset(0, 1.6, 0) // Bow offset position
+  let startPosition = bot.entity.position.offset(0, 1.6, 0) // Bow offset position
 
   // Calculate target Height, for shot in the heart  =P
   let targetHeight = 0
@@ -252,7 +242,7 @@ function getMasterGrade (botIn, targetIn, speedIn, weapon) {
   if (target.type === 'mob') {
     targetHeight = target.height
   }
-  targetPosition = new Vec3(target.position).offset(0, targetHeight, 0)
+  let targetPosition = new Vec3(target.position).offset(0, targetHeight, 0)
 
   // Check the first best trayectory
   let distances = getTargetDistance(startPosition, targetPosition)
@@ -260,16 +250,16 @@ function getMasterGrade (botIn, targetIn, speedIn, weapon) {
   if (!shotCalculation) { return false }
 
   // Recalculate the new target based on speed + first trayectory
-  const premonition = getPremonition(shotCalculation.totalTicks, speed)
+  const premonition = getPremonition(shotCalculation.totalTicks, speed, startPosition, targetPosition)
   distances = premonition.distances
   const newTarget = premonition.newTarget
 
   // Recalculate the trayectory based on new target location
-  shotCalculation = geBaseCalculation(distances.hDistance, distances.yDistance)
+  shotCalculation = geBaseCalculation(distances.hDistance, distances.yDistance, startPosition, targetPosition)
   if (!shotCalculation) { return false }
 
   // Get more precision on shot
-  const precisionShot = getPrecisionShot(shotCalculation.grade, distances.hDistance, distances.yDistance, 1)
+  const precisionShot = getPrecisionShot(shotCalculation.grade, distances.hDistance, distances.yDistance, 1, startPosition, targetPosition)
   const { arrowTrajectoryPoints, blockInTrayect, nearestDistance, nearestGrade } = precisionShot
 
   // Calculate yaw
@@ -288,7 +278,7 @@ function getMasterGrade (botIn, targetIn, speedIn, weapon) {
   }
 }
 
-function getPremonition (totalTicks, speed) {
+function getPremonition (totalTicks, speed, startPosition, targetPosition) {
   totalTicks = totalTicks + Math.ceil(totalTicks / 10)
   const velocity = new Vec3(speed)
   const newTarget = new Vec3(targetPosition)
@@ -304,14 +294,14 @@ function getPremonition (totalTicks, speed) {
 }
 
 // For parabola of Y you have 2 times for found the Y position if Y original are downside of Y destination
-function geBaseCalculation (xDestination, yDestination) {
-  const grade = getFirstGradeAproax(xDestination, yDestination)
+function geBaseCalculation (xDestination, yDestination, startPosition, targetPosition) {
+  const grade = getFirstGradeAproax(xDestination, yDestination, startPosition, targetPosition)
   let gradeShot
 
   if (!grade.nearestGradeFirst) { return false } // No aviable trayectory
 
   // Check blocks in trayectory
-  let check = tryGrade(grade.nearestGradeFirst.grade, xDestination, yDestination, BaseVo, true)
+  let check = tryGrade(grade.nearestGradeFirst.grade, xDestination, yDestination, BaseVo, startPosition, targetPosition, true)
 
   if (!check.blockInTrayect && check.nearestDistance < 4) {
     gradeShot = grade.nearestGradeFirst
@@ -319,7 +309,7 @@ function geBaseCalculation (xDestination, yDestination) {
     if (!grade.nearestGradeSecond) {
       return false // No aviable trayectory
     }
-    check = tryGrade(grade.nearestGradeSecond.grade, xDestination, yDestination, BaseVo, true)
+    check = tryGrade(grade.nearestGradeSecond.grade, xDestination, yDestination, BaseVo, startPosition, targetPosition, true)
     if (check.blockInTrayect) {
       return false // No aviable trayectory
     }
