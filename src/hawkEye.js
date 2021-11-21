@@ -1,52 +1,50 @@
 const getMasterGrade = require('./hawkEyeEquations')
 
-let target
-let bot
-let preparingShot
-let preparingShotTime
-let prevPlayerPositions = []
-let oneShot
-let chargingArrow
-let weapon = 'bow'
-let infoShot
-
 function load (botToLoad) {
-  bot = botToLoad
+  let bot = botToLoad
+  bot.hawkEye.data.target = null
+  bot.hawkEye.data.preparingShot = null
+  bot.hawkEye.data.preparingShotTime = null
+  bot.hawkEye.data.prevPlayerPositions = []
+  bot.hawkEye.data.oneShot = null
+  bot.hawkEye.data.chargingArrow = null
+  bot.hawkEye.data.weapon = 'bow'
+  bot.hawkEye.data.infoShot = null
 }
 
-function autoAttack (targetToAttack, inputWeapon = 'bow', isOneShot = false) {
+function autoAttack (bot, targetToAttack, inputWeapon = 'bow', isOneShot = false) {
   if (!targetToAttack) {
     return false
   }
-  oneShot = isOneShot
+  bot.hawkEye.data.oneShot = isOneShot
 
-  target = targetToAttack
-  preparingShot = false
-  prevPlayerPositions = []
-  weapon = inputWeapon
+  bot.hawkEye.data.target = targetToAttack
+  bot.hawkEye.data.preparingShot = false
+  bot.hawkEye.data.prevPlayerPositions = []
+  bot.hawkEye.data.weapon = inputWeapon
 
   bot.on('physicTick', getGrades)
   bot.on('physicTick', autoCalc)
   return true
 }
 
-function stop () {
+function stop (bot) {
   bot.deactivateItem()
   bot.removeListener('physicTick', getGrades)
   bot.removeListener('physicTick', autoCalc)
 }
 
-function getGrades () {
-  if (target === undefined || target === false || !target.isValid) {
-    stop()
+function getGrades (bot) {
+  if (bot.hawkEye.data.target === undefined || bot.hawkEye.data.target === false || !bot.hawkEye.data.target.isValid) {
+    stop(bot)
     return false
   }
 
-  if (prevPlayerPositions.length > 10) { prevPlayerPositions.shift() }
+  if (bot.hawkEye.data.prevPlayerPositions.length > 10) { bot.hawkEye.data.prevPlayerPositions.shift() }
 
-  const position = target.position.clone()
+  const position = bot.hawkEye.data.target.position.clone()
 
-  prevPlayerPositions.push(position)
+  bot.hawkEye.data.prevPlayerPositions.push(position)
 
   const speed = {
     x: 0,
@@ -54,24 +52,24 @@ function getGrades () {
     z: 0
   }
 
-  for (let i = 1; i < prevPlayerPositions.length; i++) {
-    const pos = prevPlayerPositions[i]
-    const prevPos = prevPlayerPositions[i - 1]
+  for (let i = 1; i < bot.hawkEye.data.prevPlayerPositions.length; i++) {
+    const pos = bot.hawkEye.data.prevPlayerPositions[i]
+    const prevPos = bot.hawkEye.data.prevPlayerPositions[i - 1]
     speed.x += pos.x - prevPos.x
     speed.y += pos.y - prevPos.y
     speed.z += pos.z - prevPos.z
   }
 
-  speed.x = speed.x / prevPlayerPositions.length
-  speed.y = speed.y / prevPlayerPositions.length
-  speed.z = speed.z / prevPlayerPositions.length
+  speed.x = speed.x / bot.hawkEye.data.prevPlayerPositions.length
+  speed.y = speed.y / bot.hawkEye.data.prevPlayerPositions.length
+  speed.z = speed.z / bot.hawkEye.data.prevPlayerPositions.length
 
-  infoShot = getMasterGrade(bot, target, speed, weapon)
+  bot.hawkEye.data.infoShot = getMasterGrade(bot, bot.hawkEye.data.target, speed, bot.hawkEye.data.weapon)
 }
 
-async function autoCalc () {
+async function autoCalc (bot) {
   let waitTime
-  switch (weapon) {
+  switch (bot.hawkEye.data.weapon) {
     case 'bow':
     case 'trident':
       waitTime = 1200
@@ -87,8 +85,8 @@ async function autoCalc () {
   }
 
   const slotID = bot.getEquipmentDestSlot('hand')
-  if (bot.inventory.slots[slotID] === null || bot.inventory.slots[slotID].name !== weapon) {
-    const weaponFound = bot.inventory.items().find(item => item.name === weapon)
+  if (bot.inventory.slots[slotID] === null || bot.inventory.slots[slotID].name !== bot.hawkEye.data.weapon) {
+    const weaponFound = bot.inventory.items().find(item => item.name === bot.hawkEye.data.weapon)
     if (weaponFound) {
       try {
         await bot.equip(weaponFound, 'hand')
@@ -99,65 +97,65 @@ async function autoCalc () {
       }
     } else {
       console.log('No weapon in inventory')
-      stop()
+      stop(bot)
       return
     }
   }
 
-  if (!preparingShot) {
-    if (['bow', 'crossbow', 'trident'].includes(weapon)) {
+  if (!bot.hawkEye.data.preparingShot) {
+    if (['bow', 'crossbow', 'trident'].includes(bot.hawkEye.data.weapon)) {
       bot.activateItem()
     }
-    preparingShot = true
-    preparingShotTime = Date.now()
+    bot.hawkEye.data.preparingShot = true
+    bot.hawkEye.data.preparingShotTime = Date.now()
   }
 
-  if (infoShot) {
-    bot.look(infoShot.yaw, infoShot.pitch)
+  if (bot.hawkEye.data.infoShot) {
+    bot.look(bot.hawkEye.data.infoShot.yaw, bot.hawkEye.data.infoShot.pitch)
 
-    if (preparingShot) {
-      if (['bow', 'trident'].includes(weapon) && Date.now() - preparingShotTime > waitTime) {
+    if (bot.hawkEye.data.preparingShot) {
+      if (['bow', 'trident'].includes(bot.hawkEye.data.weapon) && Date.now() - bot.hawkEye.data.preparingShotTime > waitTime) {
         bot.deactivateItem()
-        preparingShot = false
-        if (oneShot) { stop() }
+        bot.hawkEye.data.preparingShot = false
+        if (bot.hawkEye.data.oneShot) { stop(bot) }
       }
 
-      if (['snowball', 'ender_pearl', 'egg', 'splash_potion'].includes(weapon) && Date.now() - preparingShotTime > waitTime) {
+      if (['snowball', 'ender_pearl', 'egg', 'splash_potion'].includes(bot.hawkEye.data.weapon) && Date.now() - bot.hawkEye.data.preparingShotTime > waitTime) {
         bot.swingArm()
         bot.activateItem()
         bot.deactivateItem()
-        preparingShot = false
-        if (oneShot) { stop() }
+        bot.hawkEye.data.preparingShot = false
+        if (bot.hawkEye.data.oneShot) { stop(bot) }
       }
 
       if (weapon === 'crossbow') {
-        shotCrossbow()
+        shotCrossbow(bot)
       }
     }
   }
 }
 
-function shotCrossbow () {
-  if (chargingArrow) {
+function shotCrossbow (bot) {
+  if (bot.hawkEye.data.chargingArrow) {
     bot.activateItem()
     bot.deactivateItem()
-    chargingArrow = false
-    preparingShot = false
-    if (oneShot) { stop() }
+    bot.hawkEye.data.chargingArrow = false
+    bot.hawkEye.data.preparingShot = false
+    if (bot.hawkEye.data.oneShot) { stop(bot) }
     return
   }
 
   if (bot.heldItem === null) {
-    stop()
+    stop(bot)
     return
   }
 
   const isEnchanted = bot.heldItem.nbt.value.Enchantments ? bot.heldItem.nbt.value.Enchantments.value.value.find(enchant => enchant.id.value === 'quick_charge') : undefined
   const shotIn = 1250 - ((isEnchanted ? isEnchanted.lvl.value : 0) * 250)
 
-  if (weapon === 'crossbow' && !chargingArrow && Date.now() - preparingShotTime > shotIn) {
+  if (bot.hawkEye.data.weapon === 'crossbow' && !bot.hawkEye.data.chargingArrow && Date.now() - bot.hawkEye.data.preparingShotTime > shotIn) {
     bot.deactivateItem()
-    chargingArrow = true
+    bot.hawkEye.data.chargingArrow = true
   }
 }
 
