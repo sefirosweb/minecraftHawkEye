@@ -106,3 +106,9 @@ dist
 # Custom folder for CSV
 files/
 config.js
+
+# Folder of tests
+versions/
+server_jars/
+test/server_*
+test/common/server_*

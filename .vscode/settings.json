@@ -1,0 +1,7 @@
+{
+    "files.exclude": {
+        "node_modules": true,
+    },
+    "javascript.validate.enable": false,
+    "editor.formatOnSave": false,
+}
