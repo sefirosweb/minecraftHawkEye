@@ -1,7 +1,8 @@
 
 import { createBot } from 'mineflayer';
 import { Bot } from 'types';
-// import injectCommonTest from './common/testCommon'
+import injectCommonTest from './common/testCommon'
+import minecraftHawkEye from '../index'
 
 export const TEST_TIMEOUT_MS = 180000
 export let bot: Bot
@@ -24,7 +25,8 @@ export const mochaHooks = () => {
                     }) as Bot
 
                     bot.once('spawn', () => {
-                        // injectCommonTest(bot)
+                        injectCommonTest(bot)
+                        bot.loadPlugin(minecraftHawkEye)
                         done()
                     })
                 }

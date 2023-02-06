@@ -57,7 +57,7 @@ export default (bot: Bot) => {
   }
 
   const resetState = async () => {
-    await teleport(new Vec3(0, -60, 0))
+    await teleport(new Vec3(0, bot.test.groundY + 3, 0))
     await bot.test.wait(1000)
     bot.chat('/weather clear 999999')
     bot.chat('/time set day')
@@ -97,7 +97,7 @@ export default (bot: Bot) => {
 
   async function clearInventory() {
     const msgProm = onceWithCleanup(bot, 'message', { checkCondition: msg => msg.translate === 'commands.clear.success.single' || msg.translate === 'commands.clear.success' })
-    bot.chat('/give @a stone 1')
+    bot.chat(`/give ${bot.username} stone 1`)
     await onceWithCleanup(bot.inventory, 'updateSlot', { checkCondition: (slot, oldItem, newItem) => newItem?.name === 'stone' })
 
     const inventoryClearedProm = Promise.all(
@@ -112,7 +112,7 @@ export default (bot: Bot) => {
   }
 
   async function teleport(position: Vec3) {
-    bot.chat(`/execute as flatbot in minecraft:overworld run teleport 0 -60 0`)
+    bot.chat(`/execute as ${bot.username} in minecraft:overworld run teleport ${position.x} ${position.y} ${position.z}`)
 
     return onceWithCleanup(bot, 'move', {
       checkCondition: () => bot.entity.position.distanceTo(position) < 0.9
@@ -128,8 +128,15 @@ export default (bot: Bot) => {
     return bot.creative.flyTo(bot.entity.position.plus(delta))
   }
 
+  let tallWorld = true
+  try {
+    tallWorld = bot.supportFeature('tallWorld')
+  } catch (e) {
+    tallWorld = false
+  }
+
   bot.test = {
-    groundY: bot.supportFeature('tallWorld') ? -60 : 4,
+    groundY: tallWorld ? -60 : 4,
     sayEverywhere,
     clearInventory,
     becomeSurvival,
