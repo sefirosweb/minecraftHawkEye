@@ -21,7 +21,8 @@ export const mochaHooks = () => {
                     bot = createBot({
                         username: 'Archer',
                         host: 'host.docker.internal',
-                        port: 25565
+                        port: 25565,
+                        viewDistance: 'far'
                     }) as Bot
 
                     bot.once('spawn', () => {

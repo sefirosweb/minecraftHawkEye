@@ -19,6 +19,7 @@ const propOverrides = {
     'enable-command-block': 'true',
     'use-native-transport': 'false', // java 16 throws errors without this, https://www.spigotmc.org/threads/unable-to-access-address-of-buffer.311602
     'server-port': 255655,
+    'view-distance': '40',
     'pvp': 'true'
 }
 
