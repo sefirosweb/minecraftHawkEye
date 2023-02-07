@@ -11,15 +11,15 @@ function getPlayer (bot, playername = null) {
   return playerEntity
 }
 
-function simplyShot (bot, yaw = null, grade = null) {
+function simplyShot (bot, yaw = null, pitch = null) {
   if (yaw === null) {
     yaw = bot.player.entity.yaw
   }
-  if (grade === null) {
-    grade = bot.player.entity.grade
+  if (pitch === null) {
+    pitch = bot.player.entity.grade
   }
 
-  bot.look(yaw, grade, true, () => {
+  bot.look(yaw, pitch, false, () => {
     bot.activateItem()
     setTimeout(() => {
       bot.deactivateItem()
