@@ -3,7 +3,7 @@ import { Vec3 } from 'vec3'
 import { generateSphere } from '../common/generateSphere'
 import { bot } from '../hooks'
 
-describe('01_basic', function () {
+describe('02_dyson_sphere', function () {
   let Y = 4
   before(async () => {
     Y = bot.test.groundY + 50

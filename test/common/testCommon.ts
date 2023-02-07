@@ -46,7 +46,7 @@ export default (bot: Bot) => {
       const realY = y + bot.test.groundY - 4
       bot.chat(`/fill ~-50 ${realY} ~-50 ~50 ${realY} ~50 ` + layerNames[y])
     }
-    bot.chat(`/fill 0 ${bot.test.groundY} 0 0 -61 0 minecraft:gold_block`)
+    bot.chat(`/fill 0 ${bot.test.groundY - 1} 0 0 ${bot.test.groundY - 1} 0 minecraft:gold_block`)
     await bot.test.wait(100)
   }
 
