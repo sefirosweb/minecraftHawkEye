@@ -3,6 +3,7 @@
     "version": "1.2.10",
     "description": "Minecraft bot for equations when shooting an arrow",
     "main": "dist/index.js",
+    "types": "dist/types/index.d.ts",
     "dependencies": {
         "mineflayer": "^3.6.0",
         "prismarine-world": "^3.6.0",
