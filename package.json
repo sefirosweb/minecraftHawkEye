@@ -2,7 +2,7 @@
     "name": "minecrafthawkeye",
     "version": "1.2.8",
     "description": "Minecraft bot for equations when shooting an arrow",
-    "main": "index.js",
+    "main": "dist/index.js",
     "dependencies": {
         "mineflayer": "^3.6.0",
         "prismarine-world": "^3.6.0",
@@ -19,11 +19,15 @@
         "ts-node": "^10.9.1",
         "typescript": "^4.9.5"
     },
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "docker": "docker build -t docker_minecraft_hawk_eye . && docker run --rm -it --name docker_minecraft_hawk_eye_client  -v ~/.gitconfig:/etc/gitconfig -v $PWD:/home/app -w /home/app -u node -p 9992:9992 docker_minecraft_hawk_eye /bin/bash",
         "start_server_test": "docker build -t docker_minecraft_hawk_eye . && docker run --rm -it --name docker_minecraft_hawk_eye_test_server -v $PWD:/home/app -w /home/app -u node -p 25565:25565 docker_minecraft_hawk_eye ts-node test/common/start_test_server.ts",
         "test": "mocha -r ts-node/register -r test/hooks.ts --inspect=0.0.0.0:9992 --exit",
         "test_all": "npm run test 'test/hawkTests/*.ts'",
+        "build": "rm dist -rf && tsc",
         "standard": "standard --fix"
     },
     "repository": {

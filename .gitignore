@@ -107,8 +107,6 @@ dist
 files/
 config.js
 
-build/
-
 # Folder of tests
 versions/
 server_jars/
