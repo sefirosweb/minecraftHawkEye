@@ -11,7 +11,7 @@ describe('02_dyson_sphere', function () {
     generateSphere(45).forEach(({ x, y, z }) => bot.chat(`/setblock ${x} ${y + Y - 1} ${z} minecraft:air`))
 
     await bot.test.resetState()
-    bot.chat(`/give ${bot.username} crossbow{Enchantments:[{id:quick_charge,lvl:3},{id:unbreaking,lvl:3}]} 1`)
+    bot.chat(`/give ${bot.username} crossbow{Enchantments:[{id:quick_charge,lvl:5},{id:unbreaking,lvl:5}]} 1`)
     bot.chat(`/give ${bot.username} minecraft:arrow 1280`)
     bot.chat(`/setblock 0 ${Y - 1} 0 minecraft:stone_bricks`)
     bot.chat(`/teleport 0.5 ${Y} 0.5`)
@@ -43,6 +43,11 @@ describe('02_dyson_sphere', function () {
 
           const internal = setInterval(() => {
             if (target?.isValid === false) {
+
+              if (bot.inventory.count(719, null) < 64) {
+                bot.chat(`/give ${bot.username} minecraft:arrow 1280`)
+              }
+
               bot.chat(`/setblock ${x} ${y + Y - 1} ${z} minecraft:cobweb`)
               clearInterval(internal)
               resolve()

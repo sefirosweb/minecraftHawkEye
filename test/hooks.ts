@@ -1,6 +1,6 @@
 
 import { createBot } from 'mineflayer';
-import { Bot } from 'types';
+import { Bot } from '../types';
 import injectCommonTest from './common/testCommon'
 import minecraftHawkEye from '../index'
 

@@ -1,4 +1,3 @@
-import { generateSphere } from '../common/generateSphere'
 import { bot } from '../hooks'
 
 describe('01_basic', function () {
