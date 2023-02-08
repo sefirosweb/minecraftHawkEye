@@ -10,11 +10,11 @@ let chargingArrow
 let weapon = 'bow'
 let infoShot
 
-function load (botToLoad) {
+function load(botToLoad) {
   bot = botToLoad
 }
 
-function autoAttack (targetToAttack, inputWeapon = 'bow', isOneShot = false) {
+function autoAttack(targetToAttack, inputWeapon = 'bow', isOneShot = false) {
   if (!targetToAttack) {
     return false
   }
@@ -30,13 +30,13 @@ function autoAttack (targetToAttack, inputWeapon = 'bow', isOneShot = false) {
   return true
 }
 
-function stop () {
+function stop() {
   bot.deactivateItem()
   bot.removeListener('physicTick', getGrades)
   bot.removeListener('physicTick', autoCalc)
 }
 
-function getGrades () {
+function getGrades() {
   if (target === undefined || target === false || !target.isValid) {
     stop()
     return false
@@ -69,7 +69,7 @@ function getGrades () {
   infoShot = getMasterGrade(bot, target, speed, weapon)
 }
 
-async function autoCalc () {
+async function autoCalc() {
   let waitTime
   switch (weapon) {
     case 'bow':
@@ -137,7 +137,7 @@ async function autoCalc () {
   }
 }
 
-function shotCrossbow () {
+function shotCrossbow() {
   if (chargingArrow) {
     bot.activateItem()
     bot.deactivateItem()
@@ -161,7 +161,7 @@ function shotCrossbow () {
   }
 }
 
-function sleep (ms) {
+function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
