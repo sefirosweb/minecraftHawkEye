@@ -1,27 +1,33 @@
-const Vec3 = require('vec3')
-const { iterators } = require('prismarine-world')
+import { Vec3 } from 'vec3'
+//@ts-ignore
+import { iterators } from 'prismarine-world'
+import { Bot } from 'mineflayer'
+import { Block } from 'prismarine-block'
 const { RaycastIterator } = iterators
 
-module.exports = (bot) => {
-  const check = (from, to) => {
+export default (bot: Bot) => {
+  const check = (from: Vec3, to: Vec3) => {
     const range = from.distanceTo(to)
     const direction = to.minus(from)
     return raycast(from, direction.normalize(), range)
   }
 
-  const checkMultiplePositions = (positions) => {
-    let iterations = []
+  const checkMultiplePositions = (positions: Array<Vec3>) => {
+    let iterations: Array<Vec3> = []
     if (positions.length < 2) {
       return false
     }
 
-    let to, from, checkIterations
-    from = new Vec3(positions[0])
+    let to: Vec3
+    let from: Vec3
+    let checkIterations: ReturnType<typeof check>
+
+    from = positions[0].clone()
 
     for (let i = 1; i <= positions.length; i++) {
-      to = new Vec3(positions[i])
+      to = positions[i].clone()
       checkIterations = check(from, to)
-      if (checkIterations.block === false) {
+      if (checkIterations.block === undefined) {
         iterations = iterations.concat(checkIterations.iterations)
       }
       from = to.clone()
@@ -30,7 +36,10 @@ module.exports = (bot) => {
     return iterations
   }
 
-  const raycast = (from, direction, range) => {
+  const raycast = (from: Vec3, direction: Vec3, range: number): {
+    block: Block | null,
+    iterations: Array<Vec3>
+  } => {
     const iterations = []
     const iter = new RaycastIterator(from, direction, range)
     let pos = iter.next()
@@ -51,7 +60,7 @@ module.exports = (bot) => {
     }
 
     return {
-      block: false,
+      block: null,
       iterations
     }
   }

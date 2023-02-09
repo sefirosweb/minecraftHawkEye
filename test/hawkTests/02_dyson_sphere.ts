@@ -13,7 +13,7 @@ describe('02_dyson_sphere', function () {
     await bot.test.resetState()
     bot.chat(`/give ${bot.username} crossbow{Enchantments:[{id:quick_charge,lvl:5},{id:unbreaking,lvl:5}]} 1`)
     bot.chat(`/give ${bot.username} minecraft:arrow 1280`)
-    bot.chat(`/setblock 0 ${Y - 1} 0 minecraft:stone_bricks`)
+    bot.chat(`/setblock 0 ${Y - 1} 0 minecraft:glass_pane`)
     bot.chat(`/teleport 0.5 ${Y} 0.5`)
   })
 

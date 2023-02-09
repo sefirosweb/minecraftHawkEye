@@ -1,3 +1,8 @@
+## 1.3.0
+* Migrate all code to typescript
+* Added test server
+* Added unitary test with test server
+
 ## 1.2.7
 * Added tridents! now you can trow tridents with perfect shot
 ## 1.2.6

@@ -1,20 +1,24 @@
-const getMasterGrade = require('./hawkEyeEquations')
+import { Bot } from 'mineflayer'
+import { isEntity, OptionsMasterGrade, Weapons } from '../types'
+import { Vec3 } from 'vec3'
+import getMasterGrade from './hawkEyeEquations'
+import { Entity } from 'prismarine-entity'
 
-let target
-let bot
-let preparingShot
-let preparingShotTime
-let prevPlayerPositions = []
-let oneShot
-let chargingArrow
-let weapon = 'bow'
-let infoShot
+let target: Entity | OptionsMasterGrade
+let bot: Bot
+let preparingShot: boolean
+let preparingShotTime: number
+let prevPlayerPositions: Array<Vec3> = []
+let oneShot: boolean
+let chargingArrow: boolean
+let weapon: Weapons = Weapons.bow
+let infoShot: ReturnType<typeof getMasterGrade>
 
-function load(botToLoad) {
+function load(botToLoad: Bot) {
   bot = botToLoad
 }
 
-function autoAttack(targetToAttack, inputWeapon = 'bow', isOneShot = false) {
+function autoAttack(targetToAttack: Entity | OptionsMasterGrade, inputWeapon = Weapons.bow, isOneShot = false) {
   if (!targetToAttack) {
     return false
   }
@@ -37,9 +41,9 @@ function stop() {
 }
 
 function getGrades() {
-  if (target === undefined || target === false || !target.isValid) {
+  if (target === undefined || (isEntity(target) && !target.isValid)) {
     stop()
-    return false
+    return
   }
 
   if (prevPlayerPositions.length > 10) { prevPlayerPositions.shift() }
@@ -48,11 +52,7 @@ function getGrades() {
 
   prevPlayerPositions.push(position)
 
-  const speed = {
-    x: 0,
-    y: 0,
-    z: 0
-  }
+  const speed = new Vec3(0, 0, 0)
 
   for (let i = 1; i < prevPlayerPositions.length; i++) {
     const pos = prevPlayerPositions[i]
@@ -113,21 +113,25 @@ async function autoCalc() {
   }
 
   if (infoShot) {
-    bot.look(infoShot.yaw, infoShot.pitch)
+    bot.look(infoShot.yaw, infoShot.pitch, true)
 
     if (preparingShot) {
       if (['bow', 'trident'].includes(weapon) && Date.now() - preparingShotTime > waitTime) {
         bot.deactivateItem()
         preparingShot = false
-        if (oneShot) { stop() }
+        if (oneShot) {
+          stop()
+        }
       }
 
       if (['snowball', 'ender_pearl', 'egg', 'splash_potion'].includes(weapon) && Date.now() - preparingShotTime > waitTime) {
-        bot.swingArm()
+        bot.swingArm('left')
         bot.activateItem()
         bot.deactivateItem()
         preparingShot = false
-        if (oneShot) { stop() }
+        if (oneShot) {
+          stop()
+        }
       }
 
       if (weapon === 'crossbow') {
@@ -143,7 +147,9 @@ function shotCrossbow() {
     bot.deactivateItem()
     chargingArrow = false
     preparingShot = false
-    if (oneShot) { stop() }
+    if (oneShot) {
+      stop()
+    }
     return
   }
 
@@ -152,6 +158,7 @@ function shotCrossbow() {
     return
   }
 
+  //@ts-ignore pending to fix types from core
   const isEnchanted = bot.heldItem.nbt.value.Enchantments ? bot.heldItem.nbt.value.Enchantments.value.value.find(enchant => enchant.id.value === 'quick_charge') : undefined
   const shotIn = 1250 - ((isEnchanted ? isEnchanted.lvl.value : 0) * 250)
 
@@ -161,7 +168,7 @@ function shotCrossbow() {
   }
 }
 
-function sleep(ms) {
+const sleep = (ms: number) => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 

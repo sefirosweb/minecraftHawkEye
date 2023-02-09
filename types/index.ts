@@ -7,6 +7,60 @@ export type OptionsMasterGrade = {
     position: Vec3,
 }
 
+export enum Weapons {
+    bow = 'bow',
+    crossbow = 'crossbow',
+    trident = 'trident',
+    ender_pearl = 'ender_pearl',
+    snowball = 'snowball',
+    egg = 'egg',
+    splash_potion = 'splash_potion',
+}
+
+type PropsOfWeapons = {
+    GRAVITY: number
+    BaseVo: number
+    waitTime: number
+}
+
+export const weaponsProps: Record<Weapons, PropsOfWeapons> = {
+    bow: {
+        BaseVo: 3,
+        GRAVITY: 0.05,
+        waitTime: 1200,
+    },
+    crossbow: {
+        BaseVo: 3.15,
+        GRAVITY: 0.05,
+        waitTime: 1200,
+    },
+    trident: {
+        BaseVo: 2.5,
+        GRAVITY: 0.05,
+        waitTime: 1200,
+    },
+    ender_pearl: {
+        BaseVo: 1.5,
+        GRAVITY: 0.03,
+        waitTime: 150,
+    },
+    snowball: {
+        BaseVo: 1.5,
+        GRAVITY: 0.03,
+        waitTime: 150,
+    },
+    egg: {
+        BaseVo: 1.5,
+        GRAVITY: 0.03,
+        waitTime: 150,
+    },
+    splash_potion: {
+        BaseVo: 0.4,
+        GRAVITY: 0.03,
+        waitTime: 150,
+    },
+}
+
 declare module 'mineflayer' {
     interface Bot {
         hawkEye: {
@@ -39,3 +93,7 @@ export interface Bot extends MineflayerBot {
         wait: (ms: number) => Promise<void>
     }
 }
+
+export const isEntity = (e: Entity | OptionsMasterGrade): e is Entity => {
+    return "type" in e
+  }
