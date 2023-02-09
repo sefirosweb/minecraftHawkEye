@@ -1,5 +1,5 @@
 import { Bot } from 'mineflayer'
-import { isEntity, OptionsMasterGrade, Weapons, weaponsProps } from '../types'
+import { GetMasterGrade, isEntity, OptionsMasterGrade, Weapons, weaponsProps } from '../types'
 import { Entity } from 'prismarine-entity'
 import { Block } from 'prismarine-block'
 import { Vec3 } from 'vec3'
@@ -233,7 +233,7 @@ let GRAVITY = 0.05 // Arrow Gravity // Only for arrow for other entities have di
 const FACTOR_Y = 0.01 // Arrow "Air resistance" // In water must be changed
 const FACTOR_H = 0.01 // Arrow "Air resistance" // In water must be changed
 
-function getMasterGrade(botIn: Bot, targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, weapon: Weapons) {
+function getMasterGrade(botIn: Bot, targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, weapon: Weapons): GetMasterGrade | false {
   if (!Object.keys(Weapons).includes(weapon)) {
     throw new Error(`${weapon} is not valid weapon for calculate the grade!`)
   }

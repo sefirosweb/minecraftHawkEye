@@ -61,20 +61,25 @@ export const weaponsProps: Record<Weapons, PropsOfWeapons> = {
     },
 }
 
+export type GetMasterGrade = {
+    pitch: number,
+    yaw: number,
+    grade: number,
+    nearestDistance: number,
+    target: Vec3,
+    arrowTrajectoryPoints: Array<Vec3>,
+    blockInTrayect?: Block | null
+}
+
 declare module 'mineflayer' {
     interface Bot {
         hawkEye: {
             simplyShot: (yaw: number, pitch: number) => void
-            autoAttack: (target: Entity, weapon: string) => void
-            getMasterGrade: (target: Entity | OptionsMasterGrade, speed: Vec3, weapon: string) => {
-                pitch: number,
-                yaw: number,
-                grade: number,
-                nearestDistance: number,
-                target: Vec3,
-                arrowTrajectoryPoints: Array<Vec3>,
-                blockInTrayect?: Block
-            }
+            oneShot: (target: Entity, weapon: Weapons) => void
+            autoAttack: (target: Entity, weapon: Weapons) => void
+            getMasterGrade: (from: Entity | OptionsMasterGrade, speed: Vec3, weapon: Weapons) => GetMasterGrade | false,
+            stop: () => void,
+            getPlayer: (name?: string) => Entity | undefined
         }
     }
 }
@@ -96,4 +101,4 @@ export interface Bot extends MineflayerBot {
 
 export const isEntity = (e: Entity | OptionsMasterGrade): e is Entity => {
     return "type" in e
-  }
+}

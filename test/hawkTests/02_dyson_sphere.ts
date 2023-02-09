@@ -1,5 +1,6 @@
 
 import { Vec3 } from 'vec3'
+import { Weapons } from '../../types'
 import { generateSphere } from '../common/generateSphere'
 import { bot } from '../hooks'
 
@@ -37,7 +38,7 @@ describe('02_dyson_sphere', function () {
           throw new Error('Target not found')
         }
 
-        bot.hawkEye.autoAttack(target, 'crossbow')
+        bot.hawkEye.autoAttack(target, Weapons.crossbow)
 
         return new Promise((resolve) => {
 

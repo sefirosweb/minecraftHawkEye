@@ -14,11 +14,11 @@ let chargingArrow: boolean
 let weapon: Weapons = Weapons.bow
 let infoShot: ReturnType<typeof getMasterGrade>
 
-function load(botToLoad: Bot) {
+export const load = (botToLoad: Bot) => {
   bot = botToLoad
 }
 
-function autoAttack(targetToAttack: Entity | OptionsMasterGrade, inputWeapon = Weapons.bow, isOneShot = false) {
+export const autoAttack = (targetToAttack: Entity | OptionsMasterGrade, inputWeapon = Weapons.bow, isOneShot = false) => {
   if (!targetToAttack) {
     return false
   }
@@ -34,13 +34,13 @@ function autoAttack(targetToAttack: Entity | OptionsMasterGrade, inputWeapon = W
   return true
 }
 
-function stop() {
+export const stop = () => {
   bot.deactivateItem()
   bot.removeListener('physicTick', getGrades)
   bot.removeListener('physicTick', autoCalc)
 }
 
-function getGrades() {
+const getGrades = () => {
   if (target === undefined || (isEntity(target) && !target.isValid)) {
     stop()
     return
@@ -69,7 +69,7 @@ function getGrades() {
   infoShot = getMasterGrade(bot, target, speed, weapon)
 }
 
-async function autoCalc() {
+const autoCalc = async () => {
   let waitTime
   switch (weapon) {
     case 'bow':
@@ -141,7 +141,7 @@ async function autoCalc() {
   }
 }
 
-function shotCrossbow() {
+const shotCrossbow = () => {
   if (chargingArrow) {
     bot.activateItem()
     bot.deactivateItem()
