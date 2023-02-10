@@ -1,3 +1,4 @@
+import { Weapons } from '../../types'
 import { bot } from '../hooks'
 
 describe('01_basic', function () {
@@ -22,7 +23,7 @@ describe('01_basic', function () {
       throw new Error('Target not found')
     }
 
-    bot.hawkEye.autoAttack(target, 'bow')
+    bot.hawkEye.autoAttack(target, Weapons.bow)
 
     return new Promise((resolve) => {
 
@@ -45,7 +46,7 @@ describe('01_basic', function () {
       throw new Error('Target not found')
     }
 
-    bot.hawkEye.autoAttack(target, 'bow')
+    bot.hawkEye.autoAttack(target, Weapons.bow)
 
     return new Promise((resolve) => {
 

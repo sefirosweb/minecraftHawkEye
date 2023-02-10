@@ -217,6 +217,10 @@ function getFirstGradeAproax(xDestination: number, yDestination: number) {
     }
   }
 
+  if (nearestGradeFirst === undefined && nearestGradeSecond === undefined) {
+    return false
+  }
+
   if (nearestGradeFirst === undefined || nearestGradeSecond === undefined) {
     throw Error('Error on calculate getFirstGradeAproax')
   }
@@ -311,7 +315,7 @@ function geBaseCalculation(xDestination: number, yDestination: number) {
   const grade = getFirstGradeAproax(xDestination, yDestination)
   let gradeShot
 
-  if (!grade.nearestGradeFirst) { return false } // No aviable trayectory
+  if (!grade) { return false } // No aviable trayectory
 
   // Check blocks in trayectory
   const checkFirst = tryGrade(grade.nearestGradeFirst.grade, xDestination, yDestination, BaseVo, true)
