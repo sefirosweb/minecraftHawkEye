@@ -1,15 +1,17 @@
 
 import { Vec3 } from 'vec3'
+import { getTargetDistance } from '../../src/hawkEyeEquations'
 import { Weapons } from '../../types'
 import { generateSphere } from '../common/generateSphere'
 import { bot } from '../hooks'
 
 describe('02_dyson_sphere', function () {
-  let Y = 4
+  const yConst = 50
+  let Y = -11
   before(async () => {
-    Y = bot.test.groundY + 50
+    Y = bot.test.groundY + yConst
 
-    generateSphere(45).forEach(({ x, y, z }) => bot.chat(`/setblock ${x} ${y + Y - 1} ${z} minecraft:air`))
+    reset()
 
     await bot.test.resetState()
     bot.chat(`/give ${bot.username} crossbow{Enchantments:[{id:quick_charge,lvl:5},{id:unbreaking,lvl:5}]} 1`)
@@ -18,15 +20,23 @@ describe('02_dyson_sphere', function () {
     bot.chat(`/teleport 0.5 ${Y} 0.5`)
   })
 
-  after(() => {
+  const reset = () => {
     generateSphere(45).forEach(({ x, y, z }) => bot.chat(`/setblock ${x} ${y + Y - 1} ${z} minecraft:air`))
-  })
+    bot.chat(`/setblock 0 ${Y - 1} 0 minecraft:air`)
+  }
+
+  after(() => reset())
 
   const randomly = () => Math.random() - 0.5;
   const vec: Array<Vec3> = []
-  vec.concat(generateSphere(45)).sort(randomly)
+
+  const spherePos = vec.concat(generateSphere(45)).sort(randomly)
+   // When is to near to center can't shot them
+  const validPositions = spherePos.filter((creeperPos) => getTargetDistance(new Vec3(0.5, Y - 1, 0.5), creeperPos).hDistance > 9)
+
+  validPositions
     .forEach(({ x, y, z }) => {
-      it(`POS: ${x} ${y} ${z}`, async (): Promise<void> => {
+      it(`POS: ${x} ${y + Y} ${z}`, async (): Promise<void> => {
 
         bot.chat(`/setblock ${x} ${y + Y - 1} ${z} minecraft:stone_bricks`)
         bot.chat(`/summon minecraft:creeper ${x + 0.5} ${y + Y} ${z + 0.5}`)

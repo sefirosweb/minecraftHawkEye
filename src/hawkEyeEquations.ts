@@ -12,7 +12,7 @@ let startPosition: Vec3
 let targetPosition: Vec3
 let intercept: ReturnType<typeof interceptLoader>
 
-function getTargetDistance(origin: Vec3, destination: Vec3) {
+export const getTargetDistance = (origin: Vec3, destination: Vec3) => {
   const xDistance = Math.pow(origin.x - destination.x, 2)
   const zDistance = Math.pow(origin.z - destination.z, 2)
   const hDistance = Math.sqrt(xDistance + zDistance)
@@ -28,41 +28,41 @@ function getTargetDistance(origin: Vec3, destination: Vec3) {
   }
 }
 
-function getTargetYaw(origin: Vec3, destination: Vec3) {
+const getTargetYaw = (origin: Vec3, destination: Vec3) => {
   const xDistance = destination.x - origin.x
   const zDistance = destination.z - origin.z
   const yaw = Math.atan2(xDistance, zDistance) + Math.PI
   return yaw
 }
 
-function degreesToRadians(degrees: number) {
+const degreesToRadians = (degrees: number) => {
   const pi = Math.PI
   return degrees * (pi / 180)
 }
 
-function radiansToDegrees(radians: number) {
+const radiansToDegrees = (radians: number) => {
   const pi = Math.PI
   return radians * (180 / pi)
 }
 
-function getVox(Vo: number, Alfa: number, Resistance = 0) {
+const getVox = (Vo: number, Alfa: number, Resistance = 0) => {
   return Vo * Math.cos(Alfa) - Resistance
 }
 
-function getVoy(Vo: number, Alfa: number, Resistance = 0) {
+const getVoy = (Vo: number, Alfa: number, Resistance = 0) => {
   return Vo * Math.sin(Alfa) - Resistance
 }
 
-function getVo(Vox: number, Voy: number, G: number) {
+const getVo = (Vox: number, Voy: number, G: number) => {
   return Math.sqrt(Math.pow(Vox, 2) + Math.pow(Voy - G, 2)) // New Total Velocity - Gravity
 }
 
-function getGrades(Vo: number, Voy: number, Gravity: number) {
+const getGrades = (Vo: number, Voy: number, Gravity: number) => {
   return radiansToDegrees(Math.asin((Voy - Gravity) / Vo))
 }
 
 // Simulate Arrow Trayectory
-function tryGrade(grade: number, xDestination: number, yDestination: number, VoIn: number, tryIntercetpBlock = false) {
+const tryGrade = (grade: number, xDestination: number, yDestination: number, VoIn: number, tryIntercetpBlock = false) => {
   let precisionFactor = 1 // !Danger More precision increse the calc! =>  !More Slower!
 
   let Vo = VoIn
@@ -143,7 +143,7 @@ function tryGrade(grade: number, xDestination: number, yDestination: number, VoI
 }
 
 // Get more precision on shot
-function getPrecisionShot(grade: number, xDestination: number, yDestination: number, decimals: number) {
+const getPrecisionShot = (grade: number, xDestination: number, yDestination: number, decimals: number) => {
   let nearestDistance: number | undefined
   let nearestGrade: number | undefined
   let arrowTrajectoryPoints: Array<Vec3> | undefined
@@ -178,7 +178,7 @@ function getPrecisionShot(grade: number, xDestination: number, yDestination: num
 // https://es.qwe.wiki/wiki/Trajectory
 
 type TryGrade = ReturnType<typeof tryGrade> & { grade: number }
-function getFirstGradeAproax(xDestination: number, yDestination: number) {
+const getFirstGradeAproax = (xDestination: number, yDestination: number) => {
   let firstFound = false
   let nearestGradeFirst: TryGrade | undefined
   let nearestGradeSecond: TryGrade | undefined
@@ -237,7 +237,7 @@ let GRAVITY = 0.05 // Arrow Gravity // Only for arrow for other entities have di
 const FACTOR_Y = 0.01 // Arrow "Air resistance" // In water must be changed
 const FACTOR_H = 0.01 // Arrow "Air resistance" // In water must be changed
 
-function getMasterGrade(botIn: Bot, targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, weapon: Weapons): GetMasterGrade | false {
+const getMasterGrade = (botIn: Bot, targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, weapon: Weapons): GetMasterGrade | false => {
   if (!Object.keys(Weapons).includes(weapon)) {
     throw new Error(`${weapon} is not valid weapon for calculate the grade!`)
   }
@@ -295,7 +295,7 @@ function getMasterGrade(botIn: Bot, targetIn: OptionsMasterGrade | Entity, speed
   }
 }
 
-function getPremonition(totalTicks: number, speed: Vec3) {
+const getPremonition = (totalTicks: number, speed: Vec3) => {
   totalTicks = totalTicks + Math.ceil(totalTicks / 10)
   const velocity = speed.clone()
   const newTarget = targetPosition.clone()
@@ -311,7 +311,7 @@ function getPremonition(totalTicks: number, speed: Vec3) {
 }
 
 // For parabola of Y you have 2 times for found the Y position if Y original are downside of Y destination
-function geBaseCalculation(xDestination: number, yDestination: number) {
+const geBaseCalculation = (xDestination: number, yDestination: number) => {
   const grade = getFirstGradeAproax(xDestination, yDestination)
   let gradeShot
 
