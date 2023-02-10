@@ -1,6 +1,7 @@
+//@ts-nocheck
 const mineflayer = require('mineflayer')
 const mineflayerViewer = require('prismarine-viewer').mineflayer
-const minecraftHawkEye = require('../index')
+const minecraftHawkEye = require('../src/index')
 const Vec3 = require('vec3')
 
 const bot = mineflayer.createBot({

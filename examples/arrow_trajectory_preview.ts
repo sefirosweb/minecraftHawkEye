@@ -1,6 +1,7 @@
-const mineflayer = require('mineflayer')
-const mineflayerViewer = require('prismarine-viewer').mineflayer
-const minecraftHawkEye = require('../index')
+//@ts-nocheck
+import mineflayer from 'mineflayer'
+import mineflayerViewer from 'prismarine-viewer'
+import minecraftHawkEye from '../src/index'
 
 // first install the dependency
 // npm i mineflayer prismarine-viewer minecrafthawkeye
@@ -12,7 +13,7 @@ const bot = mineflayer.createBot({
     password: process.argv[5]
 })
 
-bot.loadPlugin(minecraftHawkEye)
+
 let intervalShot, intervalPreview, target
 
 bot.on('spawn', () => {
@@ -22,9 +23,12 @@ bot.on('spawn', () => {
     bot.chat(`/give ${bot.username} minecraft:arrow 300`)
     bot.chat('/time set day')
     bot.chat('Ready!')
-    target = bot.hawkEye.getPlayer()
-    intervalShot = setInterval(fire, 5000)
-    intervalPreview = setInterval(shotPreview, 200)
+
+    setTimeout(() => {
+        target = bot.hawkEye.getPlayer()
+        intervalShot = setInterval(fire, 5000)
+        intervalPreview = setInterval(shotPreview, 200)
+    }, 4000)
 })
 
 bot.on('die', () => {
@@ -33,13 +37,16 @@ bot.on('die', () => {
 })
 
 bot.once('spawn', () => {
-    mineflayerViewer(bot, { port: 3000 })
+    bot.loadPlugin(() => minecraftHawkEye(bot))
+    mineflayerViewer.mineflayer(bot, { port: 3000 })
 })
 
 const shotPreview = () => {
     bot.viewer.erase('arrowTrajectoryPoints')
     if (target) {
         const arrowTrajectoryPoints = bot.hawkEye.getMasterGrade(target, null, 'bow').arrowTrajectoryPoints // Returns array of Vec3 positions
+
+        
         if (arrowTrajectoryPoints) {
             bot.viewer.drawPoints('arrowTrajectoryPoints', arrowTrajectoryPoints, 0xff0000, 5)
         }

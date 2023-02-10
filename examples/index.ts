@@ -1,6 +1,7 @@
+//@ts-nocheck
+
 const mineflayer = require('mineflayer')
-// const hawkEyePlugin = require('minecrafthawkeye');
-const minecraftHawkEye = require('../index')
+const minecraftHawkEye = require('../src/index')
 
 const bot = mineflayer.createBot({
   host: process.argv[2],

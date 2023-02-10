@@ -1,3 +1,4 @@
+//@ts-nocheck
 const config = require('../config')
 const mineflayer = require('mineflayer')
 const { pathfinder, Movements } = require('mineflayer-pathfinder')

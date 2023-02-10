@@ -1,5 +1,7 @@
+//@ts-nocheck
+
 const mineflayer = require('mineflayer')
-const minecraftHawkEye = require('../index')
+const minecraftHawkEye = require('../src/index')
 
 const bot = mineflayer.createBot({
   host: process.argv[2],
@@ -9,9 +11,11 @@ const bot = mineflayer.createBot({
 })
 
 bot.loadPlugin(minecraftHawkEye)
+const ball = 'snowball' // snowball / egg / splash_potion
 
 bot.on('spawn', () => {
-  bot.chat(`/give ${bot.username} minecraft:ender_pearl 300`)
+  bot.chat(`/give ${bot.username} minecraft:${ball} 300`)
+  // bot.chat(`/give ${bot.username} splash_potion{Potion:"minecraft:strong_regeneration"} 30`)
   bot.chat('/time set day')
   bot.chat('Ready!')
   fire()
@@ -23,18 +27,12 @@ bot.on('die', () => {
 
 const fire = async () => {
   const target = bot.hawkEye.getPlayer()
-  let sleep = 5000
   if (target) {
-    const infoShot = bot.hawkEye.getMasterGrade(target, null, 'ender_pearl')
-    if (infoShot) {
-      await bot.look(infoShot.yaw, infoShot.pitch)
-      bot.hawkEye.oneShot(target, 'ender_pearl')
-      console.log('Shunpo!')
-    } else {
-      sleep = 200
-    }
+    bot.hawkEye.autoAttack(target, ball)
+    console.log('shooting')
+  } else {
+    setTimeout(() => {
+      fire()
+    }, 500)
   }
-  setTimeout(() => {
-    fire()
-  }, sleep)
 }
