@@ -31,7 +31,7 @@ describe('02_dyson_sphere', function () {
   const vec: Array<Vec3> = []
 
   const spherePos = vec.concat(generateSphere(45)).sort(randomly)
-   // When is to near to center can't shot them
+  // When is to near to center can't shot them
   const validPositions = spherePos.filter((creeperPos) => getTargetDistance(new Vec3(0.5, Y - 1, 0.5), creeperPos).hDistance > 9)
 
   validPositions
@@ -51,21 +51,15 @@ describe('02_dyson_sphere', function () {
         bot.hawkEye.autoAttack(target, Weapons.crossbow)
 
         return new Promise((resolve) => {
-
-          const internal = setInterval(() => {
-            if (target?.isValid === false) {
-
-              if (bot.inventory.count(719, null) < 64) {
-                bot.chat(`/give ${bot.username} minecraft:arrow 1280`)
-              }
-
-              bot.chat(`/setblock ${x} ${y + Y - 1} ${z} minecraft:cobweb`)
-              clearInterval(internal)
-              resolve()
+          bot.on('auto_shop_stopped', () => {
+            if (bot.inventory.count(719, null) < 64) {
+              bot.chat(`/give ${bot.username} minecraft:arrow 1280`)
             }
-          }, 400)
-        })
 
+            bot.chat(`/setblock ${x} ${y + Y - 1} ${z} minecraft:cobweb`)
+            resolve()
+          })
+        })
       })
     })
 })

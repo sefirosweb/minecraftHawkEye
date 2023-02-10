@@ -26,13 +26,9 @@ describe('01_basic', function () {
     bot.hawkEye.autoAttack(target, Weapons.bow)
 
     return new Promise((resolve) => {
-
-      const internal = setInterval(() => {
-        if (target?.isValid === false) {
-          clearInterval(internal)
-          resolve()
-        }
-      }, 400)
+      bot.on('auto_shop_stopped', () => {
+        resolve()
+      })
     })
   })
 
@@ -49,13 +45,9 @@ describe('01_basic', function () {
     bot.hawkEye.autoAttack(target, Weapons.bow)
 
     return new Promise((resolve) => {
-
-      const internal = setInterval(() => {
-        if (target?.isValid === false) {
-          clearInterval(internal)
-          resolve()
-        }
-      }, 400)
+      bot.on('auto_shop_stopped', () => {
+        resolve()
+      })
     })
   })
 

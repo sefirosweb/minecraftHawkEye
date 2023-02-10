@@ -108,6 +108,15 @@ splash_potion
 trident
 ```
 
+Events:
+
+When but uses autoAttack and the mob is gone (killed o dissapeared)
+```js
+bot.on('auto_shop_stopped', (target) => {
+    ///
+})
+```
+
 I'm glad I can help you, do we help each other?
 
 # TODOs

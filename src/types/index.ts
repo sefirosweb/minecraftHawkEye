@@ -83,6 +83,9 @@ declare module 'mineflayer' {
             getPlayer: (name?: string) => Entity | undefined
         }
     }
+    interface BotEvents {
+        auto_shop_stopped: (target: Entity | OptionsMasterGrade) => void
+    }
 }
 
 export interface Bot extends MineflayerBot {

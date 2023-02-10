@@ -1,5 +1,5 @@
 import { Bot } from 'mineflayer'
-import { isEntity, OptionsMasterGrade, Weapons } from './types'
+import { isEntity, OptionsMasterGrade, Weapons, weaponsProps } from './types'
 import { Vec3 } from 'vec3'
 import getMasterGrade from './hawkEyeEquations'
 import { Entity } from 'prismarine-entity'
@@ -35,9 +35,11 @@ export const autoAttack = (targetToAttack: Entity | OptionsMasterGrade, inputWea
 }
 
 export const stop = () => {
+
   bot.deactivateItem()
   bot.removeListener('physicTick', getGrades)
   bot.removeListener('physicTick', autoCalc)
+  bot.emit('auto_shop_stopped', target)
 }
 
 const getGrades = () => {
@@ -70,21 +72,7 @@ const getGrades = () => {
 }
 
 const autoCalc = async () => {
-  let waitTime
-  switch (weapon) {
-    case 'bow':
-    case 'trident':
-      waitTime = 1200
-      break
-    case 'snowball':
-    case 'ender_pearl':
-    case 'egg':
-    case 'splash_potion':
-      waitTime = 150
-      break
-    default:
-      waitTime = 1200
-  }
+  const waitTime = weaponsProps[weapon].waitTime
 
   const slotID = bot.getEquipmentDestSlot('hand')
   if (bot.inventory.slots[slotID] === null || bot.inventory.slots[slotID].name !== weapon) {

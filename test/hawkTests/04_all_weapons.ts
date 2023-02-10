@@ -42,14 +42,10 @@ describe('04_all_weapons', function () {
       bot.hawkEye.autoAttack(target, weapon)
 
       return new Promise((resolve) => {
-
-        const internal = setInterval(async () => {
-          if (target?.isValid === false) {
-            clearInterval(internal)
-            await bot.test.wait(4000)
-            resolve()
-          }
-        }, 400)
+        bot.on('auto_shop_stopped', async () => {
+          await bot.test.wait(4000)
+          resolve()
+        })
       })
     })
 
