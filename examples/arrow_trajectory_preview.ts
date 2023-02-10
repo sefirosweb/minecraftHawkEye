@@ -1,6 +1,7 @@
 //@ts-nocheck
 import mineflayer from 'mineflayer'
 import mineflayerViewer from 'prismarine-viewer'
+import { Vec3 } from 'vec3'
 import minecraftHawkEye from '../src/index'
 
 // first install the dependency
@@ -27,7 +28,7 @@ bot.on('spawn', () => {
     setTimeout(() => {
         target = bot.hawkEye.getPlayer()
         intervalShot = setInterval(fire, 5000)
-        intervalPreview = setInterval(shotPreview, 200)
+        intervalPreview = setInterval(shotPreview, 4000)
     }, 4000)
 })
 
@@ -45,8 +46,11 @@ const shotPreview = () => {
     bot.viewer.erase('arrowTrajectoryPoints')
     if (target) {
         const arrowTrajectoryPoints = bot.hawkEye.getMasterGrade(target, null, 'bow').arrowTrajectoryPoints // Returns array of Vec3 positions
+        const res = bot.hawkEye.calculateArrowTrayectory(bot.entity.position.clone(), new Vec3(1, 0, 0))
+        console.log(Date.now())
+        console.log({ res })
 
-        
+
         if (arrowTrajectoryPoints) {
             bot.viewer.drawPoints('arrowTrajectoryPoints', arrowTrajectoryPoints, 0xff0000, 5)
         }

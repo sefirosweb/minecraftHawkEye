@@ -18,7 +18,7 @@ export enum Weapons {
     splash_potion = 'splash_potion',
 }
 
-type PropsOfWeapons = {
+export type PropsOfWeapons = {
     GRAVITY: number
     BaseVo: number
     waitTime: number
@@ -81,6 +81,12 @@ declare module 'mineflayer' {
             getMasterGrade: (from: Entity | OptionsMasterGrade, speed: Vec3, weapon: Weapons) => GetMasterGrade | false,
             stop: () => void,
             getPlayer: (name?: string) => Entity | undefined
+            calculateArrowTrayectory: (currentPos: Vec3, itemSpeed: Vec3, ammunitionType?: Weapons) => {
+                nearestDistance: number | undefined;
+                totalTicks: number;
+                blockInTrayect: Block;
+                arrowTrajectoryPoints: Array<Vec3>;
+            }
         }
     }
     interface BotEvents {

@@ -9,7 +9,7 @@ import { download } from 'minecraft-wrap'
 
 const propOverrides = {
     motd: 'Test Minecraft Server',
-    'level-type': 'FLAT',
+    // 'level-type': 'FLAT',
     'spawn-npcs': 'true',
     'spawn-animals': 'true',
     'online-mode': 'false',

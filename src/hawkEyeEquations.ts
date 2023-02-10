@@ -1,5 +1,5 @@
 import { Bot } from 'mineflayer'
-import { GetMasterGrade, isEntity, OptionsMasterGrade, Weapons, weaponsProps } from './types'
+import { GetMasterGrade, isEntity, OptionsMasterGrade, PropsOfWeapons, Weapons, weaponsProps } from './types'
 import { Entity } from 'prismarine-entity'
 import { Block } from 'prismarine-block'
 import { Vec3 } from 'vec3'
@@ -236,6 +236,73 @@ let BaseVo: number // Power of shot
 let GRAVITY = 0.05 // Arrow Gravity // Only for arrow for other entities have different gravity
 const FACTOR_Y = 0.01 // Arrow "Air resistance" // In water must be changed
 const FACTOR_H = 0.01 // Arrow "Air resistance" // In water must be changed
+
+export const calculateArrowTrayectory = (currentPos: Vec3, itemSpeed: Vec3, ammunitionType?: Weapons) => {
+  const weapon = ammunitionType ?? Weapons.bow
+
+  if (!Object.keys(Weapons).includes(weapon)) {
+    throw new Error(`${weapon} is not valid to calculate the trayectory!`)
+  }
+
+
+  const res = staticCalc(weaponsProps[weapon], 30, 3)
+
+  return res
+
+}
+
+const staticCalc = (weapon: PropsOfWeapons, grade: number, VoIn: number, precision = 1) => {
+  let Vo = VoIn
+  const gravity = weapon.GRAVITY / precision
+  const factorY = FACTOR_Y / precision
+  const factorH = FACTOR_H / precision
+  
+  let Voy = getVoy(Vo, degreesToRadians(grade)) // Vector Y
+  let Vox = getVox(Vo, degreesToRadians(grade)) // Vector X
+  let Vy = Voy / precision
+  let Vx = Vox / precision
+  let ProjectileGrade
+
+  let nearestDistance: number | undefined
+  let totalTicks = 0
+
+  let blockInTrayect: Block | null = null
+  const arrowTrajectoryPoints = []
+  const yaw = getTargetYaw(startPosition, targetPosition)
+
+  while (true) {
+    totalTicks += (1 / precision)
+
+    Vo = getVo(Vox, Voy, gravity)
+    ProjectileGrade = getGrades(Vo, Voy, gravity)
+
+    Voy = getVoy(Vo, degreesToRadians(ProjectileGrade), Voy * factorY)
+    Vox = getVox(Vo, degreesToRadians(ProjectileGrade), Vox * factorH)
+
+    Vy += Voy / precision
+    Vx += Vox / precision
+
+    const x = startPosition.x - (Math.sin(yaw) * Vx)
+    const z = startPosition.z - (Math.sin(yaw) * Vx / Math.tan(yaw))
+    const y = startPosition.y + Vy
+
+    const currentArrowPosition = new Vec3(x, y, z)
+    arrowTrajectoryPoints.push(currentArrowPosition)
+    const previusArrowPositionIntercept = arrowTrajectoryPoints[arrowTrajectoryPoints.length === 1 ? 0 : arrowTrajectoryPoints.length - 2]
+
+    blockInTrayect = intercept.check(previusArrowPositionIntercept, currentArrowPosition).block
+
+    if (blockInTrayect !== null) {
+      return {
+        nearestDistance,
+        totalTicks,
+        blockInTrayect,
+        arrowTrajectoryPoints
+      }
+    }
+  }
+}
+
 
 const getMasterGrade = (botIn: Bot, targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, weapon: Weapons): GetMasterGrade | false => {
   if (!Object.keys(Weapons).includes(weapon)) {

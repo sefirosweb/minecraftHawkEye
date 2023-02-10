@@ -2,7 +2,7 @@ import { Bot } from "mineflayer"
 
 import { autoAttack, stop, load } from './hawkEye'
 import { getPlayer, simplyShot } from './botFunctions'
-import getMasterGrade from './hawkEyeEquations'
+import getMasterGrade, { calculateArrowTrayectory } from './hawkEyeEquations'
 import { Weapons } from "./types"
 
 const inject = (bot: Bot) => {
@@ -14,9 +14,9 @@ const inject = (bot: Bot) => {
     getMasterGrade: (from, speed, weapon) => getMasterGrade(bot, from, speed, weapon),
     simplyShot: (yaw, grade) => simplyShot(bot, yaw, grade),
     stop: () => stop(),
-    getPlayer: (name?: string) => getPlayer(bot, name)
+    getPlayer: (name?: string) => getPlayer(bot, name),
+    calculateArrowTrayectory: calculateArrowTrayectory
   }
-
 }
 
 export default inject

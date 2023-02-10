@@ -22,7 +22,7 @@ export const mochaHooks = () => {
                         username: 'Archer',
                         host: 'host.docker.internal',
                         port: 25565,
-                        viewDistance: 'far'
+                        viewDistance: 'tiny'
                     }) as Bot
 
                     bot.once('spawn', () => {
