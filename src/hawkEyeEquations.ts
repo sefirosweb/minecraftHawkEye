@@ -1,5 +1,5 @@
 import { Bot } from 'mineflayer'
-import { GetMasterGrade, isEntity, OptionsMasterGrade, Weapons, weaponsProps } from '../types'
+import { GetMasterGrade, isEntity, OptionsMasterGrade, Weapons, weaponsProps } from './types'
 import { Entity } from 'prismarine-entity'
 import { Block } from 'prismarine-block'
 import { Vec3 } from 'vec3'
@@ -133,9 +133,9 @@ const tryGrade = (grade: number, xDestination: number, yDestination: number, VoI
     // Arrow passed player || Voy (arrow is going down and passed player) || Detected solid block
     if (Vx > xDestination || (Voy < 0 && yDestination > Vy) || blockInTrayect !== null) {
       return {
-        nearestDistance: nearestDistance,
-        totalTicks: totalTicks,
-        blockInTrayect: blockInTrayect,
+        nearestDistance,
+        totalTicks,
+        blockInTrayect,
         arrowTrajectoryPoints
       }
     }
@@ -188,7 +188,7 @@ const getFirstGradeAproax = (xDestination: number, yDestination: number) => {
 
     const tryGradeShot: TryGrade = {
       ...calculatedTryGrade,
-      grade: grade
+      grade
     }
 
     if (tryGradeShot.nearestDistance > 4) {
@@ -286,7 +286,7 @@ const getMasterGrade = (botIn: Bot, targetIn: OptionsMasterGrade | Entity, speed
 
   return {
     pitch: degreesToRadians(nearestGrade / 10),
-    yaw: yaw,
+    yaw,
     grade: nearestGrade / 10,
     nearestDistance,
     target: newTarget,
@@ -295,9 +295,9 @@ const getMasterGrade = (botIn: Bot, targetIn: OptionsMasterGrade | Entity, speed
   }
 }
 
-const getPremonition = (totalTicks: number, speed: Vec3) => {
+const getPremonition = (totalTicks: number, targetSpeed: Vec3) => {
   totalTicks = totalTicks + Math.ceil(totalTicks / 10)
-  const velocity = speed.clone()
+  const velocity = targetSpeed.clone()
   const newTarget = targetPosition.clone()
   for (let i = 1; i <= totalTicks; i++) {
     newTarget.add(velocity)

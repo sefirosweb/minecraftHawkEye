@@ -1,4 +1,4 @@
-import { Weapons } from '../../types'
+import { Weapons } from '../../src/types'
 import { bot } from '../hooks'
 
 describe('04_all_weapons', function () {

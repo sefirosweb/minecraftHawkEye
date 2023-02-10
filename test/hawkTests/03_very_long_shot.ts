@@ -1,6 +1,5 @@
-import { OptionsMasterGrade } from '../../types'
 import { Vec3 } from 'vec3'
-import { Weapons } from '../../types'
+import { Weapons, OptionsMasterGrade } from '../../src/types'
 import { bot } from '../hooks'
 
 describe('03_very_long_shot', function () {

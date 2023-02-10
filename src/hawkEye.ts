@@ -1,5 +1,5 @@
 import { Bot } from 'mineflayer'
-import { isEntity, OptionsMasterGrade, Weapons } from '../types'
+import { isEntity, OptionsMasterGrade, Weapons } from './types'
 import { Vec3 } from 'vec3'
 import getMasterGrade from './hawkEyeEquations'
 import { Entity } from 'prismarine-entity'
@@ -98,7 +98,6 @@ const autoCalc = async () => {
         return
       }
     } else {
-      console.log('No weapon in inventory')
       stop()
       return
     }
@@ -158,7 +157,7 @@ const shotCrossbow = () => {
     return
   }
 
-  //@ts-ignore pending to fix types from core
+  // @ts-ignore pending to fix types from core
   const isEnchanted = bot.heldItem.nbt.value.Enchantments ? bot.heldItem.nbt.value.Enchantments.value.value.find(enchant => enchant.id.value === 'quick_charge') : undefined
   const shotIn = 1250 - ((isEnchanted ? isEnchanted.lvl.value : 0) * 250)
 

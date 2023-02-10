@@ -1,5 +1,5 @@
 import { Vec3 } from 'vec3'
-//@ts-ignore
+// @ts-ignore
 import { iterators } from 'prismarine-world'
 import { Bot } from 'mineflayer'
 import { Block } from 'prismarine-block'

@@ -1,8 +1,8 @@
 import { Bot } from "mineflayer"
 
-import { autoAttack, stop, load } from './src/hawkEye'
-import { getPlayer, simplyShot } from './src/botFunctions'
-import getMasterGrade from './src/hawkEyeEquations'
+import { autoAttack, stop, load } from './hawkEye'
+import { getPlayer, simplyShot } from './botFunctions'
+import getMasterGrade from './hawkEyeEquations'
 import { Weapons } from "./types"
 
 const inject = (bot: Bot) => {

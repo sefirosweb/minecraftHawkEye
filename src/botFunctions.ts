@@ -3,7 +3,7 @@ import { Bot } from "mineflayer"
 export const getPlayer = (bot: Bot, playername?: string) => {
   const playerEntity = Object.keys(bot.entities)
     .map(id => bot.entities[id])
-    .find(function (entity) {
+    .find((entity) => {
       if (entity.type === 'player') {
         if (playername === undefined) { return true }
         if (entity.username === playername) { return true }

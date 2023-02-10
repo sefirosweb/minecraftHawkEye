@@ -8,7 +8,18 @@ on:
 permissions:
   contents: write
 jobs: 
-  release:
+  Lint:
+    name: "Check code"
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+    - run: npm i && npm run lint
+
+  Release:
     name: "Publish package to NPM"
     runs-on: ubuntu-latest
     steps:

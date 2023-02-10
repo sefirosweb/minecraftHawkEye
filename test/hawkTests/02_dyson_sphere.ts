@@ -1,7 +1,7 @@
 
 import { Vec3 } from 'vec3'
 import { getTargetDistance } from '../../src/hawkEyeEquations'
-import { Weapons } from '../../types'
+import { Weapons } from '../../src/types'
 import { generateSphere } from '../common/generateSphere'
 import { bot } from '../hooks'
 

@@ -4,7 +4,7 @@ import { Vec3 } from 'vec3'
 import { sleep, onceWithCleanup } from './promise_utils'
 
 import { Block } from 'prismarine-block'
-import { Bot } from '../../types';
+import { Bot } from '../../src/types';
 
 export default (bot: Bot) => {
   const gameModeChangedMessages = ['commands.gamemode.success.self', 'gameMode.changed']

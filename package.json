@@ -11,15 +11,13 @@
     "devDependencies": {
         "@types/chai": "^4.3.4",
         "@types/mocha": "^10.0.1",
-        "@typescript-eslint/eslint-plugin": "^5.51.0",
-        "@typescript-eslint/parser": "^5.51.0",
         "chai": "^4.3.7",
-        "eslint": "^8.33.0",
         "minecraft-wrap": "^1.5.1",
         "mocha": "^10.2.0",
         "prismarine-viewer": "^1.23.0",
         "standard": "^17.0.0",
         "ts-node": "^10.9.1",
+        "tslint": "^6.1.3",
         "typescript": "^4.9.5"
     },
     "files": [
@@ -33,7 +31,8 @@
         "build": "rm dist -rf && tsc",
         "standard": "standard --fix",
         "update": "npx npm-check-updates",
-        "lint": "eslint . --ignore-path .gitignore"
+        "lint": "tslint -c tslint.json 'src/**/*.ts'",
+        "lint:fix": "npm run lint -- --fix"
     },
     "repository": {
         "type": "git",

@@ -1,8 +1,8 @@
 
 import { createBot } from 'mineflayer';
-import { Bot } from '../types';
+import { Bot } from '../src/types';
 import injectCommonTest from './common/testCommon'
-import minecraftHawkEye from '../index'
+import minecraftHawkEye from '../src/index'
 
 export const TEST_TIMEOUT_MS = 180000
 export let bot: Bot
