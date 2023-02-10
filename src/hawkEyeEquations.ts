@@ -255,7 +255,7 @@ function getMasterGrade(botIn: Bot, targetIn: OptionsMasterGrade | Entity, speed
 
   // Calculate target Height, for shot in the heart  =P
   const targetHeight: number = !isEntity(target) ? 0 : (target.type === 'player' ? 1.16 : (target.height ?? 0))
-  targetPosition = target.position.clone().offset(0, targetHeight, 0)
+  targetPosition = target.position.offset(0, targetHeight, 0)
 
   // Check the first best trayectory
   let distances = getTargetDistance(startPosition, targetPosition)
@@ -314,16 +314,17 @@ function geBaseCalculation(xDestination: number, yDestination: number) {
   if (!grade.nearestGradeFirst) { return false } // No aviable trayectory
 
   // Check blocks in trayectory
-  let check = tryGrade(grade.nearestGradeFirst.grade, xDestination, yDestination, BaseVo, true)
+  const checkFirst = tryGrade(grade.nearestGradeFirst.grade, xDestination, yDestination, BaseVo, true)
 
-  if (!check.blockInTrayect && check.nearestDistance < 4) {
+  if (!checkFirst.blockInTrayect && checkFirst.nearestDistance < 4) {
     gradeShot = grade.nearestGradeFirst
   } else {
     if (!grade.nearestGradeSecond) {
       return false // No aviable trayectory
     }
-    check = tryGrade(grade.nearestGradeSecond.grade, xDestination, yDestination, BaseVo, true)
-    if (check.blockInTrayect) {
+
+    const checkSecond = tryGrade(grade.nearestGradeSecond.grade, xDestination, yDestination, BaseVo, true)
+    if (checkSecond.blockInTrayect) {
       return false // No aviable trayectory
     }
     gradeShot = grade.nearestGradeSecond
