@@ -1,7 +1,9 @@
 # minecraftHawkEye
-Minecraft bot for equations when shooting an arrow
+Module for the Minecraft bot, hit 100% of the time with the bow, using the equations of parabolic shooting with friction
 
-This program / bot is based on <a href="https://github.com/PrismarineJS/mineflayer" target="_blank">mineflayer</a> repository
+This module is based on bot of <a href="https://github.com/PrismarineJS/mineflayer" target="_blank">mineflayer</a> repository
+
+This calculate the trajectory of arrow / snowballs... to ensure which is the best angle to hit
 
 Install:
 - Install nodejs >= 14 from nodejs.org
@@ -19,35 +21,44 @@ const weapon = 'bow'
 
 Now you can request functions
 ```js
-// Get an a player entity:
-const playerEntity = bot.hawkEye.getPlayer(playername) // If emtpy return first player found
+// Get an a entity
+// Example get te player entity, If emtpy return first player found
+const playerEntity = bot.hawkEye.getPlayer(playername) 
+
 // Auto attack every 1,2 secs to target
-bot.hawkEye.autoAttack(target, weapon) // You can put blockPosition, see example,
+bot.hawkEye.autoAttack(target, weapon)
+
 // Stop auto attack
 bot.hawkEye.stop()
-// One Shot
+
+// Fire only 1 shot
 bot.hawkEye.oneshot(target, weapon)
 
-// Get Yaw and Pitch
-bot.hawkEye.getMasterGrade(target, speed, weapon) // speed (Vec3) if optional, but this is use for calc the intersection between arrow and new target position
+// Otherwise you can get Yaw and Pitch
+bot.hawkEye.getMasterGrade(target, speedInVec3, weapon)
+// With Yaw and Pitch you can use yourself bot.look(yaw,pitch) adn activate / deactivate main hand to fire
 
-// Simple one shot you need to put manually Yaw and Pitch
-bot.hawkEye.simplyShot = function (yaw, pitch) // Pitch = Grades in radians
+
+// Similar has oneshot but need yo add manually the Pitch and Way in radians
+bot.hawkEye.simplyShot(yaw, pitch)
 ```
 
-A simply example in one file:
+A example in one file:
 
 ```js
+// ** Grant OP to Archer **
 // file: example.js
 const mineflayer = require('mineflayer')
 const minecraftHawkEye = require('minecrafthawkeye');
+const Vec3 = require('Vec3')
 
 const bot = mineflayer.createBot({
-    host: process.argv[2],
-    port: parseInt(process.argv[3]),
+    host: process.argv[2] ? process.argv[2] : 'localhost',
+    port: process.argv[3] ? parseInt(process.argv[3]) : 25565,
     username: process.argv[4] ? process.argv[4] : 'Archer',
     password: process.argv[5]
 })
+
 bot.loadPlugin(minecraftHawkEye)
 
 bot.on('spawn', function() {
@@ -76,28 +87,25 @@ bot.on('spawn', function() {
     // If you want to shot in XYZ position:
     /*
           const blockPosition = {
-                  position: {
-                      x: 244.5,
-                      y: 75.5,
-                      z: -220
-                  },
-                  isValid: true // Fake to is "alive"
+                  position: new Vec3(244.5, 75.5, -220),
+                  isValid: true
               }
           // bot.hawkEye.oneShot(blockPosition);
           // bot.hawkEye.autoAttack(blockPosition);
       */
 })
 ```
-
-In world give a bow + arrows: \
-/give Archer bow{Enchantments:[{id:unbreaking,lvl:100}]} 1 \
-/give Archer minecraft:arrow 6000
-
-All is done, when is attack mode they get best posibilty for impact, and shot arrow every 1,2 secs (max power)
+All is done, when is attack mode they get best possibility for impact, and shot arrow every 1,2 secs (max power)
 
 ## Valid list of weapons or items that can calculate the perfect shot or launch it directly
-```js
-const validWeapons = ['bow', 'crossbow', 'snowball', 'ender_pearl', 'egg', 'splash_potion', 'trident']
+```
+bow
+crossbow
+snowball
+ender_pearl
+egg
+splash_potion
+trident
 ```
 
 I'm glad I can help you, do we help each other?
@@ -105,5 +113,3 @@ I'm glad I can help you, do we help each other?
 # TODOs
 No TODOs!
 Anyone have more ideas? :D
-* Maybe create a best documentation =P
-

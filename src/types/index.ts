@@ -5,6 +5,7 @@ import { Block } from 'prismarine-block'
 
 export type OptionsMasterGrade = {
     position: Vec3,
+    isValid: boolean
 }
 
 export enum Weapons {

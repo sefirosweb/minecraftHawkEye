@@ -40,7 +40,8 @@ describe('03_very_long_shot', function () {
   it('Very long shot distance', async (): Promise<void> => {
 
     const block: OptionsMasterGrade = {
-      position: new Vec3(120, Y + 1, 0.5)
+      position: new Vec3(120, Y + 1, 0.5),
+      isValid: true
     }
 
     const result = bot.hawkEye.getMasterGrade(block, new Vec3(0, 0, 0), Weapons.bow)
