@@ -10,7 +10,7 @@ const bot = mineflayer.createBot({
 
 bot.loadPlugin(minecraftHawkEye)
 
-bot.on('spawn', function () {
+bot.on('spawn', () => {
   bot.chat(`/give ${bot.username} minecraft:ender_pearl 300`)
   bot.chat('/time set day')
   bot.chat('Ready!')
@@ -21,7 +21,7 @@ bot.on('die', () => {
   bot.hawkEye.stop()
 })
 
-async function fire () {
+const fire = async () => {
   const target = bot.hawkEye.getPlayer()
   let sleep = 5000
   if (target) {

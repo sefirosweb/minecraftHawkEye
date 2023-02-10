@@ -34,7 +34,7 @@ bot.once('spawn', () => {
 })
 
 let totalIds = 0
-function arrowTrajectory () {
+const arrowTrajectory = () => {
   bot.chat('/kill @e[type=minecraft:arrow]')
   bot.viewer.erase('arrowTrajectoryPoints')
   for (let i = 0; i <= totalIds; i++) {
@@ -58,7 +58,7 @@ function arrowTrajectory () {
   }
 }
 
-function fire () {
+const fire = () => {
   const target = bot.hawkEye.getPlayer()
   if (target) {
     bot.hawkEye.oneShot(target, 'bow')

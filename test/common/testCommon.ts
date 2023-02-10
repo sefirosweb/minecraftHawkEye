@@ -95,7 +95,7 @@ export default (bot: Bot) => {
     return msgProm
   }
 
-  async function clearInventory() {
+  const clearInventory = async () => {
     const msgProm = onceWithCleanup(bot, 'message', { checkCondition: msg => msg.translate === 'commands.clear.success.single' || msg.translate === 'commands.clear.success' })
     bot.chat(`/give ${bot.username} stone 1`)
     await onceWithCleanup(bot.inventory, 'updateSlot', { checkCondition: (slot, oldItem, newItem) => newItem?.name === 'stone' })
@@ -111,7 +111,7 @@ export default (bot: Bot) => {
     assert.strictEqual(bot.inventory.slots.filter(i => i).length, 0)
   }
 
-  async function teleport(position: Vec3) {
+  const teleport = async (position: Vec3) => {
     bot.chat(`/execute as ${bot.username} in minecraft:overworld run teleport ${position.x} ${position.y} ${position.z}`)
 
     return onceWithCleanup(bot, 'move', {
@@ -135,6 +135,10 @@ export default (bot: Bot) => {
     tallWorld = false
   }
 
+  const wait = async (ms: number): Promise<void> => {
+    return new Promise((resolve) => { setTimeout(resolve, ms) })
+  }
+
   bot.test = {
     groundY: tallWorld ? -60 : 4,
     sayEverywhere,
@@ -144,9 +148,6 @@ export default (bot: Bot) => {
     fly,
     resetState,
     placeBlock,
-
-    wait: function (ms) {
-      return new Promise((resolve) => { setTimeout(resolve, ms) })
-    }
+    wait,
   }
 }

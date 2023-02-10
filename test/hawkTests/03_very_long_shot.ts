@@ -2,7 +2,7 @@ import { Vec3 } from 'vec3'
 import { Weapons, OptionsMasterGrade } from '../../src/types'
 import { bot } from '../hooks'
 
-describe('03_very_long_shot', function () {
+describe('03_very_long_shot', () => {
   let Y = 4
   before(async () => {
     Y = bot.test.groundY

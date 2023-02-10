@@ -10,7 +10,7 @@ const bot = mineflayer.createBot({
 
 bot.loadPlugin(minecraftHawkEye)
 
-bot.on('spawn', function () {
+bot.on('spawn', () => {
   bot.chat('/kill @e[type=minecraft:arrow]')
   // bot.chat(`/give ${bot.username} crossbow{Enchantments:[{id:unbreaking,lvl:3}]} 1`)
   bot.chat(`/give ${bot.username} crossbow{Enchantments:[{id:quick_charge,lvl:3},{id:unbreaking,lvl:3}]} 1`)
@@ -24,7 +24,7 @@ bot.on('die', () => {
   bot.hawkEye.stop()
 })
 
-async function fire () {
+const fire = async () => {
   bot.chat('/kill @e[type=minecraft:arrow]')
 
   const target = bot.hawkEye.getPlayer() // Fire to nearest player

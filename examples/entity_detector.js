@@ -21,14 +21,14 @@ bot.once('spawn', () => {
   bot.on('physicTick', () => {
     const target = Object.keys(bot.entities)
       .map(id => bot.entities[id])
-      .find(function (e) {
+      .find((e) => {
         // return e.name === 'potion'
         return e.name === 'trident'
       })
 
     // const itemsInMap = Object.keys(bot.entities)
     //   .map(id => bot.entities[id])
-    //   .filter(function (e) {
+    //   .filter((e) => {
     //     return e.type !== 'mob'
     //   })
 

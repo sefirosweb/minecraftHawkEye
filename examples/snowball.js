@@ -11,7 +11,7 @@ const bot = mineflayer.createBot({
 bot.loadPlugin(minecraftHawkEye)
 const ball = 'snowball' // snowball / egg / splash_potion
 
-bot.on('spawn', function () {
+bot.on('spawn', () => {
   bot.chat(`/give ${bot.username} minecraft:${ball} 300`)
   // bot.chat(`/give ${bot.username} splash_potion{Potion:"minecraft:strong_regeneration"} 30`)
   bot.chat('/time set day')
@@ -23,7 +23,7 @@ bot.on('die', () => {
   bot.hawkEye.stop()
 })
 
-async function fire () {
+const fire = async () => {
   const target = bot.hawkEye.getPlayer()
   if (target) {
     bot.hawkEye.autoAttack(target, ball)

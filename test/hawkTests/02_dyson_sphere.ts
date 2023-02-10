@@ -5,7 +5,7 @@ import { Weapons } from '../../src/types'
 import { generateSphere } from '../common/generateSphere'
 import { bot } from '../hooks'
 
-describe('02_dyson_sphere', function () {
+describe('02_dyson_sphere', () => {
   const yConst = 50
   let Y = -11
   before(async () => {

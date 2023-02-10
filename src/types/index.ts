@@ -98,7 +98,6 @@ export interface Bot extends MineflayerBot {
         fly: (delta: Vec3) => Promise<void>
         resetState: () => Promise<void>
         placeBlock: (slot: number, position: Vec3) => void
-
         wait: (ms: number) => Promise<void>
     }
 }

@@ -10,7 +10,7 @@ const bot = mineflayer.createBot({
 })
 bot.loadPlugin(minecraftHawkEye)
 
-bot.on('spawn', function () {
+bot.on('spawn', () => {
   bot.chat('/give ' + bot.username + ' bow{Enchantments:[{id:unbreaking,lvl:100}]} 1')
   bot.chat('/give ' + bot.username + ' minecraft:arrow 300')
   bot.chat('/time set day')

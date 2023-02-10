@@ -17,7 +17,7 @@ export const mochaHooks = () => {
                     return
                 }
 
-                function begin() {
+                const begin = () => {
                     bot = createBot({
                         username: 'Archer',
                         host: 'host.docker.internal',

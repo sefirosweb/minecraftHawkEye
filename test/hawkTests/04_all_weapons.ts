@@ -1,7 +1,7 @@
 import { Weapons } from '../../src/types'
 import { bot } from '../hooks'
 
-describe('04_all_weapons', function () {
+describe('04_all_weapons', () => {
   let Y = 4
   before(async () => {
     Y = bot.test.groundY

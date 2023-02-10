@@ -36,7 +36,7 @@ bot.once('spawn', () => {
     mineflayerViewer(bot, { port: 3000 })
 })
 
-function shotPreview() {
+const shotPreview = () => {
     bot.viewer.erase('arrowTrajectoryPoints')
     if (target) {
         const arrowTrajectoryPoints = bot.hawkEye.getMasterGrade(target, null, 'bow').arrowTrajectoryPoints // Returns array of Vec3 positions
@@ -46,7 +46,7 @@ function shotPreview() {
     }
 }
 
-function fire() {
+const fire = () => {
     if (target) {
         bot.hawkEye.oneShot(target, 'bow')
     }

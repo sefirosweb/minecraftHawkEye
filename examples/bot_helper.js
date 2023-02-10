@@ -12,14 +12,14 @@ bot.loadPlugin(pathfinder)
 
 let point = 0
 
-bot.on('spawn', function () {
+bot.on('spawn', () => {
   bot.chat('Ready!')
   bot.chat('/give Looker bow{Enchantments:[{id:unbreaking,lvl:100}]} 1')
   bot.chat('/give Looker minecraft:arrow 300')
   goNextPoint(bot, points[point])
 })
 
-bot.on('physicTick', function () {
+bot.on('physicTick', () => {
   // console.log(bot.entity.velocity)
 })
 
@@ -53,7 +53,7 @@ points.push({
   z: -70
 })
 
-function goNextPoint (bot, goal) {
+const goNextPoint = (bot, goal) => {
   const mcData = require('minecraft-data')(bot.version)
   const defaultMove = new Movements(bot, mcData)
   bot.pathfinder.setMovements(defaultMove)
