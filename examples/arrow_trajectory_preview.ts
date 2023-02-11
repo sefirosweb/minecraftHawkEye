@@ -47,12 +47,9 @@ const shotPreview = () => {
     if (target) {
         const arrowTrajectoryPoints = bot.hawkEye.getMasterGrade(target, null, 'bow').arrowTrajectoryPoints // Returns array of Vec3 positions
         const res = bot.hawkEye.calculateArrowTrayectory(bot.entity.position.clone(), new Vec3(1, 0, 0))
-        console.log(Date.now())
-        console.log({ res })
-
 
         if (arrowTrajectoryPoints) {
-            bot.viewer.drawPoints('arrowTrajectoryPoints', arrowTrajectoryPoints, 0xff0000, 5)
+            bot.viewer.drawPoints('arrowTrajectoryPoints', res.arrowTrajectoryPoints, 0xff0000, 5)
         }
     }
 }

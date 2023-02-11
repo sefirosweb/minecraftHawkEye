@@ -57,8 +57,8 @@ const getVo = (Vox: number, Voy: number, G: number) => {
   return Math.sqrt(Math.pow(Vox, 2) + Math.pow(Voy - G, 2)) // New Total Velocity - Gravity
 }
 
-const getGrades = (Vo: number, Voy: number, Gravity: number) => {
-  return radiansToDegrees(Math.asin((Voy - Gravity) / Vo))
+const applyGravityToVoy = (Vo: number, Voy: number, Gravity: number) => { // radians
+  return Math.asin((Voy - Gravity) / Vo)
 }
 
 // Simulate Arrow Trayectory
@@ -76,7 +76,7 @@ const tryGrade = (grade: number, xDestination: number, yDestination: number, VoI
   let Vox = getVox(Vo, degreesToRadians(grade)) // Vector X
   let Vy = Voy / precisionFactor
   let Vx = Vox / precisionFactor
-  let ProjectileGrade
+  let Alfa
 
   let nearestDistance: number | undefined
   let totalTicks = 0
@@ -111,10 +111,10 @@ const tryGrade = (grade: number, xDestination: number, yDestination: number, VoI
     factorH = FACTOR_H / precisionFactor
 
     Vo = getVo(Vox, Voy, gravity)
-    ProjectileGrade = getGrades(Vo, Voy, gravity)
+    Alfa = applyGravityToVoy(Vo, Voy, gravity)
 
-    Voy = getVoy(Vo, degreesToRadians(ProjectileGrade), Voy * factorY)
-    Vox = getVox(Vo, degreesToRadians(ProjectileGrade), Vox * factorH)
+    Voy = getVoy(Vo, Alfa, Voy * factorY)
+    Vox = getVox(Vo, Alfa, Vox * factorH)
 
     Vy += Voy / precisionFactor
     Vx += Vox / precisionFactor
@@ -245,48 +245,54 @@ export const calculateArrowTrayectory = (currentPos: Vec3, itemSpeed: Vec3, ammu
   }
 
 
-  const res = staticCalc(weaponsProps[weapon], 30, 3)
+
+  const currentArrowPos = bot.entity.position.offset(0, 20, 0)
+  const weaponGravity = weaponsProps[weapon].GRAVITY
+  const pitch = degreesToRadians(35)
+  const yaw = getTargetYaw(new Vec3(1, 0, 1), new Vec3(0, 0, 0))
+  const vo = 2
+  const res = staticCalc(currentArrowPos, weaponGravity, pitch, yaw, vo)
 
   return res
 
 }
 
-const staticCalc = (weapon: PropsOfWeapons, grade: number, VoIn: number, precision = 1) => {
+const staticCalc = (initialArrowPosition: Vec3, gravityIn: number, pitch: number, yaw: number, VoIn: number, precision = 1) => {
   let Vo = VoIn
-  const gravity = weapon.GRAVITY / precision
+  const gravity = gravityIn / precision
   const factorY = FACTOR_Y / precision
   const factorH = FACTOR_H / precision
-  
-  let Voy = getVoy(Vo, degreesToRadians(grade)) // Vector Y
-  let Vox = getVox(Vo, degreesToRadians(grade)) // Vector X
+
+  let Voy = getVoy(Vo, pitch) // Vector Y
+  let Vox = getVox(Vo, pitch) // Vector X
   let Vy = Voy / precision
   let Vx = Vox / precision
-  let ProjectileGrade
+  let Alfa
 
   let nearestDistance: number | undefined
   let totalTicks = 0
 
   let blockInTrayect: Block | null = null
   const arrowTrajectoryPoints = []
-  const yaw = getTargetYaw(startPosition, targetPosition)
 
   while (true) {
     totalTicks += (1 / precision)
 
     Vo = getVo(Vox, Voy, gravity)
-    ProjectileGrade = getGrades(Vo, Voy, gravity)
+    Alfa = applyGravityToVoy(Vo, Voy, gravity)
 
-    Voy = getVoy(Vo, degreesToRadians(ProjectileGrade), Voy * factorY)
-    Vox = getVox(Vo, degreesToRadians(ProjectileGrade), Vox * factorH)
+    Voy = getVoy(Vo, Alfa, Voy * factorY)
+    Vox = getVox(Vo, Alfa, Vox * factorH)
 
     Vy += Voy / precision
     Vx += Vox / precision
 
-    const x = startPosition.x - (Math.sin(yaw) * Vx)
-    const z = startPosition.z - (Math.sin(yaw) * Vx / Math.tan(yaw))
-    const y = startPosition.y + Vy
+    const x = initialArrowPosition.x - (Math.sin(yaw) * Vx)
+    const z = initialArrowPosition.z - (Math.sin(yaw) * Vx / Math.tan(yaw))
+    const y = initialArrowPosition.y + Vy
 
     const currentArrowPosition = new Vec3(x, y, z)
+
     arrowTrajectoryPoints.push(currentArrowPosition)
     const previusArrowPositionIntercept = arrowTrajectoryPoints[arrowTrajectoryPoints.length === 1 ? 0 : arrowTrajectoryPoints.length - 2]
 
