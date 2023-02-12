@@ -118,6 +118,9 @@ export type Projectil = {
     enabled: boolean,
     currentSpeed: number // Vo,
     currentSpeedTime: number
-    previusPositions: Array<Vec3>,
+    previusPositions: Array<{
+        at: number,
+        pos: Vec3
+    }>,
     updatedAt: number
 }

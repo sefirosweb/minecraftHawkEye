@@ -184,7 +184,10 @@ export const detectProjectiles = (projectile: string = 'arrow') => {
     }
 
     // if (currentProjectileDetected[e.uuid].previusPositions.length > 3) { currentProjectileDetected[e.uuid].previusPositions.shift() }
-    currentProjectileDetected[e.uuid].previusPositions.push(e.position.clone())
+    currentProjectileDetected[e.uuid].previusPositions.push({
+      at: Date.now(),
+      pos: e.position.clone()
+    })
   })
 
   Object.entries(currentProjectileDetected)
@@ -206,16 +209,20 @@ export const detectProjectiles = (projectile: string = 'arrow') => {
 
       const previusPositions = projectil.previusPositions
 
-      const start = previusPositions.length > 4 ? previusPositions.length - 4 : 1
-      const previusPositionsTocheck = previusPositions.slice(start - 1)
+      const totalItemsToCatch = 3
+      const start = previusPositions.length >= totalItemsToCatch ? previusPositions.length - totalItemsToCatch : 0
+      const previusPositionsTocheck = previusPositions.slice(start)
 
       for (let i = 1; i < previusPositionsTocheck.length; i++) {
         const pos = previusPositionsTocheck[i]
         const prevPos = previusPositionsTocheck[i - 1]
-        speed.x += Math.abs(pos.x - prevPos.x)
-        speed.y += Math.abs(pos.y - prevPos.y)
-        speed.z += Math.abs(pos.z - prevPos.z)
+        speed.x += Math.abs(pos.pos.x - prevPos.pos.x)
+        speed.y += Math.abs(pos.pos.y - prevPos.pos.y)
+        speed.z += Math.abs(pos.pos.z - prevPos.pos.z)
       }
+
+      const startDate = previusPositionsTocheck[0].at
+      const endDate = previusPositionsTocheck[previusPositionsTocheck.length - 1].at
 
       speed.x = speed.x / previusPositionsTocheck.length
       speed.y = speed.y / previusPositionsTocheck.length
@@ -230,7 +237,7 @@ export const detectProjectiles = (projectile: string = 'arrow') => {
       if (projectil.currentSpeed === 0 && Date.now() - projectil.currentSpeedTime > 1500) {
         projectil.enabled = false
       } else {
-        console.log(`${uuid} => ${projectil.currentSpeed}`)
+        console.log(`${uuid} / ${endDate - startDate} => ${projectil.currentSpeed}`)
         arrowsInAir.push(projectil)
       }
     })
