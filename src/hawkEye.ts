@@ -1,7 +1,7 @@
 import { Bot } from 'mineflayer'
 import { isEntity, OptionsMasterGrade, Projectil, Weapons, weaponsProps } from './types'
 import { Vec3 } from 'vec3'
-import getMasterGrade from './hawkEyeEquations'
+import getMasterGrade, {calculateArrowTrayectory} from './hawkEyeEquations'
 import { Entity } from 'prismarine-entity'
 
 let target: Entity | OptionsMasterGrade
@@ -159,8 +159,32 @@ const sleep = (ms: number) => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-const currentProjectileDetected: Record<string, Projectil> = {}
 
+export const detectAim = () =>{
+  const entities = Object.values(bot.entities)
+    .filter((e) => e.type === "player")
+
+  const calculatedEntityTarget:Record<string,{
+    uuid:string,
+    name:string,
+    prevTrajectory: Array<Vec3>
+  }> = {}
+
+  entities
+  .forEach((e) => {
+    if(!e.uuid) return
+    const calc = calculateArrowTrayectory(e.position, 3, e.pitch,e.yaw, Weapons.bow)
+    calculatedEntityTarget[e.uuid] = {
+      uuid:e.uuid,
+      name:e.name??'', 
+      prevTrajectory: calc.arrowTrajectoryPoints
+    }
+  })
+  
+  return calculatedEntityTarget
+}
+
+const currentProjectileDetected: Record<string, Projectil> = {}
 export const detectProjectiles = (projectile: string = 'arrow') => {
   const projectiles = Object.values(bot.entities)
     .filter((e) => e.name === projectile)

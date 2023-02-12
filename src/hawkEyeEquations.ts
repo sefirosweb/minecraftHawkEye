@@ -294,7 +294,7 @@ const staticCalc = (initialArrowPosition: Vec3, gravityIn: number, pitch: number
     arrowTrajectoryPoints.push(currentArrowPosition)
     const previusArrowPositionIntercept = arrowTrajectoryPoints[arrowTrajectoryPoints.length === 1 ? 0 : arrowTrajectoryPoints.length - 2]
 
-    blockInTrayect = intercept.check(previusArrowPositionIntercept, currentArrowPosition).block
+    blockInTrayect = intercept?.check(previusArrowPositionIntercept, currentArrowPosition).block
 
     if (blockInTrayect !== null) {
       return {

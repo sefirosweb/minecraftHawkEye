@@ -6,6 +6,7 @@ import minecraftHawkEye from '../src/index'
 import { Weapons } from '../src/types'
 import { Entity } from 'prismarine-entity'
 import { calculateYaw, calculayePitch } from '../src/hawkEyeEquations'
+import { detectAim } from '../src/hawkEye'
 
 // first install the dependency
 // npm i mineflayer prismarine-viewer minecrafthawkeye
@@ -14,7 +15,8 @@ const bot = mineflayer.createBot({
     host: process.argv[2] ? process.argv[2] : 'host.docker.internal',
     port: process.argv[3] ? parseInt(process.argv[3]) : 25565,
     username: process.argv[4] ? process.argv[4] : 'Archer',
-    password: process.argv[5]
+    password: process.argv[5],
+    viewDistance: 'far'
 })
 
 
@@ -47,17 +49,17 @@ bot.on('spawn', () => {
                     const lastItem = p.previusPositions[p.previusPositions.length - 1]
                     const lastItem2 = p.previusPositions[p.previusPositions.length - 2]
 
-                    if (lastItem.equals(lastItem2)) {
+                    if (lastItem.pos.equals(lastItem2.pos)) {
                         return '';
                     }
 
-                    const yaw = calculateYaw(lastItem2, lastItem)
-                    const pitch = calculayePitch(lastItem2, lastItem)
+                    const yaw = calculateYaw(lastItem2.pos, lastItem.pos)
+                    const pitch = calculayePitch(lastItem2.pos, lastItem.pos)
 
-                    const res = bot.hawkEye.calculateArrowTrayectory(lastItem, p.currentSpeed, pitch, yaw, Weapons.bow)
+                    const res = bot.hawkEye.calculateArrowTrayectory(lastItem.pos, p.currentSpeed, pitch, yaw, Weapons.bow)
 
                     //@ts-ignore
-                    bot.viewer.drawPoints(`arrowPremonition_${p.uuid}`, p.previusPositions.concat(res.arrowTrajectoryPoints), 0xffff00, 5)
+                    bot.viewer.drawPoints(`arrowPremonition_${p.uuid}`, p.previusPositions.map(prev => prev.pos).concat(res.arrowTrajectoryPoints), 0xffff00, 5)
 
                     setTimeout(() => {
                         //@ts-ignore
@@ -66,6 +68,13 @@ bot.on('spawn', () => {
 
                 })
             }
+
+            const detectedAim = bot.hawkEye.detectAim()
+            Object.values(detectedAim).forEach(e =>{
+                  //@ts-ignore
+                  bot.viewer.drawPoints(`arrowPremonition_${e.uuid}`, e.prevTrajectory, 0xffffff, 5)
+            })
+
         })
     }, 4000)
 })
