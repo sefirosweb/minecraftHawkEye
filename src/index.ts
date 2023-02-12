@@ -4,6 +4,7 @@ import { getPlayer, simplyShot } from './botFunctions'
 import getMasterGrade, { calculateArrowTrayectory } from './hawkEyeEquations'
 import { Weapons } from "./types"
 import loadBot from "./loadBot"
+import { start_radar, stop_radar } from './projectilRadar'
 
 const inject = (bot: Bot) => {
   loadBot(bot)
@@ -18,6 +19,8 @@ const inject = (bot: Bot) => {
     calculateArrowTrayectory,
     detectProjectiles,
     detectAim,
+    start_radar,
+    stop_radar
   }
 }
 

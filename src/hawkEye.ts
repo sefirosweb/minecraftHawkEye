@@ -172,7 +172,7 @@ export const detectAim = () => {
       const calc = calculateArrowTrayectory(e.position, 3, e.pitch, e.yaw, Weapons.bow)
       calculatedEntityTarget[e.uuid] = {
         uuid: e.uuid,
-        name: e.name ?? '',
+        name: e.type === "player" ? e.username ?? '' : e.name ?? '',
         prevTrajectory: calc.arrowTrajectoryPoints
       }
     })

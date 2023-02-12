@@ -87,10 +87,14 @@ declare module 'mineflayer' {
             detectProjectiles: (projectile?: string) => ReturnType<typeof detectProjectiles>
             detectAim: () => ReturnType<typeof detectAim>
             calculateArrowTrayectory: (currentPos: Vec3, itemSpeed: number, pitch: number, yaw: number, ammunitionType?: Weapons) => ReturnType<typeof calculateArrowTrayectory>
+            start_radar: () => void
+            stop_radar: () => void
         }
     }
     interface BotEvents {
         auto_shop_stopped: (target: Entity | OptionsMasterGrade) => void
+        target_aiming_at_you: (target: string) => void
+        incoming_arrow: (target: Entity) => void
     }
 }
 

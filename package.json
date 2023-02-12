@@ -25,7 +25,7 @@
     ],
     "scripts": {
         "start_server_test": "ts-node test/common/start_test_server.ts",
-        "test": "mocha -r ts-node/register -r test/hooks.ts --exit",
+        "test": "mocha -r ts-node/register -r test/hooks.ts --timeout 60000 --exit",
         "test_all": "npm run test 'test/hawkTests/*.ts'",
         "build": "rm dist -rf && tsc",
         "lint": "tslint -c tslint.json 'src/**/*.ts'",

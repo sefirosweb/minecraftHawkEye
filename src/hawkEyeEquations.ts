@@ -1,16 +1,14 @@
-import { Bot } from 'mineflayer'
-import { GetMasterGrade, isEntity, OptionsMasterGrade, PropsOfWeapons, Weapons, weaponsProps } from './types'
+import { GetMasterGrade, isEntity, OptionsMasterGrade, Weapons, weaponsProps } from './types'
 import { Entity } from 'prismarine-entity'
 import { Block } from 'prismarine-block'
 import { Vec3 } from 'vec3'
-import interceptLoader from './intercept'
+import { check } from './intercept'
 import { bot } from './loadBot'
 
 let target: Entity | OptionsMasterGrade
 let speed: Vec3
 let startPosition: Vec3
 let targetPosition: Vec3
-let intercept: ReturnType<typeof interceptLoader>
 
 export const getTargetDistance = (origin: Vec3, destination: Vec3) => {
   const xDistance = Math.pow(origin.x - destination.x, 2)
@@ -133,7 +131,7 @@ const tryGrade = (grade: number, xDestination: number, yDestination: number, VoI
     arrowTrajectoryPoints.push(currentArrowPosition)
     const previusArrowPositionIntercept = arrowTrajectoryPoints[arrowTrajectoryPoints.length === 1 ? 0 : arrowTrajectoryPoints.length - 2]
     if (tryIntercetpBlock) {
-      blockInTrayect = intercept.check(previusArrowPositionIntercept, currentArrowPosition).block
+      blockInTrayect = check(previusArrowPositionIntercept, currentArrowPosition).block
     }
 
     // Arrow passed player || Voy (arrow is going down and passed player) || Detected solid block
@@ -293,7 +291,7 @@ const staticCalc = (initialArrowPosition: Vec3, gravityIn: number, pitch: number
     arrowTrajectoryPoints.push(currentArrowPosition)
     const previusArrowPositionIntercept = arrowTrajectoryPoints[arrowTrajectoryPoints.length === 1 ? 0 : arrowTrajectoryPoints.length - 2]
 
-    blockInTrayect = intercept?.check(previusArrowPositionIntercept, currentArrowPosition).block
+    blockInTrayect = check(previusArrowPositionIntercept, currentArrowPosition).block
 
     if (blockInTrayect !== null) {
       return {
@@ -315,7 +313,6 @@ const getMasterGrade = (targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, we
   BaseVo = weaponProp.BaseVo
   GRAVITY = weaponProp.GRAVITY
 
-  intercept = interceptLoader(bot)
   target = targetIn
   speed = speedIn
 
