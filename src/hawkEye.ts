@@ -166,12 +166,9 @@ export const detectAim = () => {
     prevTrajectory: Array<Vec3>
   }> = {}
 
-  console.clear()
-
   entities
     .forEach((e) => {
       if (!e.uuid) return
-      console.log(`${e.name} ${e.uuid} => ${e.pitch} ${e.yaw}`)
       const calc = calculateArrowTrayectory(e.position, 3, e.pitch, e.yaw, Weapons.bow)
       calculatedEntityTarget[e.uuid] = {
         uuid: e.uuid,
@@ -244,9 +241,6 @@ export const detectProjectiles = (projectile: string = 'arrow') => {
         speed.z += Math.abs(pos.pos.z - prevPos.pos.z)
       }
 
-      const startDate = previusPositionsTocheck[0].at
-      const endDate = previusPositionsTocheck[previusPositionsTocheck.length - 1].at
-
       speed.x = speed.x / previusPositionsTocheck.length
       speed.y = speed.y / previusPositionsTocheck.length
       speed.z = speed.z / previusPositionsTocheck.length
@@ -260,7 +254,6 @@ export const detectProjectiles = (projectile: string = 'arrow') => {
       if (projectil.currentSpeed === 0 && Date.now() - projectil.currentSpeedTime > 1500) {
         projectil.enabled = false
       } else {
-        console.log(`${uuid} / ${endDate - startDate} => ${projectil.currentSpeed}`)
         arrowsInAir.push(projectil)
       }
     })

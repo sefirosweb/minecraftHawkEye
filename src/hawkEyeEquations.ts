@@ -267,7 +267,6 @@ const staticCalc = (initialArrowPosition: Vec3, gravityIn: number, pitch: number
   let Vx = Vox / precision
   let Alfa
 
-  let nearestDistance: number | undefined
   let totalTicks = 0
 
   let blockInTrayect: Block | null = null
@@ -298,7 +297,6 @@ const staticCalc = (initialArrowPosition: Vec3, gravityIn: number, pitch: number
 
     if (blockInTrayect !== null) {
       return {
-        nearestDistance,
         totalTicks,
         blockInTrayect,
         arrowTrajectoryPoints
