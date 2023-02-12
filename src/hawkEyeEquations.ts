@@ -126,7 +126,7 @@ const tryGrade = (grade: number, xDestination: number, yDestination: number, VoI
     Vx += Vox / precisionFactor
 
     const x = startPosition.x - (Math.sin(yaw) * Vx)
-    const z = startPosition.z - (Math.sin(yaw) * Vx / Math.tan(yaw))
+    const z = yaw === 0 ? startPosition.z : startPosition.z - (Math.sin(yaw) * Vx / Math.tan(yaw))
     const y = startPosition.y + Vy
 
     const currentArrowPosition = new Vec3(x, y, z)
@@ -286,7 +286,7 @@ const staticCalc = (initialArrowPosition: Vec3, gravityIn: number, pitch: number
     Vx += Vox / precision
 
     const x = initialArrowPosition.x - (Math.sin(yaw) * Vx)
-    const z = initialArrowPosition.z - (Math.sin(yaw) * Vx / Math.tan(yaw))
+    const z = yaw === 0 ? initialArrowPosition.z : initialArrowPosition.z - (Math.sin(yaw) * Vx / Math.tan(yaw))
     const y = initialArrowPosition.y + Vy
 
     const currentArrowPosition = new Vec3(x, y, z)
