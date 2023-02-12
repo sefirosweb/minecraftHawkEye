@@ -1,8 +1,11 @@
-//@ts-nocheck
 import mineflayer from 'mineflayer'
+//@ts-ignore
 import mineflayerViewer from 'prismarine-viewer'
 import { Vec3 } from 'vec3'
 import minecraftHawkEye from '../src/index'
+import { Weapons } from '../src/types'
+import { Entity } from 'prismarine-entity'
+import { calculateYaw, calculayePitch } from '../src/hawkEyeEquations'
 
 // first install the dependency
 // npm i mineflayer prismarine-viewer minecrafthawkeye
@@ -15,7 +18,9 @@ const bot = mineflayer.createBot({
 })
 
 
-let intervalShot, intervalPreview, target
+let intervalShot: ReturnType<typeof setInterval>
+let intervalPreview: ReturnType<typeof setInterval>
+let target: Entity | undefined
 
 bot.on('spawn', () => {
     bot.chat('/kill @e[type=minecraft:arrow]')
@@ -30,9 +35,42 @@ bot.on('spawn', () => {
         intervalShot = setInterval(fire, 5000)
         intervalPreview = setInterval(shotPreview, 4000)
     }, 4000)
+
+    setTimeout(() => {
+        bot.on('physicTick', () => {
+
+            const projectiles = bot.hawkEye.detectProjectiles()
+            if (projectiles.length > 0) {
+                projectiles.forEach((p) => {
+                    if (p.previusPositions.length < 2) return
+
+                    const lastItem = p.previusPositions[p.previusPositions.length - 1]
+                    const lastItem2 = p.previusPositions[p.previusPositions.length - 2]
+
+                    if (lastItem.equals(lastItem2)) {
+                        return '';
+                    }
+
+                    const yaw = calculateYaw(lastItem2, lastItem)
+                    const pitch = calculayePitch(lastItem2, lastItem)
+
+                    const res = bot.hawkEye.calculateArrowTrayectory(lastItem, p.currentSpeed, pitch, yaw, Weapons.bow)
+
+                    //@ts-ignore
+                    bot.viewer.drawPoints(`arrowPremonition_${p.uuid}`, p.previusPositions.concat(res.arrowTrajectoryPoints), 0xffff00, 5)
+
+                    setTimeout(() => {
+                        //@ts-ignore
+                        bot.viewer.erase(`arrowPremonition_${p.uuid}`)
+                    }, 10000);
+
+                })
+            }
+        })
+    }, 4000)
 })
 
-bot.on('die', () => {
+bot.on('death', () => {
     clearInterval(intervalShot)
     clearInterval(intervalPreview)
 })
@@ -43,19 +81,21 @@ bot.once('spawn', () => {
 })
 
 const shotPreview = () => {
+    //@ts-ignore
     bot.viewer.erase('arrowTrajectoryPoints')
     if (target) {
-        const arrowTrajectoryPoints = bot.hawkEye.getMasterGrade(target, null, 'bow').arrowTrajectoryPoints // Returns array of Vec3 positions
-        const res = bot.hawkEye.calculateArrowTrayectory(bot.entity.position.clone(), new Vec3(1, 0, 0))
+        const masterGrade = bot.hawkEye.getMasterGrade(target, new Vec3(0, 0, 0), Weapons.bow)
+        // const res = bot.hawkEye.calculateArrowTrayectory(bot.entity.position.clone(), new Vec3(1, 0, 0))
 
-        if (arrowTrajectoryPoints) {
-            bot.viewer.drawPoints('arrowTrajectoryPoints', res.arrowTrajectoryPoints, 0xff0000, 5)
+        if (masterGrade) {
+            //@ts-ignore
+            bot.viewer.drawPoints('arrowTrajectoryPoints', masterGrade.arrowTrajectoryPoints, 0xff0000, 5)
         }
     }
 }
 
 const fire = () => {
     if (target) {
-        bot.hawkEye.oneShot(target, 'bow')
+        bot.hawkEye.oneShot(target, Weapons.bow)
     }
 }

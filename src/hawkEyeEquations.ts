@@ -28,11 +28,17 @@ export const getTargetDistance = (origin: Vec3, destination: Vec3) => {
   }
 }
 
-const getTargetYaw = (origin: Vec3, destination: Vec3) => {
+export const calculateYaw = (origin: Vec3, destination: Vec3) => {
   const xDistance = destination.x - origin.x
   const zDistance = destination.z - origin.z
   const yaw = Math.atan2(xDistance, zDistance) + Math.PI
   return yaw
+}
+
+export const calculayePitch = (origin: Vec3, destination: Vec3) => {
+  const { hDistance, yDistance } = getTargetDistance(origin, destination)
+  const pitch = Math.atan2(yDistance, hDistance)
+  return pitch
 }
 
 const degreesToRadians = (degrees: number) => {
@@ -83,7 +89,7 @@ const tryGrade = (grade: number, xDestination: number, yDestination: number, VoI
 
   let blockInTrayect: Block | null = null
   const arrowTrajectoryPoints = []
-  const yaw = getTargetYaw(startPosition, targetPosition)
+  const yaw = calculateYaw(startPosition, targetPosition)
 
   while (true) {
     const firstDistance = Math.sqrt(Math.pow(Vy - yDestination, 2) + Math.pow(Vx - xDestination, 2))
@@ -237,24 +243,16 @@ let GRAVITY = 0.05 // Arrow Gravity // Only for arrow for other entities have di
 const FACTOR_Y = 0.01 // Arrow "Air resistance" // In water must be changed
 const FACTOR_H = 0.01 // Arrow "Air resistance" // In water must be changed
 
-export const calculateArrowTrayectory = (currentPos: Vec3, itemSpeed: Vec3, ammunitionType?: Weapons) => {
+export const calculateArrowTrayectory = (currentPos: Vec3, itemSpeed: number, pitch: number, yaw: number, ammunitionType?: Weapons) => {
   const weapon = ammunitionType ?? Weapons.bow
 
   if (!Object.keys(Weapons).includes(weapon)) {
     throw new Error(`${weapon} is not valid to calculate the trayectory!`)
   }
-
-
-
-  const currentArrowPos = bot.entity.position.offset(0, 20, 0)
   const weaponGravity = weaponsProps[weapon].GRAVITY
-  const pitch = degreesToRadians(35)
-  const yaw = getTargetYaw(new Vec3(1, 0, 1), new Vec3(0, 0, 0))
-  const vo = 2
-  const res = staticCalc(currentArrowPos, weaponGravity, pitch, yaw, vo)
+  const res = staticCalc(currentPos, weaponGravity, pitch, yaw, itemSpeed)
 
   return res
-
 }
 
 const staticCalc = (initialArrowPosition: Vec3, gravityIn: number, pitch: number, yaw: number, VoIn: number, precision = 1) => {
@@ -322,11 +320,7 @@ const getMasterGrade = (botIn: Bot, targetIn: OptionsMasterGrade | Entity, speed
   bot = botIn
   intercept = interceptLoader(bot)
   target = targetIn
-  if (speedIn == null) {
-    speed = new Vec3(0, 0, 0)
-  } else {
-    speed = speedIn
-  }
+  speed = speedIn
 
   startPosition = bot.entity.position.offset(0, 1.6, 0) // Bow offset position
 
@@ -353,7 +347,7 @@ const getMasterGrade = (botIn: Bot, targetIn: OptionsMasterGrade | Entity, speed
   const { arrowTrajectoryPoints, blockInTrayect, nearestDistance, nearestGrade } = precisionShot
 
   // Calculate yaw
-  const yaw = getTargetYaw(startPosition, newTarget)
+  const yaw = calculateYaw(startPosition, newTarget)
 
   if (nearestDistance > 4) { return false } // Too far
 

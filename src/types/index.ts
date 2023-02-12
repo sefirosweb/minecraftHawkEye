@@ -80,8 +80,9 @@ declare module 'mineflayer' {
             autoAttack: (target: Entity, weapon: Weapons) => void
             getMasterGrade: (from: Entity | OptionsMasterGrade, speed: Vec3, weapon: Weapons) => GetMasterGrade | false,
             stop: () => void,
-            getPlayer: (name?: string) => Entity | undefined
-            calculateArrowTrayectory: (currentPos: Vec3, itemSpeed: Vec3, ammunitionType?: Weapons) => {
+            getPlayer: (name?: string) => Entity | undefined,
+            detectProjectiles: (projectile?: string) => Array<Projectil>
+            calculateArrowTrayectory: (currentPos: Vec3, itemSpeed: number, pitch: number, yaw: number, ammunitionType?: Weapons) => {
                 nearestDistance: number | undefined;
                 totalTicks: number;
                 blockInTrayect: Block;
@@ -110,4 +111,13 @@ export interface Bot extends MineflayerBot {
 
 export const isEntity = (e: Entity | OptionsMasterGrade): e is Entity => {
     return "type" in e
+}
+
+export type Projectil = {
+    uuid: string,
+    enabled: boolean,
+    currentSpeed: number // Vo,
+    currentSpeedTime: number
+    previusPositions: Array<Vec3>,
+    updatedAt: number
 }
