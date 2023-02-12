@@ -4,8 +4,8 @@ import { Entity } from 'prismarine-entity'
 import { Block } from 'prismarine-block'
 import { Vec3 } from 'vec3'
 import interceptLoader from './intercept'
+import { bot } from './loadBot'
 
-let bot: Bot
 let target: Entity | OptionsMasterGrade
 let speed: Vec3
 let startPosition: Vec3
@@ -308,7 +308,7 @@ const staticCalc = (initialArrowPosition: Vec3, gravityIn: number, pitch: number
 }
 
 
-const getMasterGrade = (botIn: Bot, targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, weapon: Weapons): GetMasterGrade | false => {
+const getMasterGrade = (targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, weapon: Weapons): GetMasterGrade | false => {
   if (!Object.keys(Weapons).includes(weapon)) {
     throw new Error(`${weapon} is not valid weapon for calculate the grade!`)
   }
@@ -317,7 +317,6 @@ const getMasterGrade = (botIn: Bot, targetIn: OptionsMasterGrade | Entity, speed
   BaseVo = weaponProp.BaseVo
   GRAVITY = weaponProp.GRAVITY
 
-  bot = botIn
   intercept = interceptLoader(bot)
   target = targetIn
   speed = speedIn

@@ -1,11 +1,10 @@
-import { Bot } from 'mineflayer'
 import { isEntity, OptionsMasterGrade, Projectil, Weapons, weaponsProps } from './types'
 import { Vec3 } from 'vec3'
 import getMasterGrade, { calculateArrowTrayectory } from './hawkEyeEquations'
 import { Entity } from 'prismarine-entity'
+import { bot } from './loadBot'
 
 let target: Entity | OptionsMasterGrade
-let bot: Bot
 let preparingShot: boolean
 let preparingShotTime: number
 let prevPlayerPositions: Array<Vec3> = []
@@ -13,10 +12,6 @@ let oneShot: boolean
 let chargingArrow: boolean
 let weapon: Weapons = Weapons.bow
 let infoShot: ReturnType<typeof getMasterGrade>
-
-export const load = (botToLoad: Bot) => {
-  bot = botToLoad
-}
 
 export const autoAttack = (targetToAttack: Entity | OptionsMasterGrade, inputWeapon = Weapons.bow, isOneShot = false) => {
   if (!targetToAttack) {
@@ -68,7 +63,7 @@ const getGrades = () => {
   speed.y = speed.y / prevPlayerPositions.length
   speed.z = speed.z / prevPlayerPositions.length
 
-  infoShot = getMasterGrade(bot, target, speed, weapon)
+  infoShot = getMasterGrade(target, speed, weapon)
 }
 
 const autoCalc = async () => {

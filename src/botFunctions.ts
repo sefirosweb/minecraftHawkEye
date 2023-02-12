@@ -1,6 +1,6 @@
-import { Bot } from "mineflayer"
+import { bot } from "./loadBot"
 
-export const getPlayer = (bot: Bot, playername?: string) => {
+export const getPlayer = (playername?: string) => {
   const playerEntity = Object.keys(bot.entities)
     .map(id => bot.entities[id])
     .find((entity) => {
@@ -13,7 +13,7 @@ export const getPlayer = (bot: Bot, playername?: string) => {
   return playerEntity
 }
 
-export const simplyShot = (bot: Bot, yaw: number, pitch: number): Promise<void> => {
+export const simplyShot = (yaw: number, pitch: number): Promise<void> => {
   return new Promise((resolve) => {
     bot.look(yaw, pitch, true)
       .then(() => {
