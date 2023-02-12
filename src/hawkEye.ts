@@ -162,7 +162,7 @@ const sleep = (ms: number) => {
 
 export const detectAim = () => {
   const entities = Object.values(bot.entities)
-    // @ts-ignore
+    // @ts-ignore PR: https://github.com/PrismarineJS/prismarine-entity/pull/55
     .filter((e) => e.type === "player" || (e.type === 'hostile' && e.name === 'skeleton'))
 
   const calculatedEntityTarget: Record<string, {
@@ -191,7 +191,7 @@ export const detectAim = () => {
 const currentProjectileDetected: Record<string, Projectil> = {}
 export const detectProjectiles = (projectile: string = 'arrow') => {
   const projectiles = Object.values(bot.entities)
-    //@ts-ignore
+    // @ts-ignore PR: https://github.com/PrismarineJS/prismarine-entity/pull/55
     .filter((e) => e.name === projectile && e.type === "projectile")
 
   const updatedAt = Date.now()
