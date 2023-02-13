@@ -87,6 +87,7 @@ const tryGrade = (grade: number, xDestination: number, yDestination: number, VoI
 
   let blockInTrayect: Block | null = null
   const arrowTrajectoryPoints = []
+  arrowTrajectoryPoints.push(startPosition)
   const yaw = calculateYaw(startPosition, targetPosition)
 
   while (true) {
@@ -269,6 +270,7 @@ const staticCalc = (initialArrowPosition: Vec3, gravityIn: number, pitch: number
 
   let blockInTrayect: Block | null = null
   const arrowTrajectoryPoints = []
+  arrowTrajectoryPoints.push(initialArrowPosition)
 
   while (true) {
     totalTicks += (1 / precision)
