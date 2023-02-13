@@ -33,18 +33,24 @@ export const calculateYaw = (origin: Vec3, destination: Vec3) => {
   return yaw
 }
 
+export const calculateDestinationByYaw = (origin: Vec3, yaw: number, distance: number) => {
+  const y = distance * Math.cos(yaw)
+  const x = distance * Math.sin(yaw)
+  return origin.offset(x, 0, y)
+}
+
 export const calculayePitch = (origin: Vec3, destination: Vec3) => {
   const { hDistance, yDistance } = getTargetDistance(origin, destination)
   const pitch = Math.atan2(yDistance, hDistance)
   return pitch
 }
 
-const degreesToRadians = (degrees: number) => {
+export const degreesToRadians = (degrees: number) => {
   const pi = Math.PI
   return degrees * (pi / 180)
 }
 
-const radiansToDegrees = (radians: number) => {
+export const radiansToDegrees = (radians: number) => {
   const pi = Math.PI
   return radians * (180 / pi)
 }
