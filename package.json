@@ -4,6 +4,7 @@
     "description": "Minecraft bot for equations when shooting an arrow",
     "main": "dist/index.js",
     "dependencies": {
+        "detect-collisions": "^6.7.3",
         "mineflayer": "^4.8.0",
         "prismarine-world": "^3.6.1",
         "vec3": "^0.1.7"
