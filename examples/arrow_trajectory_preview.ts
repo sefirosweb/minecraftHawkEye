@@ -6,13 +6,12 @@ import minecraftHawkEye from '../src/index'
 import { Weapons } from '../src/types'
 import { Entity } from 'prismarine-entity'
 import { calculateYaw, calculayePitch } from '../src/hawkEyeEquations'
-import { detectAim } from '../src/hawkEye'
 
 // first install the dependency
 // npm i mineflayer prismarine-viewer minecrafthawkeye
 
 const bot = mineflayer.createBot({
-    host: process.argv[2] ? process.argv[2] : 'host.docker.internal',
+    host: process.argv[2] ? process.argv[2] : 'localhost',
     port: process.argv[3] ? parseInt(process.argv[3]) : 25565,
     username: process.argv[4] ? process.argv[4] : 'Archer',
     password: process.argv[5],

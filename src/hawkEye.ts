@@ -1,6 +1,6 @@
 import { isEntity, OptionsMasterGrade, Projectil, Weapons, weaponsProps } from './types'
 import { Vec3 } from 'vec3'
-import getMasterGrade, { calculateArrowTrayectory } from './hawkEyeEquations'
+import getMasterGrade from './hawkEyeEquations'
 import { Entity } from 'prismarine-entity'
 import { bot } from './loadBot'
 
@@ -155,30 +155,7 @@ const sleep = (ms: number) => {
 }
 
 
-export const detectAim = () => {
-  const entities = Object.values(bot.entities)
-    // @ts-ignore PR: https://github.com/PrismarineJS/prismarine-entity/pull/55
-    .filter((e) => e.type === "player" || (e.type === 'hostile' && e.name === 'skeleton'))
 
-  const calculatedEntityTarget: Record<string, {
-    uuid: string,
-    name: string,
-    prevTrajectory: Array<Vec3>
-  }> = {}
-
-  entities
-    .forEach((e) => {
-      if (!e.uuid) return
-      const calc = calculateArrowTrayectory(e.position, 3, e.pitch, e.yaw, Weapons.bow)
-      calculatedEntityTarget[e.uuid] = {
-        uuid: e.uuid,
-        name: e.type === "player" ? e.username ?? '' : e.name ?? '',
-        prevTrajectory: calc.arrowTrajectoryPoints
-      }
-    })
-
-  return calculatedEntityTarget
-}
 
 const currentProjectileDetected: Record<string, Projectil> = {}
 export const detectProjectiles = (projectile: string = 'arrow') => {

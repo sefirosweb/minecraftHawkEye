@@ -2,9 +2,10 @@ import { Bot as MineflayerBot } from 'mineflayer'
 import { Vec3 } from 'vec3'
 import { Entity } from 'prismarine-entity'
 import { Block } from 'prismarine-block'
-import { detectAim, detectProjectiles } from '../hawkEye'
+import { detectProjectiles } from '../hawkEye'
 import getMasterGrade, { calculateArrowTrayectory } from 'src/hawkEyeEquations'
 import { getPlayer } from 'src/botFunctions'
+import { detectAim } from 'src/projectilRadar'
 
 export type OptionsMasterGrade = {
     position: Vec3,
@@ -93,7 +94,7 @@ declare module 'mineflayer' {
     }
     interface BotEvents {
         auto_shop_stopped: (target: Entity | OptionsMasterGrade) => void
-        target_aiming_at_you: (target: string) => void
+        target_aiming_at_you: (target: Entity) => void
         incoming_arrow: (target: Entity) => void
     }
 }

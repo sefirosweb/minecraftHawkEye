@@ -8,6 +8,7 @@
 	},
 	"customizations": {
 		"vscode": {
+			"settings": {},
 			"extensions": [
 				"eamodio.gitlens",
 				"usernamehw.errorlens"
