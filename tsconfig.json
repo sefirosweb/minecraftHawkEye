@@ -103,10 +103,14 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
+  "ts-node": {
+    "swc": true,
+    "transpileOnly": true
+  },
   "exclude": [
     "dist",
     "test",
     "examples",
-  ]
-  
+  ],
 }
+

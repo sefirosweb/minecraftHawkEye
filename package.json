@@ -4,6 +4,7 @@
     "description": "Minecraft bot for equations when shooting an arrow",
     "main": "dist/index.js",
     "dependencies": {
+        "detect-collisions": "^6.7.3",
         "mineflayer": "^4.8.0",
         "prismarine-world": "^3.6.1",
         "vec3": "^0.1.7"
@@ -15,7 +16,7 @@
         "minecraft-wrap": "^1.5.1",
         "mocha": "^10.2.0",
         "prismarine-viewer": "^1.23.0",
-        "standard": "^17.0.0",
+        "swc": "^1.0.11",
         "ts-node": "^10.9.1",
         "tslint": "^6.1.3",
         "typescript": "^4.9.5"
@@ -24,13 +25,10 @@
         "dist"
     ],
     "scripts": {
-        "docker": "docker build -t docker_minecraft_hawk_eye . && docker run --rm -it --name docker_minecraft_hawk_eye_client  -v ~/.gitconfig:/etc/gitconfig -v $PWD:/home/app -w /home/app -u node -p 9992:9992 docker_minecraft_hawk_eye /bin/bash",
-        "start_server_test": "docker build -t docker_minecraft_hawk_eye . && docker run --rm -it --name docker_minecraft_hawk_eye_test_server -v $PWD:/home/app -w /home/app -u node -p 25565:25565 docker_minecraft_hawk_eye ts-node test/common/start_test_server.ts",
-        "test": "mocha -r ts-node/register -r test/hooks.ts --inspect=0.0.0.0:9992 --exit",
-        "test_all": "npm run test 'test/hawkTests/*.ts'",
+        "server": "ts-node test/common/start_test_server.ts",
+        "test": "mocha -r ts-node/register -r test/hooks.ts --timeout 60000 --exit",
+        "test:all": "npm run test 'test/hawkTests/*.ts'",
         "build": "rm dist -rf && tsc",
-        "standard": "standard --fix",
-        "update": "npx npm-check-updates",
         "lint": "tslint -c tslint.json 'src/**/*.ts'",
         "lint:fix": "npm run lint -- --fix"
     },

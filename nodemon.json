@@ -2,8 +2,8 @@
     "execMap": {
         "ts": "node --require ts-node/register"
     },
-    "verbose": false,
+    "verbose": true,
     "ignore": [
-        "test/*"
+        "test"
     ]
 }
