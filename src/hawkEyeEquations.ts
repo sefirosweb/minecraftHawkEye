@@ -34,9 +34,25 @@ export const calculateYaw = (origin: Vec3, destination: Vec3) => {
 }
 
 export const calculateDestinationByYaw = (origin: Vec3, yaw: number, distance: number) => {
-  const y = distance * Math.cos(yaw)
+  const z = distance * Math.cos(yaw)
   const x = distance * Math.sin(yaw)
-  return origin.offset(x, 0, y)
+  return origin.offset(x, 0, z)
+}
+
+export const calculateDestinationByPitch = (origin: Vec3, pitch: number, distance: number) => {
+  const y = distance * Math.sin(pitch)
+  return origin.offset(0, y, 0)
+}
+
+export const calculateRayCast = (origin: Vec3, pitch: number, yaw: number, distance: number) => {
+  const calculateDestination = calculateDestinationByYaw(new Vec3(0, 0, 0), yaw, distance)
+  const calculateDestinationY = calculateDestinationByPitch(new Vec3(0, 0, 0), pitch, distance)
+
+  const x = calculateDestination.x * Math.abs((Math.abs(pitch) / (Math.PI / 2)) - 1)
+  const z = calculateDestination.z * Math.abs((Math.abs(pitch) / (Math.PI / 2)) - 1)
+  const y = calculateDestinationY.y 
+
+  return origin.offset(x, y, z)
 }
 
 export const calculayePitch = (origin: Vec3, destination: Vec3) => {
@@ -46,13 +62,11 @@ export const calculayePitch = (origin: Vec3, destination: Vec3) => {
 }
 
 export const degreesToRadians = (degrees: number) => {
-  const pi = Math.PI
-  return degrees * (pi / 180)
+  return degrees * Math.PI / 180
 }
 
 export const radiansToDegrees = (radians: number) => {
-  const pi = Math.PI
-  return radians * (180 / pi)
+  return radians * (180 / Math.PI)
 }
 
 const getVox = (Vo: number, Alfa: number, Resistance = 0) => {

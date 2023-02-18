@@ -1,11 +1,12 @@
 import { Box, Line } from 'detect-collisions'
-import mineflayer from 'mineflayer'
-//@ts-ignore
+import mineflayer, { Bot } from 'mineflayer'
 import mineflayerViewer from 'prismarine-viewer'
-import { calculateDestinationByYaw } from '../src/hawkEyeEquations'
+import { Vec3 } from 'vec3'
+import { calculateDestinationByPitch, calculateDestinationByYaw, calculateRayCast } from '../src/hawkEyeEquations'
 import minecraftHawkEye from '../src/index'
 import { physics } from '../src/loadBot'
-import THREE, { Box3 } from 'three'
+
+type ModdedBot = Bot & { viewer }
 
 const bot = mineflayer.createBot({
     host: process.argv[2] ? process.argv[2] : 'localhost',
@@ -13,10 +14,16 @@ const bot = mineflayer.createBot({
     username: process.argv[4] ? process.argv[4] : 'Guard',
     password: process.argv[5],
     viewDistance: 'far'
-})
+}) as ModdedBot
+
+const DISTANCE_VISION = 15
+
 bot.loadPlugin(minecraftHawkEye)
 
+
 let danger: number | undefined
+
+let writingPost: Array<Vec3> = []
 
 bot.on('spawn', () => {
     bot.chat('/kill @e[type=arrow]')
@@ -26,9 +33,8 @@ bot.on('spawn', () => {
     bot.chat('Ready!')
 
     // bot.hawkEye.start_radar()
-    console.log(bot.registry)
-    
-    const registry = bot.registry
+
+    // const registry = bot.registry
 
     bot.on('target_aiming_at_you', (entity) => {
         console.log('detected!', entity.username ?? entity.name, Date.now())
@@ -36,10 +42,6 @@ bot.on('spawn', () => {
 
         bot.lookAt(entity.position, true)
         bot.activateItem()
-
-        // console.clear()
-        // console.log(entity.metadata)
-        // console.log(entity.metadata[8])
     })
 
     setInterval(() => {
@@ -50,53 +52,38 @@ bot.on('spawn', () => {
     }, 400)
 
     bot.on('physicTick', () => {
-
         const botPos = bot.entity.position
-
-        const start = new THREE.Vector3(botPos.x, botPos.y, botPos.z)
 
         const entity = Object.values(bot.entities)
             .find(e => e.username === 'Lordvivi')
         if (!entity) return
 
-        const lookingAt = calculateDestinationByYaw(entity.position, entity.yaw + Math.PI, 100);
-        const lookingAtThree = new THREE.Vector3(lookingAt.x, lookingAt.y, lookingAt.z)
+        const eyePosition = entity.position.offset(0, 1.6, 0)
 
-        const rayBox3 = new THREE.Raycaster(new THREE.Vector3(entity.position.x, entity.position.y, entity.position.z), new THREE.Vector3(lookingAt.x, lookingAt.y, lookingAt.z));
-        const sceneMeshes: THREE.Object3D[] = []
-        
-        const botBox3 = new Box3(new THREE.Vector3(botPos.x - 1, botPos.y, botPos.z - 1), new THREE.Vector3(botPos.x + 1, botPos.y + 2, botPos.z + 1));
+        const lookingAtHorizontal = calculateDestinationByYaw(eyePosition, entity.yaw + Math.PI, DISTANCE_VISION);
+        const lookingAtVertical = calculateDestinationByPitch(eyePosition, entity.pitch, DISTANCE_VISION);
+        const lookingAt = calculateRayCast(eyePosition, entity.pitch, entity.yaw + Math.PI, DISTANCE_VISION)
 
-        const obb = new THREE.Object3D()
-        
-        // sceneMeshes.push(botBox)
-        // console.log(rayBox3.intersectObjects();
+        bot.viewer.drawLine('entitySeeHorizontal', [eyePosition, lookingAtHorizontal], 'red')
+        bot.viewer.drawLine('entitySeeVertical', [eyePosition, lookingAtVertical], 'purple')
+        bot.viewer.drawLine('entitySee', [eyePosition, lookingAt], 'orange')
 
+        writingPost.push(lookingAt)
+        bot.viewer.drawPoints('entitySeePos', writingPost, 'red')
 
-
-
-        //@ts-ignore
-        bot.viewer.drawLine('entitySee', [entity.position.offset(0, 1.6, 0), lookingAt.offset(0, 1.6, 0)], 'red')
-
-        const botBox = new Box({
-            x: botPos.x - 1,
-            y: botPos.z - 1,
-
-        }, 2, 2);
-
-        const lookingAtLine = new Line(
+        const lookingAtHorizontalLine = new Line(
             {
                 x: entity.position.x,
                 y: entity.position.z
             },
             {
-                x: lookingAt.x,
-                y: lookingAt.z
+                x: lookingAtHorizontal.x,
+                y: lookingAtHorizontal.z
             })
 
-        const colission = physics.checkCollision(lookingAtLine, botBox) ? (danger ? 'red' : 'yellow') : 'aqua'
+        const botBox = new Box({ x: botPos.x - 1, y: botPos.z - 1, }, 2, 2);
+        const colission = physics.checkCollision(lookingAtHorizontalLine, botBox) ? (danger ? 'red' : 'yellow') : 'aqua'
 
-        //@ts-ignore
         bot.viewer.drawBoxGrid('selfBox', botPos.clone().offset(-1, 0, -1), botPos.clone().offset(1, 2, 1), colission)
     })
 })
@@ -104,7 +91,3 @@ bot.on('spawn', () => {
 bot.once('spawn', () => {
     mineflayerViewer.mineflayer(bot, { port: 3000 })
 })
-
-
-// bot.on('death', () => {
-// })
