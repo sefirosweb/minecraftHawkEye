@@ -34,8 +34,8 @@ export const calculateYaw = (origin: Vec3, destination: Vec3) => {
 }
 
 export const calculateDestinationByYaw = (origin: Vec3, yaw: number, distance: number) => {
-  const z = distance * Math.cos(yaw)
   const x = distance * Math.sin(yaw)
+  const z = distance * Math.cos(yaw)
   return origin.offset(x, 0, z)
 }
 
@@ -45,13 +45,9 @@ export const calculateDestinationByPitch = (origin: Vec3, pitch: number, distanc
 }
 
 export const calculateRayCast = (origin: Vec3, pitch: number, yaw: number, distance: number) => {
-  const calculateDestination = calculateDestinationByYaw(new Vec3(0, 0, 0), yaw, distance)
-  const calculateDestinationY = calculateDestinationByPitch(new Vec3(0, 0, 0), pitch, distance)
-
-  const x = calculateDestination.x * Math.abs((Math.abs(pitch) / (Math.PI / 2)) - 1)
-  const z = calculateDestination.z * Math.abs((Math.abs(pitch) / (Math.PI / 2)) - 1)
-  const y = calculateDestinationY.y 
-
+  const x = distance * Math.sin(yaw) * Math.cos(pitch);
+  const y = distance * Math.sin(pitch);
+  const z = distance * Math.cos(yaw) * Math.cos(pitch);
   return origin.offset(x, y, z)
 }
 
