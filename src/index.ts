@@ -1,10 +1,10 @@
 import { Bot } from "mineflayer"
-import { autoAttack, stop, detectProjectiles, detectAim } from './hawkEye'
+import { autoAttack, stop, detectProjectiles } from './hawkEye'
 import { getPlayer, simplyShot } from './botFunctions'
 import getMasterGrade, { calculateArrowTrayectory } from './hawkEyeEquations'
 import { Weapons } from "./types"
 import loadBot from "./loadBot"
-import { start_radar, stop_radar } from './projectilRadar'
+import { start_radar, stop_radar, detectAim } from './projectilRadar'
 
 const inject = (bot: Bot) => {
   loadBot(bot)
