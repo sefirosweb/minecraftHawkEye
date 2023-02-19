@@ -1,16 +1,24 @@
-import { Bot } from 'mineflayer'
 import { GetMasterGrade, isEntity, OptionsMasterGrade, Weapons, weaponsProps } from './types'
 import { Entity } from 'prismarine-entity'
 import { Block } from 'prismarine-block'
 import { Vec3 } from 'vec3'
-import interceptLoader from './intercept'
+import { check } from './intercept'
+import { bot } from './loadBot'
+import { FACTOR_H, FACTOR_Y } from './constants'
 
-let bot: Bot
 let target: Entity | OptionsMasterGrade
 let speed: Vec3
 let startPosition: Vec3
 let targetPosition: Vec3
-let intercept: ReturnType<typeof interceptLoader>
+
+class Vec2 {
+  x: number
+  y: number
+  constructor(x: number, y: number) {
+    this.x = x
+    this.y = y
+  }
+}
 
 export const getTargetDistance = (origin: Vec3, destination: Vec3) => {
   const xDistance = Math.pow(origin.x - destination.x, 2)
@@ -28,37 +36,72 @@ export const getTargetDistance = (origin: Vec3, destination: Vec3) => {
   }
 }
 
-const getTargetYaw = (origin: Vec3, destination: Vec3) => {
-  const xDistance = destination.x - origin.x
-  const zDistance = destination.z - origin.z
-  const yaw = Math.atan2(xDistance, zDistance) + Math.PI
+export const calculateAngle = (from: Vec2, to: Vec2) => {
+  const xDistance = to.x - from.x
+  const yDistance = to.y - from.y
+  const yaw = Math.atan2(xDistance, yDistance) + Math.PI
   return yaw
 }
 
-const degreesToRadians = (degrees: number) => {
-  const pi = Math.PI
-  return degrees * (pi / 180)
+export const calculateYaw = (from: Vec3, to: Vec3) => {
+
+  const yaw = calculateAngle({
+    x: from.x,
+    y: from.z
+  }, {
+    x: to.x,
+    y: to.z
+  })
+
+  return yaw
 }
 
-const radiansToDegrees = (radians: number) => {
-  const pi = Math.PI
-  return radians * (180 / pi)
+export const calculateDestinationByYaw = (origin: Vec3, yaw: number, distance: number) => {
+  const x = distance * Math.sin(yaw)
+  const z = distance * Math.cos(yaw)
+  return origin.offset(x, 0, z)
 }
 
-const getVox = (Vo: number, Alfa: number, Resistance = 0) => {
+export const calculateDestinationByPitch = (origin: Vec3, pitch: number, distance: number) => {
+  const y = distance * Math.sin(pitch)
+  return origin.offset(0, y, 0)
+}
+
+export const calculateRayCast = (origin: Vec3, pitch: number, yaw: number, distance: number) => {
+  const x = distance * Math.sin(yaw) * Math.cos(pitch);
+  const y = distance * Math.sin(pitch);
+  const z = distance * Math.cos(yaw) * Math.cos(pitch);
+  return origin.offset(x, y, z)
+}
+
+export const calculayePitch = (origin: Vec3, destination: Vec3) => {
+  const { hDistance, yDistance } = getTargetDistance(origin, destination)
+  const pitch = Math.atan2(yDistance, hDistance)
+  return pitch
+}
+
+export const degreesToRadians = (degrees: number) => {
+  return degrees * Math.PI / 180
+}
+
+export const radiansToDegrees = (radians: number) => {
+  return radians * (180 / Math.PI)
+}
+
+export const getVox = (Vo: number, Alfa: number, Resistance = 0) => {
   return Vo * Math.cos(Alfa) - Resistance
 }
 
-const getVoy = (Vo: number, Alfa: number, Resistance = 0) => {
+export const getVoy = (Vo: number, Alfa: number, Resistance = 0) => {
   return Vo * Math.sin(Alfa) - Resistance
 }
 
-const getVo = (Vox: number, Voy: number, G: number) => {
+export const getVo = (Vox: number, Voy: number, G: number) => {
   return Math.sqrt(Math.pow(Vox, 2) + Math.pow(Voy - G, 2)) // New Total Velocity - Gravity
 }
 
-const getGrades = (Vo: number, Voy: number, Gravity: number) => {
-  return radiansToDegrees(Math.asin((Voy - Gravity) / Vo))
+export const applyGravityToVoy = (Vo: number, Voy: number, Gravity: number) => { // radians
+  return Math.asin((Voy - Gravity) / Vo)
 }
 
 // Simulate Arrow Trayectory
@@ -76,14 +119,15 @@ const tryGrade = (grade: number, xDestination: number, yDestination: number, VoI
   let Vox = getVox(Vo, degreesToRadians(grade)) // Vector X
   let Vy = Voy / precisionFactor
   let Vx = Vox / precisionFactor
-  let ProjectileGrade
+  let Alfa
 
   let nearestDistance: number | undefined
   let totalTicks = 0
 
   let blockInTrayect: Block | null = null
   const arrowTrajectoryPoints = []
-  const yaw = getTargetYaw(startPosition, targetPosition)
+  arrowTrajectoryPoints.push(startPosition)
+  const yaw = calculateYaw(startPosition, targetPosition)
 
   while (true) {
     const firstDistance = Math.sqrt(Math.pow(Vy - yDestination, 2) + Math.pow(Vx - xDestination, 2))
@@ -111,23 +155,23 @@ const tryGrade = (grade: number, xDestination: number, yDestination: number, VoI
     factorH = FACTOR_H / precisionFactor
 
     Vo = getVo(Vox, Voy, gravity)
-    ProjectileGrade = getGrades(Vo, Voy, gravity)
+    Alfa = applyGravityToVoy(Vo, Voy, gravity)
 
-    Voy = getVoy(Vo, degreesToRadians(ProjectileGrade), Voy * factorY)
-    Vox = getVox(Vo, degreesToRadians(ProjectileGrade), Vox * factorH)
+    Voy = getVoy(Vo, Alfa, Voy * factorY)
+    Vox = getVox(Vo, Alfa, Vox * factorH)
 
     Vy += Voy / precisionFactor
     Vx += Vox / precisionFactor
 
     const x = startPosition.x - (Math.sin(yaw) * Vx)
-    const z = startPosition.z - (Math.sin(yaw) * Vx / Math.tan(yaw))
+    const z = yaw === 0 ? startPosition.z : startPosition.z - (Math.sin(yaw) * Vx / Math.tan(yaw))
     const y = startPosition.y + Vy
 
     const currentArrowPosition = new Vec3(x, y, z)
     arrowTrajectoryPoints.push(currentArrowPosition)
     const previusArrowPositionIntercept = arrowTrajectoryPoints[arrowTrajectoryPoints.length === 1 ? 0 : arrowTrajectoryPoints.length - 2]
     if (tryIntercetpBlock) {
-      blockInTrayect = intercept.check(previusArrowPositionIntercept, currentArrowPosition).block
+      blockInTrayect = check(previusArrowPositionIntercept, currentArrowPosition).block
     }
 
     // Arrow passed player || Voy (arrow is going down and passed player) || Detected solid block
@@ -234,10 +278,8 @@ const getFirstGradeAproax = (xDestination: number, yDestination: number) => {
 // Physics factors
 let BaseVo: number // Power of shot
 let GRAVITY = 0.05 // Arrow Gravity // Only for arrow for other entities have different gravity
-const FACTOR_Y = 0.01 // Arrow "Air resistance" // In water must be changed
-const FACTOR_H = 0.01 // Arrow "Air resistance" // In water must be changed
 
-const getMasterGrade = (botIn: Bot, targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, weapon: Weapons): GetMasterGrade | false => {
+const getMasterGrade = (targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, weapon: Weapons): GetMasterGrade | false => {
   if (!Object.keys(Weapons).includes(weapon)) {
     throw new Error(`${weapon} is not valid weapon for calculate the grade!`)
   }
@@ -246,14 +288,8 @@ const getMasterGrade = (botIn: Bot, targetIn: OptionsMasterGrade | Entity, speed
   BaseVo = weaponProp.BaseVo
   GRAVITY = weaponProp.GRAVITY
 
-  bot = botIn
-  intercept = interceptLoader(bot)
   target = targetIn
-  if (speedIn == null) {
-    speed = new Vec3(0, 0, 0)
-  } else {
-    speed = speedIn
-  }
+  speed = speedIn
 
   startPosition = bot.entity.position.offset(0, 1.6, 0) // Bow offset position
 
@@ -280,7 +316,7 @@ const getMasterGrade = (botIn: Bot, targetIn: OptionsMasterGrade | Entity, speed
   const { arrowTrajectoryPoints, blockInTrayect, nearestDistance, nearestGrade } = precisionShot
 
   // Calculate yaw
-  const yaw = getTargetYaw(startPosition, newTarget)
+  const yaw = calculateYaw(startPosition, newTarget)
 
   if (nearestDistance > 4) { return false } // Too far
 

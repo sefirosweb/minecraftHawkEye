@@ -2,6 +2,11 @@ import { Bot as MineflayerBot } from 'mineflayer'
 import { Vec3 } from 'vec3'
 import { Entity } from 'prismarine-entity'
 import { Block } from 'prismarine-block'
+import { detectProjectiles } from '../hawkEye'
+import getMasterGrade from 'src/hawkEyeEquations'
+import { getPlayer } from 'src/botFunctions'
+import { detectAim } from 'src/projectilRadar'
+import { calculateArrowTrayectory } from 'src/calculateArrowTrayectory'
 
 export type OptionsMasterGrade = {
     position: Vec3,
@@ -18,7 +23,7 @@ export enum Weapons {
     splash_potion = 'splash_potion',
 }
 
-type PropsOfWeapons = {
+export type PropsOfWeapons = {
     GRAVITY: number
     BaseVo: number
     waitTime: number
@@ -78,13 +83,17 @@ declare module 'mineflayer' {
             simplyShot: (yaw: number, pitch: number) => void
             oneShot: (target: Entity, weapon: Weapons) => void
             autoAttack: (target: Entity, weapon: Weapons) => void
-            getMasterGrade: (from: Entity | OptionsMasterGrade, speed: Vec3, weapon: Weapons) => GetMasterGrade | false,
+            getMasterGrade: (from: Entity | OptionsMasterGrade, speed: Vec3, weapon: Weapons) => ReturnType<typeof getMasterGrade>
             stop: () => void,
-            getPlayer: (name?: string) => Entity | undefined
+            getPlayer: (name?: string) => ReturnType<typeof getPlayer>
+            detectProjectiles: (projectile?: string) => ReturnType<typeof detectProjectiles>
+            calculateArrowTrayectory: (currentPos: Vec3, itemSpeed: number, pitch: number, yaw: number, ammunitionType?: Weapons) => ReturnType<typeof calculateArrowTrayectory>
         }
     }
     interface BotEvents {
         auto_shop_stopped: (target: Entity | OptionsMasterGrade) => void
+        target_aiming_at_you: (target: Entity) => void
+        incoming_arrow: (target: Entity) => void
     }
 }
 
@@ -104,4 +113,16 @@ export interface Bot extends MineflayerBot {
 
 export const isEntity = (e: Entity | OptionsMasterGrade): e is Entity => {
     return "type" in e
+}
+
+export type Projectil = {
+    uuid: string,
+    enabled: boolean,
+    currentSpeed: number // Vo,
+    currentSpeedTime: number
+    previusPositions: Array<{
+        at: number,
+        pos: Vec3
+    }>,
+    updatedAt: number
 }
