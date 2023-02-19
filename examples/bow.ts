@@ -47,14 +47,6 @@ const arrowTrajectory = () => {
     const { arrowTrajectoryPoints } = data
     if (arrowTrajectoryPoints) {
       bot.viewer.drawPoints('arrowTrajectoryPoints', arrowTrajectoryPoints, 0xff0000, 5)
-      const raycastChecks = intercept.checkMultiplePositions(arrowTrajectoryPoints)
-      totalIds = raycastChecks.length
-      for (let i = 0; i <= raycastChecks.length; i++) {
-        const drawBox = new Vec3(raycastChecks[i])
-        bot.viewer.drawBoxGrid(`raycastChecks_${i}`, drawBox, drawBox.offset(1, 1, 1))
-      }
-
-      // bot.viewer.drawPoints('raycastChecks', raycastChecks, 0xffff00, 5)
     }
   }
 }

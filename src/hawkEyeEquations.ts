@@ -136,7 +136,7 @@ const tryGrade = (grade: number, xDestination: number, yDestination: number, VoI
     arrowTrajectoryPoints.push(currentArrowPosition)
     const previusArrowPositionIntercept = arrowTrajectoryPoints[arrowTrajectoryPoints.length === 1 ? 0 : arrowTrajectoryPoints.length - 2]
     if (tryIntercetpBlock) {
-      blockInTrayect = check(previusArrowPositionIntercept, currentArrowPosition).block
+      blockInTrayect = check(previusArrowPositionIntercept, currentArrowPosition)
     }
 
     // Arrow passed player || Voy (arrow is going down and passed player) || Detected solid block
