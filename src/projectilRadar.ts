@@ -1,13 +1,13 @@
 
 import { Box, Line } from "detect-collisions"
 import { Vec3 } from "vec3"
-import { calculateArrowTrayectory, calculateDestinationByYaw, getTargetDistance } from "./hawkEyeEquations"
-import { bot, physics } from "./loadBot"
+import { calculateDestinationByYaw, getTargetDistance } from "./hawkEyeEquations"
+import { bot, system } from "./loadBot"
 import { Weapons } from "./types"
 import { Entity } from 'prismarine-entity'
+import { calculateArrowTrayectory } from "./calculateArrowTrayectory"
 
 let listening = false
-
 
 const radar = () => {
 
@@ -46,10 +46,10 @@ const radar = () => {
                     y: arrowTrajectory.y
                 })
 
-            if (physics.checkCollision(lookingAtTall, selfBoxTall)) {
+            if (system.checkCollision(lookingAtTall, selfBoxTall)) {
                 console.clear()
                 console.log(bot.entity.position)
-                console.log(physics.response)
+                console.log(system.response)
 
                 // console.log(bot.entity.position)
                 // console.log('prevArrow', prevArrow)
@@ -86,7 +86,7 @@ export const detectAim = () => {
                     y: lookingAt.z
                 })
 
-            return physics.checkCollision(lookingAtLine, selfBox)
+            return system.checkCollision(lookingAtLine, selfBox)
         })
 
     const calculatedEntityTarget: Record<string, {
@@ -127,14 +127,14 @@ export const botBoxTall = () => {
     }, 2, 2.4);
 }
 
-export const start_radar = () => {
+export const startRadar = () => {
     if (listening) return
 
     listening = true
     bot.on('physicTick', radar)
 }
 
-export const stop_radar = () => {
+export const stopRadar = () => {
     if (!listening) return
     bot.removeListener('physicTick', radar)
     listening = false

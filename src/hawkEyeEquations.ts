@@ -4,6 +4,7 @@ import { Block } from 'prismarine-block'
 import { Vec3 } from 'vec3'
 import { check } from './intercept'
 import { bot } from './loadBot'
+import { FACTOR_H, FACTOR_Y } from './constants'
 
 let target: Entity | OptionsMasterGrade
 let speed: Vec3
@@ -87,19 +88,19 @@ export const radiansToDegrees = (radians: number) => {
   return radians * (180 / Math.PI)
 }
 
-const getVox = (Vo: number, Alfa: number, Resistance = 0) => {
+export const getVox = (Vo: number, Alfa: number, Resistance = 0) => {
   return Vo * Math.cos(Alfa) - Resistance
 }
 
-const getVoy = (Vo: number, Alfa: number, Resistance = 0) => {
+export const getVoy = (Vo: number, Alfa: number, Resistance = 0) => {
   return Vo * Math.sin(Alfa) - Resistance
 }
 
-const getVo = (Vox: number, Voy: number, G: number) => {
+export const getVo = (Vox: number, Voy: number, G: number) => {
   return Math.sqrt(Math.pow(Vox, 2) + Math.pow(Voy - G, 2)) // New Total Velocity - Gravity
 }
 
-const applyGravityToVoy = (Vo: number, Voy: number, Gravity: number) => { // radians
+export const applyGravityToVoy = (Vo: number, Voy: number, Gravity: number) => { // radians
   return Math.asin((Voy - Gravity) / Vo)
 }
 
@@ -277,72 +278,6 @@ const getFirstGradeAproax = (xDestination: number, yDestination: number) => {
 // Physics factors
 let BaseVo: number // Power of shot
 let GRAVITY = 0.05 // Arrow Gravity // Only for arrow for other entities have different gravity
-const FACTOR_Y = 0.01 // Arrow "Air resistance" // In water must be changed
-const FACTOR_H = 0.01 // Arrow "Air resistance" // In water must be changed
-
-export const calculateArrowTrayectory = (currentPos: Vec3, itemSpeed: number, pitch: number, yaw: number, ammunitionType?: Weapons) => {
-  const weapon = ammunitionType ?? Weapons.bow
-
-  if (!Object.keys(Weapons).includes(weapon)) {
-    throw new Error(`${weapon} is not valid to calculate the trayectory!`)
-  }
-  const weaponGravity = weaponsProps[weapon].GRAVITY
-  const res = staticCalc(currentPos, weaponGravity, pitch, yaw, itemSpeed)
-
-  return res
-}
-
-const staticCalc = (initialArrowPosition: Vec3, gravityIn: number, pitch: number, yaw: number, VoIn: number, precision = 1) => {
-  let Vo = VoIn
-  const gravity = gravityIn / precision
-  const factorY = FACTOR_Y / precision
-  const factorH = FACTOR_H / precision
-
-  let Voy = getVoy(Vo, pitch) // Vector Y
-  let Vox = getVox(Vo, pitch) // Vector X
-  let Vy = Voy / precision
-  let Vx = Vox / precision
-  let Alfa
-
-  let totalTicks = 0
-
-  let blockInTrayect: Block | null = null
-  const arrowTrajectoryPoints = []
-  arrowTrajectoryPoints.push(initialArrowPosition)
-
-  while (true) {
-    totalTicks += (1 / precision)
-
-    Vo = getVo(Vox, Voy, gravity)
-    Alfa = applyGravityToVoy(Vo, Voy, gravity)
-
-    Voy = getVoy(Vo, Alfa, Voy * factorY)
-    Vox = getVox(Vo, Alfa, Vox * factorH)
-
-    Vy += Voy / precision
-    Vx += Vox / precision
-
-    const x = initialArrowPosition.x - (Math.sin(yaw) * Vx)
-    const z = yaw === 0 ? initialArrowPosition.z : initialArrowPosition.z - (Math.sin(yaw) * Vx / Math.tan(yaw))
-    const y = initialArrowPosition.y + Vy
-
-    const currentArrowPosition = new Vec3(x, y, z)
-
-    arrowTrajectoryPoints.push(currentArrowPosition)
-    const previusArrowPositionIntercept = arrowTrajectoryPoints[arrowTrajectoryPoints.length === 1 ? 0 : arrowTrajectoryPoints.length - 2]
-
-    blockInTrayect = check(previusArrowPositionIntercept, currentArrowPosition).block
-
-    if (blockInTrayect !== null) {
-      return {
-        totalTicks,
-        blockInTrayect,
-        arrowTrajectoryPoints
-      }
-    }
-  }
-}
-
 
 const getMasterGrade = (targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, weapon: Weapons): GetMasterGrade | false => {
   if (!Object.keys(Weapons).includes(weapon)) {

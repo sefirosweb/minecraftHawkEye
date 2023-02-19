@@ -1,10 +1,11 @@
 import { Bot } from "mineflayer"
 import { autoAttack, stop, detectProjectiles } from './hawkEye'
 import { getPlayer, simplyShot } from './botFunctions'
-import getMasterGrade, { calculateArrowTrayectory } from './hawkEyeEquations'
+import getMasterGrade from './hawkEyeEquations'
 import { Weapons } from "./types"
 import loadBot from "./loadBot"
-import { start_radar, stop_radar, detectAim } from './projectilRadar'
+import { startRadar, stopRadar, detectAim } from './projectilRadar'
+import { calculateArrowTrayectory } from "./calculateArrowTrayectory"
 
 const inject = (bot: Bot) => {
   loadBot(bot)
@@ -19,8 +20,8 @@ const inject = (bot: Bot) => {
     calculateArrowTrayectory,
     detectProjectiles,
     detectAim,
-    start_radar,
-    stop_radar
+    startRadar,
+    stopRadar
   }
 }
 

@@ -3,9 +3,10 @@ import { Vec3 } from 'vec3'
 import { Entity } from 'prismarine-entity'
 import { Block } from 'prismarine-block'
 import { detectProjectiles } from '../hawkEye'
-import getMasterGrade, { calculateArrowTrayectory } from 'src/hawkEyeEquations'
+import getMasterGrade from 'src/hawkEyeEquations'
 import { getPlayer } from 'src/botFunctions'
 import { detectAim } from 'src/projectilRadar'
+import { calculateArrowTrayectory } from 'src/calculateArrowTrayectory'
 
 export type OptionsMasterGrade = {
     position: Vec3,
@@ -88,8 +89,8 @@ declare module 'mineflayer' {
             detectProjectiles: (projectile?: string) => ReturnType<typeof detectProjectiles>
             detectAim: () => ReturnType<typeof detectAim>
             calculateArrowTrayectory: (currentPos: Vec3, itemSpeed: number, pitch: number, yaw: number, ammunitionType?: Weapons) => ReturnType<typeof calculateArrowTrayectory>
-            start_radar: () => void
-            stop_radar: () => void
+            startRadar: () => void
+            stopRadar: () => void
         }
     }
     interface BotEvents {
