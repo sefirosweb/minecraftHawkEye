@@ -5,107 +5,72 @@ import { Vec3 } from 'vec3'
 import { check } from './intercept'
 import { bot } from './loadBot'
 import { FACTOR_H, FACTOR_Y } from './constants'
+import { applyGravityToVoy, calculateYaw, degreesToRadians, getTargetDistance, getVo, getVox, getVoy } from './mathHelper'
 
-let target: Entity | OptionsMasterGrade
-let speed: Vec3
-let startPosition: Vec3
-let targetPosition: Vec3
+// // TODO: Pending to remove these global variables
+// let target: Entity | OptionsMasterGrade
+// let speed: Vec3
+// let startPosition: Vec3
+// let targetPosition: Vec3
+// let BaseVo: number // Power of shot, Depends of weapon have different value
+// let GRAVITY: number // Depends of weapon have different gravity
 
-class Vec2 {
-  x: number
-  y: number
-  constructor(x: number, y: number) {
-    this.x = x
-    this.y = y
+type TryGrade = ReturnType<typeof tryGrade> & { grade: number }
+
+const getMasterGrade = (targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, weapon: Weapons): GetMasterGrade | false => {
+  if (!Object.keys(Weapons).includes(weapon)) {
+    throw new Error(`${weapon} is not valid weapon for calculate the grade!`)
   }
-}
 
-export const getTargetDistance = (origin: Vec3, destination: Vec3) => {
-  const xDistance = Math.pow(origin.x - destination.x, 2)
-  const zDistance = Math.pow(origin.z - destination.z, 2)
-  const hDistance = Math.sqrt(xDistance + zDistance)
+  const weaponProp = weaponsProps[weapon]
+  const BaseVo = weaponProp.BaseVo
+  const GRAVITY = weaponProp.GRAVITY
 
-  const yDistance = destination.y - origin.y
+  const target = targetIn
+  const speed = speedIn
 
-  const distance = Math.sqrt(Math.pow(yDistance, 2) + xDistance + zDistance)
+  const startPosition = bot.entity.position.offset(0, 1.6, 0) // Bow offset position
+
+  // Calculate target Height, for shot in the heart  =P
+  const targetHeight: number = !isEntity(target) ? 0 : (target.type === 'player' ? 1.16 : (target.height ?? 0))
+  const targetPosition = target.position.offset(0, targetHeight, 0)
+
+  // Check the first best trayectory
+  let distances = getTargetDistance(startPosition, targetPosition)
+  let shotCalculation = geBaseCalculation(distances.hDistance, distances.yDistance, GRAVITY, startPosition, targetPosition, BaseVo)
+  if (!shotCalculation) { return false }
+
+  // Recalculate the new target based on speed + first trayectory
+  const premonition = getPremonition(shotCalculation.totalTicks, speed, startPosition, targetPosition)
+  distances = premonition.distances
+  const newTarget = premonition.newTarget
+
+  // Recalculate the trayectory based on new target location
+  shotCalculation = geBaseCalculation(distances.hDistance, distances.yDistance, GRAVITY, startPosition, targetPosition, BaseVo)
+  if (!shotCalculation) { return false }
+
+  // Get more precision on shot
+  const precisionShot = getPrecisionShot(shotCalculation.grade, distances.hDistance, distances.yDistance, 1, GRAVITY, startPosition, targetPosition, BaseVo)
+  const { arrowTrajectoryPoints, blockInTrayect, nearestDistance, nearestGrade } = precisionShot
+
+  // Calculate yaw
+  const yaw = calculateYaw(startPosition, newTarget)
+
+  if (nearestDistance > 4) { return false } // Too far
 
   return {
-    distance,
-    hDistance,
-    yDistance
+    pitch: degreesToRadians(nearestGrade / 10),
+    yaw,
+    grade: nearestGrade / 10,
+    nearestDistance,
+    target: newTarget,
+    arrowTrajectoryPoints,
+    blockInTrayect
   }
-}
-
-export const calculateAngle = (from: Vec2, to: Vec2) => {
-  const xDistance = to.x - from.x
-  const yDistance = to.y - from.y
-  const yaw = Math.atan2(xDistance, yDistance) + Math.PI
-  return yaw
-}
-
-export const calculateYaw = (from: Vec3, to: Vec3) => {
-
-  const yaw = calculateAngle({
-    x: from.x,
-    y: from.z
-  }, {
-    x: to.x,
-    y: to.z
-  })
-
-  return yaw
-}
-
-export const calculateDestinationByYaw = (origin: Vec3, yaw: number, distance: number) => {
-  const x = distance * Math.sin(yaw)
-  const z = distance * Math.cos(yaw)
-  return origin.offset(x, 0, z)
-}
-
-export const calculateDestinationByPitch = (origin: Vec3, pitch: number, distance: number) => {
-  const y = distance * Math.sin(pitch)
-  return origin.offset(0, y, 0)
-}
-
-export const calculateRayCast = (origin: Vec3, pitch: number, yaw: number, distance: number) => {
-  const x = distance * Math.sin(yaw) * Math.cos(pitch);
-  const y = distance * Math.sin(pitch);
-  const z = distance * Math.cos(yaw) * Math.cos(pitch);
-  return origin.offset(x, y, z)
-}
-
-export const calculayePitch = (origin: Vec3, destination: Vec3) => {
-  const { hDistance, yDistance } = getTargetDistance(origin, destination)
-  const pitch = Math.atan2(yDistance, hDistance)
-  return pitch
-}
-
-export const degreesToRadians = (degrees: number) => {
-  return degrees * Math.PI / 180
-}
-
-export const radiansToDegrees = (radians: number) => {
-  return radians * (180 / Math.PI)
-}
-
-export const getVox = (Vo: number, Alfa: number, Resistance = 0) => {
-  return Vo * Math.cos(Alfa) - Resistance
-}
-
-export const getVoy = (Vo: number, Alfa: number, Resistance = 0) => {
-  return Vo * Math.sin(Alfa) - Resistance
-}
-
-export const getVo = (Vox: number, Voy: number, G: number) => {
-  return Math.sqrt(Math.pow(Vox, 2) + Math.pow(Voy - G, 2)) // New Total Velocity - Gravity
-}
-
-export const applyGravityToVoy = (Vo: number, Voy: number, Gravity: number) => { // radians
-  return Math.asin((Voy - Gravity) / Vo)
 }
 
 // Simulate Arrow Trayectory
-const tryGrade = (grade: number, xDestination: number, yDestination: number, VoIn: number, tryIntercetpBlock = false) => {
+const tryGrade = (grade: number, xDestination: number, yDestination: number, VoIn: number, tryIntercetpBlock = false, GRAVITY: number, startPosition: Vec3, targetPosition: Vec3) => {
   let precisionFactor = 1 // !Danger More precision increse the calc! =>  !More Slower!
 
   let Vo = VoIn
@@ -187,7 +152,7 @@ const tryGrade = (grade: number, xDestination: number, yDestination: number, VoI
 }
 
 // Get more precision on shot
-const getPrecisionShot = (grade: number, xDestination: number, yDestination: number, decimals: number) => {
+const getPrecisionShot = (grade: number, xDestination: number, yDestination: number, decimals: number, GRAVITY: number, startPosition: Vec3, targetPosition: Vec3, BaseVo: number) => {
   let nearestDistance: number | undefined
   let nearestGrade: number | undefined
   let arrowTrajectoryPoints: Array<Vec3> | undefined
@@ -196,7 +161,7 @@ const getPrecisionShot = (grade: number, xDestination: number, yDestination: num
   decimals = Math.pow(10, decimals)
 
   for (let iGrade = (grade * 10) - 10; iGrade <= (grade * 10) + 10; iGrade += 1) {
-    const distance = tryGrade(iGrade / decimals, xDestination, yDestination, BaseVo, true)
+    const distance = tryGrade(iGrade / decimals, xDestination, yDestination, BaseVo, true, GRAVITY, startPosition, targetPosition)
     if (nearestDistance === undefined || (distance.nearestDistance < nearestDistance)) {
       nearestDistance = distance.nearestDistance
       nearestGrade = iGrade
@@ -221,14 +186,13 @@ const getPrecisionShot = (grade: number, xDestination: number, yDestination: num
 // Calculate the 2 most aproax shots
 // https://es.qwe.wiki/wiki/Trajectory
 
-type TryGrade = ReturnType<typeof tryGrade> & { grade: number }
-const getFirstGradeAproax = (xDestination: number, yDestination: number) => {
+const getFirstGradeAproax = (xDestination: number, yDestination: number, GRAVITY: number, startPosition: Vec3, targetPosition: Vec3, BaseVo: number) => {
   let firstFound = false
   let nearestGradeFirst: TryGrade | undefined
   let nearestGradeSecond: TryGrade | undefined
 
   for (let grade = -89; grade < 90; grade++) {
-    const calculatedTryGrade = tryGrade(grade, xDestination, yDestination, BaseVo)
+    const calculatedTryGrade = tryGrade(grade, xDestination, yDestination, BaseVo, false, GRAVITY, startPosition, targetPosition)
 
     const tryGradeShot: TryGrade = {
       ...calculatedTryGrade,
@@ -275,63 +239,7 @@ const getFirstGradeAproax = (xDestination: number, yDestination: number) => {
   }
 }
 
-// Physics factors
-let BaseVo: number // Power of shot
-let GRAVITY = 0.05 // Arrow Gravity // Only for arrow for other entities have different gravity
-
-const getMasterGrade = (targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, weapon: Weapons): GetMasterGrade | false => {
-  if (!Object.keys(Weapons).includes(weapon)) {
-    throw new Error(`${weapon} is not valid weapon for calculate the grade!`)
-  }
-
-  const weaponProp = weaponsProps[weapon]
-  BaseVo = weaponProp.BaseVo
-  GRAVITY = weaponProp.GRAVITY
-
-  target = targetIn
-  speed = speedIn
-
-  startPosition = bot.entity.position.offset(0, 1.6, 0) // Bow offset position
-
-  // Calculate target Height, for shot in the heart  =P
-  const targetHeight: number = !isEntity(target) ? 0 : (target.type === 'player' ? 1.16 : (target.height ?? 0))
-  targetPosition = target.position.offset(0, targetHeight, 0)
-
-  // Check the first best trayectory
-  let distances = getTargetDistance(startPosition, targetPosition)
-  let shotCalculation = geBaseCalculation(distances.hDistance, distances.yDistance)
-  if (!shotCalculation) { return false }
-
-  // Recalculate the new target based on speed + first trayectory
-  const premonition = getPremonition(shotCalculation.totalTicks, speed)
-  distances = premonition.distances
-  const newTarget = premonition.newTarget
-
-  // Recalculate the trayectory based on new target location
-  shotCalculation = geBaseCalculation(distances.hDistance, distances.yDistance)
-  if (!shotCalculation) { return false }
-
-  // Get more precision on shot
-  const precisionShot = getPrecisionShot(shotCalculation.grade, distances.hDistance, distances.yDistance, 1)
-  const { arrowTrajectoryPoints, blockInTrayect, nearestDistance, nearestGrade } = precisionShot
-
-  // Calculate yaw
-  const yaw = calculateYaw(startPosition, newTarget)
-
-  if (nearestDistance > 4) { return false } // Too far
-
-  return {
-    pitch: degreesToRadians(nearestGrade / 10),
-    yaw,
-    grade: nearestGrade / 10,
-    nearestDistance,
-    target: newTarget,
-    arrowTrajectoryPoints,
-    blockInTrayect
-  }
-}
-
-const getPremonition = (totalTicks: number, targetSpeed: Vec3) => {
+const getPremonition = (totalTicks: number, targetSpeed: Vec3, startPosition: Vec3, targetPosition: Vec3) => {
   totalTicks = totalTicks + Math.ceil(totalTicks / 10)
   const velocity = targetSpeed.clone()
   const newTarget = targetPosition.clone()
@@ -347,14 +255,14 @@ const getPremonition = (totalTicks: number, targetSpeed: Vec3) => {
 }
 
 // For parabola of Y you have 2 times for found the Y position if Y original are downside of Y destination
-const geBaseCalculation = (xDestination: number, yDestination: number) => {
-  const grade = getFirstGradeAproax(xDestination, yDestination)
+const geBaseCalculation = (xDestination: number, yDestination: number, GRAVITY: number, startPosition: Vec3, targetPosition: Vec3, BaseVo: number) => {
+  const grade = getFirstGradeAproax(xDestination, yDestination, GRAVITY, startPosition, targetPosition, BaseVo)
   let gradeShot
 
   if (!grade) { return false } // No aviable trayectory
 
   // Check blocks in trayectory
-  const checkFirst = tryGrade(grade.nearestGradeFirst.grade, xDestination, yDestination, BaseVo, true)
+  const checkFirst = tryGrade(grade.nearestGradeFirst.grade, xDestination, yDestination, BaseVo, true, GRAVITY, startPosition, targetPosition)
 
   if (!checkFirst.blockInTrayect && checkFirst.nearestDistance < 4) {
     gradeShot = grade.nearestGradeFirst
@@ -363,7 +271,7 @@ const geBaseCalculation = (xDestination: number, yDestination: number) => {
       return false // No aviable trayectory
     }
 
-    const checkSecond = tryGrade(grade.nearestGradeSecond.grade, xDestination, yDestination, BaseVo, true)
+    const checkSecond = tryGrade(grade.nearestGradeSecond.grade, xDestination, yDestination, BaseVo, true, GRAVITY, startPosition, targetPosition)
     if (checkSecond.blockInTrayect) {
       return false // No aviable trayectory
     }
