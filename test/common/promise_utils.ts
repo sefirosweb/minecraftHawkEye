@@ -75,7 +75,7 @@ export const onceWithCleanup = (emitter: EventEmitter, event: string, tt: OnceCo
     })
   }
 
-  task.promise.finally(() => emitter.removeListener(event, onEvent))
+  task.promise.catch(() => { }).finally(() => emitter.removeListener(event, onEvent))
 
   return task.promise
 }
