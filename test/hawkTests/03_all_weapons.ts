@@ -1,7 +1,7 @@
 import { Weapons } from '../../src/types'
 import { bot } from '../hooks'
 
-describe('04_all_weapons', () => {
+describe('03_all_weapons', () => {
   let Y = 4
   before(async () => {
     Y = bot.test.groundY
@@ -42,7 +42,7 @@ describe('04_all_weapons', () => {
       bot.hawkEye.autoAttack(target, weapon)
 
       return new Promise((resolve) => {
-        bot.on('auto_shop_stopped', async () => {
+        bot.once('auto_shop_stopped', async () => {
           await bot.test.wait(4000)
           resolve()
         })

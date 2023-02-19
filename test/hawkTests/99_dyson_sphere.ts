@@ -1,11 +1,11 @@
 
 import { Vec3 } from 'vec3'
-import { getTargetDistance } from '../../src/hawkEyeEquations'
+import { getTargetDistance } from '../../src/mathHelper'
 import { Weapons } from '../../src/types'
 import { generateSphere } from '../common/generateSphere'
 import { bot } from '../hooks'
 
-describe('02_dyson_sphere', () => {
+describe('99_dyson_sphere', () => {
   const yConst = 50
   let Y = -11
   before(async () => {
@@ -51,7 +51,7 @@ describe('02_dyson_sphere', () => {
         bot.hawkEye.autoAttack(target, Weapons.crossbow)
 
         return new Promise((resolve) => {
-          bot.on('auto_shop_stopped', () => {
+          bot.once('auto_shop_stopped', () => {
             if (bot.inventory.count(719, null) < 64) {
               bot.chat(`/give ${bot.username} minecraft:arrow 1280`)
             }

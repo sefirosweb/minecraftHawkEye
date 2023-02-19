@@ -5,7 +5,6 @@ import { Block } from 'prismarine-block'
 import { detectProjectiles } from '../hawkEye'
 import getMasterGrade from 'src/hawkEyeEquations'
 import { getPlayer } from 'src/botFunctions'
-import { detectAim } from 'src/projectilRadar'
 import { calculateArrowTrayectory } from 'src/calculateArrowTrayectory'
 
 export type OptionsMasterGrade = {
@@ -125,4 +124,13 @@ export type Projectil = {
         pos: Vec3
     }>,
     updatedAt: number
+}
+
+export class Vec2 {
+    x: number
+    y: number
+    constructor(x: number, y: number) {
+        this.x = x
+        this.y = y
+    }
 }
