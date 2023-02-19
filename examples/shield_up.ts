@@ -1,12 +1,16 @@
-import { Box, Line } from 'detect-collisions'
+import { Box, RaycastHit } from 'detect-collisions'
 import mineflayer, { Bot } from 'mineflayer'
 import mineflayerViewer from 'prismarine-viewer'
 import { Vec3 } from 'vec3'
-import { calculateDestinationByPitch, calculateDestinationByYaw, calculateRayCast } from '../src/hawkEyeEquations'
+import { calculateAngle, calculateRayCast } from '../src/hawkEyeEquations'
 import minecraftHawkEye from '../src/index'
-import { physics } from '../src/loadBot'
+import { system } from '../src/loadBot'
 
 type ModdedBot = Bot & { viewer }
+
+type RaycastHitAngle = RaycastHit & {
+    angle: number
+}
 
 const bot = mineflayer.createBot({
     host: process.argv[2] ? process.argv[2] : 'localhost',
@@ -22,8 +26,8 @@ bot.loadPlugin(minecraftHawkEye)
 
 
 let danger: number | undefined
-
 let writingPost: Array<Vec3> = []
+const boxSize = 2
 
 bot.on('spawn', () => {
     bot.chat('/kill @e[type=arrow]')
@@ -52,7 +56,7 @@ bot.on('spawn', () => {
     }, 400)
 
     bot.on('physicTick', () => {
-        const botPos = bot.entity.position
+        const botPos = bot.entity.position.clone()
 
         const entity = Object.values(bot.entities)
             .find(e => e.username === 'Lordvivi')
@@ -60,31 +64,141 @@ bot.on('spawn', () => {
 
         const eyePosition = entity.position.offset(0, 1.6, 0)
 
-        const lookingAtHorizontal = calculateDestinationByYaw(eyePosition, entity.yaw + Math.PI, DISTANCE_VISION);
-        const lookingAtVertical = calculateDestinationByPitch(eyePosition, entity.pitch, DISTANCE_VISION);
         const lookingAt = calculateRayCast(eyePosition, entity.pitch, entity.yaw + Math.PI, DISTANCE_VISION)
-
-        bot.viewer.drawLine('entitySeeHorizontal', [eyePosition, lookingAtHorizontal], 'red')
-        bot.viewer.drawLine('entitySeeVertical', [eyePosition, lookingAtVertical], 'purple')
         bot.viewer.drawLine('entitySee', [eyePosition, lookingAt], 'orange')
 
         writingPost.push(lookingAt)
-        bot.viewer.drawPoints('entitySeePos', writingPost, 'red')
+        // bot.viewer.drawPoints('entitySeePos', writingPost, 'red')
 
-        const lookingAtHorizontalLine = new Line(
-            {
-                x: entity.position.x,
-                y: entity.position.z
+        // if (entity.position.x === lookingAt.x && entity.position.z === lookingAt.z) return
+
+
+
+        const lookingAtXZ =
+        {
+            from: {
+                x: eyePosition.x,
+                y: eyePosition.z
             },
+            to: {
+                x: lookingAt.x,
+                y: lookingAt.z
+            }
+        }
+
+        const lookingAtXY =
+        {
+            from: {
+                x: eyePosition.x,
+                y: eyePosition.y
+            },
+            to:
             {
-                x: lookingAtHorizontal.x,
-                y: lookingAtHorizontal.z
-            })
+                x: lookingAt.x,
+                y: lookingAt.y
+            }
+        }
 
-        const botBox = new Box({ x: botPos.x - 1, y: botPos.z - 1, }, 2, 2);
-        const colission = physics.checkCollision(lookingAtHorizontalLine, botBox) ? (danger ? 'red' : 'yellow') : 'aqua'
+        const lookingAtZY =
+        {
+            from: {
+                x: eyePosition.z,
+                y: eyePosition.y
+            },
+            to:
+            {
+                x: lookingAt.z,
+                y: lookingAt.y
+            }
+        }
 
-        bot.viewer.drawBoxGrid('selfBox', botPos.clone().offset(-1, 0, -1), botPos.clone().offset(1, 2, 1), colission)
+
+
+
+        const botBoxXZ = new Box({ x: botPos.x - boxSize / 2, y: botPos.z - boxSize / 2 }, boxSize, boxSize, { isCentered: true });
+        const botBoxXY = new Box({ x: botPos.x - boxSize / 2, y: botPos.y - boxSize / 2 }, boxSize, boxSize, { isCentered: true });
+        const botBoxZY = new Box({ x: botPos.z - boxSize / 2, y: botPos.y - boxSize / 2 }, boxSize, boxSize, { isCentered: true });
+
+        console.clear()
+
+        system.insert(botBoxXZ)
+        const colisionXZ = system.raycast(lookingAtXZ.from, lookingAtXZ.to) as RaycastHitAngle
+        if (colisionXZ) {
+            bot.viewer.drawPoints('drawPointXZ', [new Vec3(colisionXZ.point.x, botPos.y, colisionXZ.point.y)], 'blue')
+            const angle = calculateAngle(lookingAtXZ.from, lookingAtXZ.to)
+            colisionXZ.angle = angle
+
+        } else {
+            bot.viewer.erase('drawPointXZ')
+        }
+        system.remove(botBoxXZ)
+
+
+        system.insert(botBoxXY)
+        const colisionXY = system.raycast(lookingAtXY.from, lookingAtXY.to) as RaycastHitAngle
+        if (colisionXY) {
+            bot.viewer.drawPoints('drawPointXY', [new Vec3(colisionXY.point.x, colisionXY.point.y, botPos.z)], 'gray')
+            const angle = calculateAngle(lookingAtXY.from, lookingAtXY.to)
+            colisionXY.angle = angle
+        } else {
+            bot.viewer.erase('drawPointXY')
+        }
+        system.remove(botBoxXY)
+
+
+        system.insert(botBoxZY)
+        const colisionZY = system.raycast(lookingAtZY.from, lookingAtZY.to) as RaycastHitAngle
+        if (colisionZY) {
+            bot.viewer.drawPoints('drawPointZY', [new Vec3(botPos.x, colisionZY.point.y, colisionZY.point.x)], 'green')
+            const angle = calculateAngle(lookingAtZY.from, lookingAtZY.to)
+            colisionZY.angle = angle
+        } else {
+            bot.viewer.erase('drawPointZY')
+        }
+        system.remove(botBoxZY)
+
+
+        console.log(colisionXZ?.angle)
+
+        const back = colisionXZ?.angle > Math.PI / 2 && colisionXZ?.angle < (Math.PI / 2 + Math.PI)
+        const front = !back
+
+        const right = colisionXZ?.angle > Math.PI
+        const left = !right
+
+        // console.log({ front })
+        // console.log({ back })
+        // console.log({ right })
+        // console.log({ left })
+
+        let colission = 'aqua'
+        if (
+            colisionXZ
+            && colisionXY
+            && colisionZY
+        ) {
+
+            console.log('colisionXZ', colisionXZ.point)
+            console.log('colisionXY', colisionXY.point)
+            console.log('colisionZY', colisionZY.point)
+
+
+
+            const front =
+                botBoxXZ.maxY === colisionXZ.point.y && botBoxXY.maxY === colisionXY.point.y && botBoxZY.maxX === colisionZY.point.x ||
+                botBoxXZ.maxY === colisionXZ.point.y && botBoxXY.minX === colisionXY.point.x && botBoxZY.maxX === colisionZY.point.x
+
+            console.log({ front })
+
+
+            colission = danger ? 'red' : 'yellow'
+            const backFront = new Vec3(colisionXZ.point.x, colisionZY.point.y, colisionZY.point.x)
+            bot.viewer.drawPoints('hitPlayer', [backFront], 'red')
+        } else {
+            bot.viewer.erase('hitPlayer')
+        }
+
+        bot.viewer.drawBoxGrid('selfBox', botPos.clone().offset(-(boxSize / 2), -(boxSize / 2), -(boxSize / 2)), botPos.clone().offset(boxSize / 2, (boxSize / 2), boxSize / 2), colission)
     })
 })
 

@@ -10,6 +10,15 @@ let speed: Vec3
 let startPosition: Vec3
 let targetPosition: Vec3
 
+class Vec2 {
+  x: number
+  y: number
+  constructor(x: number, y: number) {
+    this.x = x
+    this.y = y
+  }
+}
+
 export const getTargetDistance = (origin: Vec3, destination: Vec3) => {
   const xDistance = Math.pow(origin.x - destination.x, 2)
   const zDistance = Math.pow(origin.z - destination.z, 2)
@@ -26,10 +35,23 @@ export const getTargetDistance = (origin: Vec3, destination: Vec3) => {
   }
 }
 
-export const calculateYaw = (origin: Vec3, destination: Vec3) => {
-  const xDistance = destination.x - origin.x
-  const zDistance = destination.z - origin.z
-  const yaw = Math.atan2(xDistance, zDistance) + Math.PI
+export const calculateAngle = (from: Vec2, to: Vec2) => {
+  const xDistance = to.x - from.x
+  const yDistance = to.y - from.y
+  const yaw = Math.atan2(xDistance, yDistance) + Math.PI
+  return yaw
+}
+
+export const calculateYaw = (from: Vec3, to: Vec3) => {
+
+  const yaw = calculateAngle({
+    x: from.x,
+    y: from.z
+  }, {
+    x: to.x,
+    y: to.z
+  })
+
   return yaw
 }
 
