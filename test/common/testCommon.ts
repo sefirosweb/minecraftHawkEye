@@ -98,7 +98,6 @@ export default (bot: Bot) => {
   const clearInventory = async () => {
     const msgProm = onceWithCleanup(bot, 'message', { checkCondition: msg => msg.translate === 'commands.clear.success.single' || msg.translate === 'commands.clear.success' })
     bot.chat(`/give ${bot.username} stone 1`)
-    await onceWithCleanup(bot.inventory, 'updateSlot', { checkCondition: (slot, oldItem, newItem) => newItem?.name === 'stone' })
 
     const inventoryClearedProm = Promise.all(
       bot.inventory.slots
