@@ -72,6 +72,7 @@ export default (bot: Bot) => {
     await resetBlocksToSuperflat()
     await sleep(1000)
     await clearInventory()
+    bot.creative.stopFlying()
   }
 
   const becomeCreative = () => {
