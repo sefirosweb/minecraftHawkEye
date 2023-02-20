@@ -95,7 +95,7 @@ declare module 'mineflayer' {
     }
     interface BotEvents {
         auto_shop_stopped: (target: Entity | OptionsMasterGrade) => void
-        target_aiming_at_you: (target: Entity) => void
+        target_aiming_at_you: (target: Entity, arrowTrajectory: Array<Vec3>) => void
         incoming_arrow: (target: Entity) => void
     }
 }
@@ -138,3 +138,5 @@ export class Vec2 {
         this.y = y
     }
 }
+
+export type BoxColission = { start: Vec3, end: Vec3 }

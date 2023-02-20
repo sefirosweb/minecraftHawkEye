@@ -1,92 +1,70 @@
 
-import { Box, Line } from "detect-collisions"
+import { Box } from "detect-collisions"
 import { Vec3 } from "vec3"
-import { calculateDestinationByYaw, getTargetDistance } from "./hawkEyeEquations"
 import { bot, system } from "./loadBot"
-import { Weapons } from "./types"
+import { BoxColission, Weapons } from "./types"
 import { Entity } from 'prismarine-entity'
 import { calculateArrowTrayectory } from "./calculateArrowTrayectory"
+import { calculateDestinationByYaw, calculateImpactToBoundingBox, getBoxes } from "./mathHelper"
 
 let listening = false
+const DISTANCE_VISION = 100
 
 const radar = () => {
-
     const detectedEntities = detectAim()
-    const selfBox = botBox()
-    const selfBoxTall = botBoxTall()
-    let prevArrow: Vec3
+    const botBoxes = getBotBoxes()
+    let prevArrow: Vec3 | undefined
 
     Object.values(detectedEntities).forEach(e => {
-        e.prevTrajectory.forEach(arrowTrajectory => {
+        prevArrow = undefined
+        e.prevTrajectory.forEach((arrowTrajectory, i) => {
 
             if (!prevArrow) {
                 prevArrow = arrowTrajectory
                 return
             }
 
-            const lookingAtLine = new Line(
-                {
-                    x: prevArrow.x,
-                    y: prevArrow.z
-                },
-                {
-                    x: arrowTrajectory.x,
-                    y: arrowTrajectory.z
-                })
 
-            const distance = getTargetDistance(prevArrow, arrowTrajectory)
+            const colission = calculateImpactToBoundingBox(prevArrow, arrowTrajectory, botBoxes)
 
-            const lookingAtTall = new Line(
-                {
-                    x: prevArrow.x,
-                    y: prevArrow.y
-                },
-                {
-                    x: arrowTrajectory.x,
-                    y: arrowTrajectory.y
-                })
-
-            if (system.checkCollision(lookingAtTall, selfBoxTall)) {
-                console.clear()
-                console.log(bot.entity.position)
-                console.log(system.response)
-
-                // console.log(bot.entity.position)
-                // console.log('prevArrow', prevArrow)
-                // console.log('arrowTrajectory', arrowTrajectory)
-                bot.emit('target_aiming_at_you', e.entity)
+            if (colission) {
+                // calculateImpactToBoundingBox(prevArrow, arrowTrajectory, botBoxes)
+                bot.emit('target_aiming_at_you', e.entity, e.prevTrajectory)
             }
 
             prevArrow = arrowTrajectory
-
-
-
-            // if (bot.entity.position.distanceTo(arrowTrajectory) < 2) {
-            //     bot.emit('target_aiming_at_you', e.entity)
-            // }
         })
     })
 }
 
 export const detectAim = () => {
-    const selfBox = botBox()
+    const { boxXZ } = getBoxes(getBotBoxes())
+
     const entities = Object.values(bot.entities)
         // @ts-ignore PR: https://github.com/PrismarineJS/prismarine-entity/pull/55
         .filter((e) => (e.type === "player" && e.metadata[8] === 1 /* Is loading bow */) || (e.type === 'hostile' && e.name === 'skeleton'))
         .filter(e => {
-            const lookingAt = calculateDestinationByYaw(e.position, e.yaw + Math.PI, 100);
 
-            const lookingAtLine = new Line(
-                {
-                    x: e.position.x,
-                    y: e.position.z
+            const eyePosition = e.position.offset(0, 1.6, 0)
+            const lookingAt = calculateDestinationByYaw(eyePosition, e.yaw + Math.PI, DISTANCE_VISION)
+
+            const lookingAtXZ =
+            {
+                from: {
+                    x: eyePosition.x,
+                    y: eyePosition.z
                 },
-                {
+                to: {
                     x: lookingAt.x,
                     y: lookingAt.z
-                })
+                }
+            }
 
-            return system.checkCollision(lookingAtLine, selfBox)
+            system.insert(boxXZ)
+            const colisionXZ = system.raycast(lookingAtXZ.from, lookingAtXZ.to)
+            system.remove(boxXZ)
+
+            return colisionXZ !== null
         })
 
     const calculatedEntityTarget: Record<string, {
@@ -99,7 +77,7 @@ export const detectAim = () => {
     entities
         .forEach((e) => {
             if (!e.uuid) return
-            const calc = calculateArrowTrayectory(e.position, 3, e.pitch, e.yaw, Weapons.bow)
+            const calc = calculateArrowTrayectory(e.position.offset(0, 1.6, 0), 3, e.pitch, e.yaw, Weapons.bow)
             calculatedEntityTarget[e.uuid] = {
                 uuid: e.uuid,
                 entity: e,
@@ -111,12 +89,11 @@ export const detectAim = () => {
     return calculatedEntityTarget
 }
 
-export const botBox = () => {
-    return new Box({
-        x: bot.entity.position.x - 1,
-        y: bot.entity.position.z - 1,
-
-    }, 2, 2);
+export const getBotBoxes = (): BoxColission => {
+    return {
+        start: bot.entity.position.offset(-1, -0.5, -1),
+        end: bot.entity.position.offset(1, 2.5, 1),
+    }
 }
 
 export const botBoxTall = () => {

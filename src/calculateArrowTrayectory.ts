@@ -1,9 +1,9 @@
 import { Vec3 } from 'vec3'
 import { FACTOR_H, FACTOR_Y } from './constants'
-import {applyGravityToVoy, getVo, getVox, getVoy} from './hawkEyeEquations'
 import { Weapons, weaponsProps } from './types'
 import { Block } from 'prismarine-block'
 import { check } from './intercept'
+import { applyGravityToVoy, getVo, getVox, getVoy } from './mathHelper'
 
 export const calculateArrowTrayectory = (currentPos: Vec3, itemSpeed: number, pitch: number, yaw: number, ammunitionType?: Weapons) => {
     const weapon = ammunitionType ?? Weapons.bow
@@ -56,7 +56,7 @@ const staticCalc = (initialArrowPosition: Vec3, gravityIn: number, pitch: number
         arrowTrajectoryPoints.push(currentArrowPosition)
         const previusArrowPositionIntercept = arrowTrajectoryPoints[arrowTrajectoryPoints.length === 1 ? 0 : arrowTrajectoryPoints.length - 2]
 
-        blockInTrayect = check(previusArrowPositionIntercept, currentArrowPosition).block
+        blockInTrayect = check(previusArrowPositionIntercept, currentArrowPosition)
 
         if (blockInTrayect !== null) {
             return {
