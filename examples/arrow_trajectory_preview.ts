@@ -1,14 +1,12 @@
-import mineflayer from 'mineflayer'
-//@ts-ignore
+import mineflayer, { Bot } from 'mineflayer'
 import mineflayerViewer from 'prismarine-viewer'
 import { Vec3 } from 'vec3'
 import minecraftHawkEye from '../src/index'
 import { Weapons } from '../src/types'
 import { Entity } from 'prismarine-entity'
-import { calculateYaw, calculayePitch } from '../src/hawkEyeEquations'
+import { calculateYaw, calculayePitch } from '../src/mathHelper'
 
-// first install the dependency
-// npm i mineflayer prismarine-viewer minecrafthawkeye
+type ModdedBot = Bot & { viewer }
 
 const bot = mineflayer.createBot({
     host: process.argv[2] ? process.argv[2] : 'localhost',
@@ -16,7 +14,7 @@ const bot = mineflayer.createBot({
     username: process.argv[4] ? process.argv[4] : 'Archer',
     password: process.argv[5],
     viewDistance: 'far'
-})
+}) as ModdedBot
 
 
 let intervalShot: ReturnType<typeof setInterval>
@@ -39,7 +37,6 @@ bot.on('spawn', () => {
 
     setTimeout(() => {
         bot.on('physicTick', () => {
-
             const projectiles = bot.hawkEye.detectProjectiles()
             if (projectiles.length > 0) {
                 projectiles.forEach((p) => {
@@ -67,13 +64,6 @@ bot.on('spawn', () => {
 
                 })
             }
-
-            const detectedAim = bot.hawkEye.detectAim()
-            Object.values(detectedAim).forEach(e =>{
-                  //@ts-ignore
-                  bot.viewer.drawPoints(`arrowPremonition_${e.uuid}`, e.prevTrajectory, 0xffffff, 5)
-            })
-
         })
     }, 4000)
 })
@@ -89,14 +79,10 @@ bot.once('spawn', () => {
 })
 
 const shotPreview = () => {
-    //@ts-ignore
     bot.viewer.erase('arrowTrajectoryPoints')
     if (target) {
         const masterGrade = bot.hawkEye.getMasterGrade(target, new Vec3(0, 0, 0), Weapons.bow)
-        // const res = bot.hawkEye.calculateArrowTrayectory(bot.entity.position.clone(), new Vec3(1, 0, 0))
-
         if (masterGrade) {
-            //@ts-ignore
             bot.viewer.drawPoints('arrowTrajectoryPoints', masterGrade.arrowTrajectoryPoints, 0xff0000, 5)
         }
     }
