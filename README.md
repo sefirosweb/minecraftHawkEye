@@ -3,7 +3,9 @@ Module for the Minecraft bot, hit 100% of the time with the bow, using the equat
 
 This module is based on bot of <a href="https://github.com/PrismarineJS/mineflayer" target="_blank">mineflayer</a> repository
 
-This calculate the trajectory of arrow / snowballs... to ensure which is the best angle to hit
+This calculate the trajectory of arrow / snowballs... to ensure which is the best angle to hit,
+
+They can hit from 120 blocks away!
 
 Install:
 - Install nodejs >= 14 from nodejs.org
@@ -146,6 +148,15 @@ bot.on('incoming_projectil', (projectil: Projectil, arrowTrajectory: Array<Vec3>
 ```
 
 I'm glad I can help you, do we help each other?
+
+# Videos:
+https://www.youtube.com/watch?v=InMkncDnYTA
+
+https://www.youtube.com/watch?v=jjl4mMyL7hk
+
+https://www.youtube.com/watch?v=OHX3u8Nrrp8
+
+https://www.youtube.com/watch?v=VKg5xiww5Lo
 
 # TODOs
 No TODOs!
