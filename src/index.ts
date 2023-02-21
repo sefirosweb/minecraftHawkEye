@@ -25,4 +25,6 @@ const inject = (bot: Bot) => {
   }
 }
 
+export { HawkEye, HawkEyeEvents } from './types'
+
 export default inject
