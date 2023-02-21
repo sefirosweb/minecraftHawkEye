@@ -41,6 +41,22 @@ bot.hawkEye.getMasterGrade(target, speedInVec3, weapon)
 
 // Similar has oneshot but need yo add manually the Pitch and Way in radians
 bot.hawkEye.simplyShot(yaw, pitch)
+
+// If you want the result of calculation of arrow trajectory you can use that
+bot.hawkEye.calculateArrowTrayectory(currentPosition, currentSpeed, pitch, yaw, 'bow')
+
+// Start to check if any player / mob or any incoming to bot
+// CAUTION: This use a lot of CPU, because on each tick game calculate all nearby mobs or players
+bot.hawkEye.startRadar()
+bot.hawkEye.stopRadar()
+
+// Return a array of mobs & players are looking in your direction
+bot.hawkEye.detectAim()
+
+// Return list of arrows are in "air" just now
+bot.hawkEye.detectProjectiles()
+
+
 ```
 
 A example in one file:
@@ -111,8 +127,20 @@ trident
 Events:
 
 When but uses autoAttack and the mob is gone (killed o dissapeared)
-```js
-bot.on('auto_shot_stopped', (target) => {
+```ts
+bot.on('auto_shot_stopped', (target: Entity | OptionsMasterGrade) => {
+    ///
+})
+```
+When radar is active and some player or mob are aim you dispatch this event
+```ts
+bot.on('target_aiming_at_you', (entity: Entity, arrowTrajectory: Array<Vec3>) => {
+    ///
+})
+```
+When radar is active and When arrow are incoming and can be hit bot this event is dispatched
+```ts
+bot.on('incoming_projectil', (projectil: Projectil, arrowTrajectory: Array<Vec3>) => {
     ///
 })
 ```
