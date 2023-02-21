@@ -51,7 +51,7 @@ describe('99_dyson_sphere', () => {
         bot.hawkEye.autoAttack(target, Weapons.crossbow)
 
         return new Promise((resolve) => {
-          bot.once('auto_shop_stopped', () => {
+          bot.once('auto_shot_stopped', () => {
             if (bot.inventory.count(719, null) < 64) {
               bot.chat(`/give ${bot.username} minecraft:arrow 1280`)
             }

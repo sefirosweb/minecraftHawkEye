@@ -112,7 +112,7 @@ Events:
 
 When but uses autoAttack and the mob is gone (killed o dissapeared)
 ```js
-bot.on('auto_shop_stopped', (target) => {
+bot.on('auto_shot_stopped', (target) => {
     ///
 })
 ```

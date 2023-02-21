@@ -5,7 +5,8 @@ import { bot } from "./loadBot"
 import { BoxColission, Weapons } from "./types"
 import { Entity } from 'prismarine-entity'
 import { calculateArrowTrayectory } from "./calculateArrowTrayectory"
-import { calculateDestinationByYaw, calculateImpactToBoundingBox, getBoxes } from "./mathHelper"
+import { calculateDestinationByYaw, calculateImpactToBoundingBox, calculateYaw, calculayePitch, getBoxes } from "./mathHelper"
+import { detectProjectiles } from './hawkEye'
 
 let listening = false
 const DISTANCE_VISION = 100
@@ -34,6 +35,40 @@ const radar = () => {
             prevArrow = arrowTrajectory
         })
     })
+
+    const projectiles = detectProjectiles()
+    projectiles.forEach(p => {
+        if (p.previusPositions.length < 2) return
+
+        const lastItem = p.previusPositions[p.previusPositions.length - 1]
+        const lastItem2 = p.previusPositions[p.previusPositions.length - 2]
+
+        if (lastItem.pos.equals(lastItem2.pos)) {
+            return
+        }
+
+        const yaw = calculateYaw(lastItem2.pos, lastItem.pos)
+        const pitch = calculayePitch(lastItem2.pos, lastItem.pos)
+
+        const arrowTrajectoryPoints = bot.hawkEye.calculateArrowTrayectory(lastItem.pos, p.currentSpeed, pitch, yaw, Weapons.bow).arrowTrajectoryPoints
+        if (arrowTrajectoryPoints.length < 2) return
+
+        for (let pi = 1; pi < arrowTrajectoryPoints.length; pi++) {
+            const prevousArrow = arrowTrajectoryPoints[pi - 1]
+            const currentArrow = arrowTrajectoryPoints[pi]
+
+            const colission = calculateImpactToBoundingBox(prevousArrow, currentArrow, botBoxes)
+
+            if (colission) {
+                // @ts-ignore
+                bot.emit('incoming_projectil', p, arrowTrajectoryPoints)
+                return
+            }
+
+        }
+
+        // console.log(p)
+    })
 }
 
 export const detectAim = () => {
@@ -46,10 +81,10 @@ export const detectAim = () => {
             const eyePosition = e.position.offset(0, 1.6, 0)
             const lookingAt = calculateDestinationByYaw(eyePosition, e.yaw + Math.PI, DISTANCE_VISION)
 
-            const rayXZ_start: Vector = { x: eyePosition.x, y: eyePosition.z }
-            const rayXZ_end: Vector = { x: lookingAt.x, y: lookingAt.z }
+            const rayXZStart: Vector = { x: eyePosition.x, y: eyePosition.z }
+            const rayXZEnd: Vector = { x: lookingAt.x, y: lookingAt.z }
 
-            const ray = new Line(rayXZ_start, rayXZ_end)
+            const ray = new Line(rayXZStart, rayXZEnd)
             const colisionXZ = system.checkCollision(ray, boxXZ)
             return colisionXZ
         })

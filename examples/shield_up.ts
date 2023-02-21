@@ -5,6 +5,7 @@ import minecraftHawkEye from '../src/index'
 import { calculateRayCast, calculateDestinationByYaw, calculateImpactToBoundingBox } from '../src/mathHelper'
 import { Entity } from 'prismarine-entity'
 import { getBotBoxes } from '../src/projectilRadar'
+import { Projectil } from '../src/types'
 
 type ModdedBot = Bot & { viewer }
 
@@ -16,10 +17,9 @@ const bot = mineflayer.createBot({
     viewDistance: 'far'
 }) as ModdedBot
 
-const DISTANCE_VISION = 100
-
 bot.loadPlugin(minecraftHawkEye)
 
+const DISTANCE_VISION = 100
 let danger: number | undefined
 
 bot.once('spawn', () => {
@@ -38,28 +38,39 @@ bot.on('spawn', () => {
     setInterval(() => {
         if (danger && Date.now() - danger > 4000) {
             danger = undefined
-            bot.viewer.erase('previewArrow')
+            bot.viewer.erase('detectedPlayerAim')
             bot.deactivateItem()
         }
     }, 400)
 
     bot.on('physicTick', startRadarViewer)
     bot.on('target_aiming_at_you', targetAimingAtYou)
+    bot.on('incoming_projectil', detectedIncomingArrow)
 
     bot.on('death', () => {
         bot.removeListener('physicTick', startRadarViewer)
         bot.removeListener('target_aiming_at_you', targetAimingAtYou)
+        bot.removeListener('incoming_projectil', detectedIncomingArrow)
     })
 })
+
+const upShield = (entity: Entity) => {
+    danger = Date.now()
+    bot.lookAt(entity.position, true)
+    bot.activateItem()
+}
+
+const detectedIncomingArrow = (projectil: Projectil, arrowTrajectory: Array<Vec3>) => {
+    console.log('detected arrow!', Date.now())
+    bot.viewer.drawPoints('incomingArrows', arrowTrajectory, 'orange')
+    upShield(projectil.entity)
+}
 
 const targetAimingAtYou = (entity: Entity, arrowTrajectory: Array<Vec3>) => {
     console.log('detected!', entity.username ?? entity.name, Date.now())
     danger = Date.now()
-
-    bot.lookAt(entity.position, true)
-    bot.activateItem()
-
-    bot.viewer.drawPoints('previewArrow', arrowTrajectory, 'red')
+    upShield(entity)
+    bot.viewer.drawPoints('detectedPlayerAim', arrowTrajectory, 'red')
 }
 
 // Visible function to see what "see" the bot

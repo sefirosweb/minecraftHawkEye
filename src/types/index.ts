@@ -77,26 +77,36 @@ export type GetMasterGrade = {
     blockInTrayect?: Block | null
 }
 
+export type HawkEye = {
+    simplyShot: (yaw: number, pitch: number) => void
+    oneShot: (target: Entity, weapon: Weapons) => void
+    autoAttack: (target: Entity, weapon: Weapons) => void
+    getMasterGrade: (from: Entity | OptionsMasterGrade, speed: Vec3, weapon: Weapons) => ReturnType<typeof getMasterGrade>
+    stop: () => void,
+    getPlayer: (name?: string) => ReturnType<typeof getPlayer>
+    detectProjectiles: (projectile?: string) => ReturnType<typeof detectProjectiles>
+    detectAim: () => ReturnType<typeof detectAim>
+    calculateArrowTrayectory: (currentPos: Vec3, itemSpeed: number, pitch: number, yaw: number, ammunitionType?: Weapons) => ReturnType<typeof calculateArrowTrayectory>
+    startRadar: () => void
+    stopRadar: () => void
+}
+
+export interface HawkEyeEvents {
+    auto_shot_stopped: (target: Entity | OptionsMasterGrade) => void
+    target_aiming_at_you: (entity: Entity, arrowTrajectory: Array<Vec3>) => void
+    incoming_projectil: (projectil: Projectil, arrowTrajectory: Array<Vec3>) => void
+    incoming_arrow: (entity: Entity) => void
+}
+
 declare module 'mineflayer' {
     interface Bot {
-        hawkEye: {
-            simplyShot: (yaw: number, pitch: number) => void
-            oneShot: (target: Entity, weapon: Weapons) => void
-            autoAttack: (target: Entity, weapon: Weapons) => void
-            getMasterGrade: (from: Entity | OptionsMasterGrade, speed: Vec3, weapon: Weapons) => ReturnType<typeof getMasterGrade>
-            stop: () => void,
-            getPlayer: (name?: string) => ReturnType<typeof getPlayer>
-            detectProjectiles: (projectile?: string) => ReturnType<typeof detectProjectiles>
-            detectAim: () => ReturnType<typeof detectAim>
-            calculateArrowTrayectory: (currentPos: Vec3, itemSpeed: number, pitch: number, yaw: number, ammunitionType?: Weapons) => ReturnType<typeof calculateArrowTrayectory>
-            startRadar: () => void
-            stopRadar: () => void
-        }
+        hawkEye: HawkEye
     }
     interface BotEvents {
-        auto_shop_stopped: (target: Entity | OptionsMasterGrade) => void
-        target_aiming_at_you: (target: Entity, arrowTrajectory: Array<Vec3>) => void
-        incoming_arrow: (target: Entity) => void
+        auto_shot_stopped: (target: Entity | OptionsMasterGrade) => void
+        target_aiming_at_you: (entity: Entity, arrowTrajectory: Array<Vec3>) => void
+        incoming_projectil: (projectil: Projectil, arrowTrajectory: Array<Vec3>) => void
+        incoming_arrow: (entity: Entity) => void
     }
 }
 
@@ -120,6 +130,7 @@ export const isEntity = (e: Entity | OptionsMasterGrade): e is Entity => {
 
 export type Projectil = {
     uuid: string,
+    entity: Entity,
     enabled: boolean,
     currentSpeed: number // Vo,
     currentSpeedTime: number

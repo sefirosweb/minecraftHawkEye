@@ -102,26 +102,26 @@ export const calculateImpactToBoundingBox = (from: Vec3, to: Vec3, box: BoxColis
     const system = new System()
     const { boxXZ, boxXY, boxZY } = getBoxes(box)
 
-    const rayXZ_start: Vector = { x: from.x, y: from.z }
-    const rayXZ_end: Vector = { x: to.x, y: to.z }
+    const rayXZStart: Vector = { x: from.x, y: from.z }
+    const rayXZEnd: Vector = { x: to.x, y: to.z }
 
-    const rayXY_start: Vector = { x: from.x, y: from.y }
-    const rayXY_end: Vector = { x: to.x, y: to.y }
+    const rayXYStart: Vector = { x: from.x, y: from.y }
+    const rayXYEnd: Vector = { x: to.x, y: to.y }
 
-    const rayZY_start: Vector = { x: from.z, y: from.y }
-    const rayZY_end: Vector = { x: to.z, y: to.y }
+    const rayZYStart: Vector = { x: from.z, y: from.y }
+    const rayZYEnd: Vector = { x: to.z, y: to.y }
 
     if (
-        rayXZ_start.x === rayXZ_end.x && rayXZ_start.y === rayXZ_end.y ||
-        rayXY_start.x === rayXY_end.x && rayXY_start.y === rayXY_end.y ||
-        rayZY_start.x === rayZY_end.x && rayZY_start.y === rayZY_end.y
+        rayXZStart.x === rayXZEnd.x && rayXZStart.y === rayXZEnd.y ||
+        rayXYStart.x === rayXYEnd.x && rayXYStart.y === rayXYEnd.y ||
+        rayZYStart.x === rayZYEnd.x && rayZYStart.y === rayZYEnd.y
     ) {
         return false
     }
 
-    const rayXZ = new Line(rayXZ_start, rayXZ_end)
-    const rayXY = new Line(rayXY_start, rayXY_end)
-    const rayZY = new Line(rayZY_start, rayZY_end)
+    const rayXZ = new Line(rayXZStart, rayXZEnd)
+    const rayXY = new Line(rayXYStart, rayXYEnd)
+    const rayZY = new Line(rayZYStart, rayZYEnd)
 
     const colisionXZ = system.checkCollision(rayXZ, boxXZ)
     const colisionXY = system.checkCollision(rayXY, boxXY)

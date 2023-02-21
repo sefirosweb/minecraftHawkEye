@@ -34,7 +34,7 @@ export const stop = () => {
   bot.deactivateItem()
   bot.removeListener('physicTick', getGrades)
   bot.removeListener('physicTick', autoCalc)
-  bot.emit('auto_shop_stopped', target)
+  bot.emit('auto_shot_stopped', target)
 }
 
 const getGrades = () => {
@@ -170,6 +170,7 @@ export const detectProjectiles = (projectile: string = 'arrow') => {
     if (!currentProjectileDetected[e.uuid]) {
       currentProjectileDetected[e.uuid] = {
         uuid: e.uuid,
+        entity: e,
         enabled: true,
         currentSpeed: 0,
         currentSpeedTime: Date.now(),
