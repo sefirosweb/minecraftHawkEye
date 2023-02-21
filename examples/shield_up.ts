@@ -52,8 +52,6 @@ bot.on('spawn', () => {
     })
 })
 
-
-
 const targetAimingAtYou = (entity: Entity, arrowTrajectory: Array<Vec3>) => {
     console.log('detected!', entity.username ?? entity.name, Date.now())
     danger = Date.now()
@@ -61,9 +59,8 @@ const targetAimingAtYou = (entity: Entity, arrowTrajectory: Array<Vec3>) => {
     bot.lookAt(entity.position, true)
     bot.activateItem()
 
-    bot.viewer.drawLine('previewArrow', arrowTrajectory, 'red')
+    bot.viewer.drawPoints('previewArrow', arrowTrajectory, 'red')
 }
-
 
 // Visible function to see what "see" the bot
 const startRadarViewer = () => {
@@ -84,5 +81,3 @@ const startRadarViewer = () => {
 
     bot.viewer.drawBoxGrid('selfBox1', botBoxes.start, botBoxes.end, boxColor)
 }
-
-

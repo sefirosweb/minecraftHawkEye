@@ -1,7 +1,7 @@
 
-import { Box } from "detect-collisions"
+import { Box, Line, System, Vector } from "detect-collisions"
 import { Vec3 } from "vec3"
-import { bot, system } from "./loadBot"
+import { bot } from "./loadBot"
 import { BoxColission, Weapons } from "./types"
 import { Entity } from 'prismarine-entity'
 import { calculateArrowTrayectory } from "./calculateArrowTrayectory"
@@ -17,18 +17,17 @@ const radar = () => {
 
     Object.values(detectedEntities).forEach(e => {
         prevArrow = undefined
-        e.prevTrajectory.forEach((arrowTrajectory, i) => {
+
+        e.prevTrajectory.forEach((arrowTrajectory) => {
 
             if (!prevArrow) {
                 prevArrow = arrowTrajectory
                 return
             }
 
-
             const colission = calculateImpactToBoundingBox(prevArrow, arrowTrajectory, botBoxes)
 
             if (colission) {
-                // calculateImpactToBoundingBox(prevArrow, arrowTrajectory, botBoxes)
                 bot.emit('target_aiming_at_you', e.entity, e.prevTrajectory)
             }
 
@@ -38,33 +37,21 @@ const radar = () => {
 }
 
 export const detectAim = () => {
+    const system = new System();
     const { boxXZ } = getBoxes(getBotBoxes())
-
     const entities = Object.values(bot.entities)
         // @ts-ignore PR: https://github.com/PrismarineJS/prismarine-entity/pull/55
-        .filter((e) => (e.type === "player" && e.metadata[8] === 1 /* Is loading bow */) || (e.type === 'hostile' && e.name === 'skeleton'))
+        .filter((e) => (e.type === "player" && (e.metadata[8] === 1 || e.metadata[8] === 3) /* Is loading bow */) || (e.type === 'hostile' && e.name === 'skeleton'))
         .filter(e => {
-
             const eyePosition = e.position.offset(0, 1.6, 0)
             const lookingAt = calculateDestinationByYaw(eyePosition, e.yaw + Math.PI, DISTANCE_VISION)
 
-            const lookingAtXZ =
-            {
-                from: {
-                    x: eyePosition.x,
-                    y: eyePosition.z
-                },
-                to: {
-                    x: lookingAt.x,
-                    y: lookingAt.z
-                }
-            }
+            const rayXZ_start: Vector = { x: eyePosition.x, y: eyePosition.z }
+            const rayXZ_end: Vector = { x: lookingAt.x, y: lookingAt.z }
 
-            system.insert(boxXZ)
-            const colisionXZ = system.raycast(lookingAtXZ.from, lookingAtXZ.to)
-            system.remove(boxXZ)
-
-            return colisionXZ !== null
+            const ray = new Line(rayXZ_start, rayXZ_end)
+            const colisionXZ = system.checkCollision(ray, boxXZ)
+            return colisionXZ
         })
 
     const calculatedEntityTarget: Record<string, {

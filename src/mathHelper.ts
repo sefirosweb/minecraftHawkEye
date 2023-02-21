@@ -1,6 +1,5 @@
 import { Box, Line, System, Vector } from "detect-collisions"
 import { Vec3 } from "vec3"
-import { bot } from "./loadBot"
 import { BoxColission, Vec2 } from "./types"
 
 export const getTargetDistance = (origin: Vec3, destination: Vec3) => {
