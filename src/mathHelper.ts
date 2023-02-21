@@ -1,6 +1,6 @@
-import { Box } from "detect-collisions"
+import { Box, Line, System, Vector } from "detect-collisions"
 import { Vec3 } from "vec3"
-import { system } from "./loadBot"
+import { bot } from "./loadBot"
 import { BoxColission, Vec2 } from "./types"
 
 export const getTargetDistance = (origin: Vec3, destination: Vec3) => {
@@ -100,58 +100,35 @@ export const getBoxes = (boxIn: BoxColission) => {
 }
 
 export const calculateImpactToBoundingBox = (from: Vec3, to: Vec3, box: BoxColission) => {
-
+    const system = new System()
     const { boxXZ, boxXY, boxZY } = getBoxes(box)
 
-    const rayXZ =
-    {
-        from: {
-            x: from.x,
-            y: from.z
-        },
-        to: {
-            x: to.x,
-            y: to.z
-        }
+    const rayXZ_start: Vector = { x: from.x, y: from.z }
+    const rayXZ_end: Vector = { x: to.x, y: to.z }
+
+    const rayXY_start: Vector = { x: from.x, y: from.y }
+    const rayXY_end: Vector = { x: to.x, y: to.y }
+
+    const rayZY_start: Vector = { x: from.z, y: from.y }
+    const rayZY_end: Vector = { x: to.z, y: to.y }
+
+    if (
+        rayXZ_start.x === rayXZ_end.x && rayXZ_start.y === rayXZ_end.y ||
+        rayXY_start.x === rayXY_end.x && rayXY_start.y === rayXY_end.y ||
+        rayZY_start.x === rayZY_end.x && rayZY_start.y === rayZY_end.y
+    ) {
+        return false
     }
 
-    const rayXY =
-    {
-        from: {
-            x: from.x,
-            y: from.y
-        },
-        to:
-        {
-            x: to.x,
-            y: to.y
-        }
-    }
+    const rayXZ = new Line(rayXZ_start, rayXZ_end)
+    const rayXY = new Line(rayXY_start, rayXY_end)
+    const rayZY = new Line(rayZY_start, rayZY_end)
 
-    const rayZY =
-    {
-        from: {
-            x: from.z,
-            y: from.y
-        },
-        to:
-        {
-            x: to.z,
-            y: to.y
-        }
-    }
+    const colisionXZ = system.checkCollision(rayXZ, boxXZ)
+    const colisionXY = system.checkCollision(rayXY, boxXY)
+    const colisionZY = system.checkCollision(boxZY, rayZY)
 
-    system.insert(boxXZ)
-    const colisionXZ = system.raycast(rayXZ.from, rayXZ.to)
-    system.remove(boxXZ)
+    const all = colisionXZ === true && colisionXY === true && colisionZY === true
 
-    system.insert(boxXY)
-    const colisionXY = system.raycast(rayXY.from, rayXY.to)
-    system.remove(boxXY)
-
-    system.insert(boxZY)
-    const colisionZY = system.raycast(rayZY.from, rayZY.to)
-    system.remove(boxZY)
-
-    return colisionXZ !== null && colisionXY !== null && colisionZY !== null
+    return all
 }
