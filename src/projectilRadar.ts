@@ -76,8 +76,12 @@ export const detectAim = () => {
     const { boxXZ } = getBoxes(getBotBoxes())
     const entities = Object.values(bot.entities)
         // @ts-ignore PR: https://github.com/PrismarineJS/prismarine-entity/pull/55
-        .filter((e) => (e.type === "player" && (e.metadata[8] === 1 || e.metadata[8] === 3) /* Is loading bow */) || (e.type === 'hostile' && e.name === 'skeleton'))
+        .filter((e) => (e.type === "player" && (e.metadata[8] === 1 || e.metadata[8] === 3) /* Is loading bow */) || (e.type === 'mob' && e.name === 'skeleton'))
         .filter(e => {
+            if (e.name === 'skeleton' && e.position.distanceTo(bot.entity.position) > 16) return false
+            if (e.name === 'skeleton' && e.position.distanceTo(bot.entity.position) <= 16) return true
+
+
             const eyePosition = e.position.offset(0, 1.6, 0)
             const lookingAt = calculateDestinationByYaw(eyePosition, e.yaw + Math.PI, DISTANCE_VISION)
 
