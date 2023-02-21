@@ -26,7 +26,7 @@ describe('01_basic', () => {
     bot.hawkEye.autoAttack(target, Weapons.bow)
 
     return new Promise((resolve) => {
-      bot.once('auto_shop_stopped', () => {
+      bot.once('auto_shot_stopped', () => {
         resolve()
       })
     })
@@ -45,7 +45,7 @@ describe('01_basic', () => {
     bot.hawkEye.autoAttack(target, Weapons.bow)
 
     return new Promise((resolve) => {
-      bot.once('auto_shop_stopped', () => {
+      bot.once('auto_shot_stopped', () => {
         resolve()
       })
     })

@@ -1,6 +1,5 @@
 
 import { createBot } from 'mineflayer';
-import mineflayerViewer from 'prismarine-viewer'
 import { Bot } from '../src/types';
 import injectCommonTest from './common/testCommon'
 import minecraftHawkEye from '../src/index'
@@ -29,7 +28,6 @@ export const mochaHooks = () => {
                     bot.once('spawn', () => {
                         injectCommonTest(bot)
                         bot.loadPlugin(minecraftHawkEye)
-                        mineflayerViewer.mineflayer(bot, { port: 3000 })
                         done()
                     })
                 }

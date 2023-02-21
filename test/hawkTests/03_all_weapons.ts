@@ -42,7 +42,7 @@ describe('03_all_weapons', () => {
       bot.hawkEye.autoAttack(target, weapon)
 
       return new Promise((resolve) => {
-        bot.once('auto_shop_stopped', async () => {
+        bot.once('auto_shot_stopped', async () => {
           await bot.test.wait(4000)
           resolve()
         })

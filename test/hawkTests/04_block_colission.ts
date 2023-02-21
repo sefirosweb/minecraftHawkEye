@@ -25,7 +25,7 @@ describe('04_block_colission', () => {
     bot.hawkEye.autoAttack(target, Weapons.bow)
 
     return new Promise((resolve) => {
-      bot.once('auto_shop_stopped', async () => {
+      bot.once('auto_shot_stopped', async () => {
         await bot.test.wait(2000)
         resolve()
       })
@@ -47,7 +47,7 @@ describe('04_block_colission', () => {
     bot.hawkEye.autoAttack(target, Weapons.bow)
 
     return new Promise((resolve) => {
-      bot.once('auto_shop_stopped', async () => {
+      bot.once('auto_shot_stopped', async () => {
         bot.chat(`/fill -7 ${Y} -7 7 ${Y + 5} 7 air hollow`)
         await bot.test.wait(2000)
         resolve()
@@ -69,7 +69,7 @@ describe('04_block_colission', () => {
     bot.hawkEye.autoAttack(target, Weapons.bow)
 
     return new Promise((resolve) => {
-      bot.once('auto_shop_stopped', async () => {
+      bot.once('auto_shot_stopped', async () => {
         await bot.test.wait(2000)
         resolve()
       })

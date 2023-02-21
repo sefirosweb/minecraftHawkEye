@@ -73,6 +73,7 @@ export default (bot: Bot) => {
     await sleep(1000)
     await clearInventory()
     bot.creative.stopFlying()
+    await becomeSurvival()
   }
 
   const becomeCreative = () => {

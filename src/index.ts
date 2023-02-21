@@ -4,6 +4,7 @@ import { getPlayer, simplyShot } from './botFunctions'
 import getMasterGrade from './hawkEyeEquations'
 import { Weapons } from "./types"
 import loadBot from "./loadBot"
+import { startRadar, stopRadar, detectAim } from './projectilRadar'
 import { calculateArrowTrayectory } from "./calculateArrowTrayectory"
 
 const inject = (bot: Bot) => {
@@ -17,8 +18,13 @@ const inject = (bot: Bot) => {
     stop,
     getPlayer,
     calculateArrowTrayectory,
-    detectProjectiles
+    detectProjectiles,
+    detectAim,
+    startRadar,
+    stopRadar
   }
 }
+
+export { HawkEye, HawkEyeEvents } from './types'
 
 export default inject
