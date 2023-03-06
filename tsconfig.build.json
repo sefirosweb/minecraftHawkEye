@@ -1,0 +1,16 @@
+{
+    "extends": "./tsconfig",
+    "compilerOptions": {
+        "emitDeclarationOnly": true,
+        "rootDir": "src"
+    },
+    "include": ["src/**/*"],
+    "exclude": [
+        "dist",
+        "examples",
+        "test",
+      ],
+
+}
+  
+  
