@@ -1,6 +1,6 @@
 {
     "name": "minecrafthawkeye",
-    "version": "1.3.3",
+    "version": "1.3.4",
     "description": "Minecraft bot for equations when shooting an arrow",
     "main": "dist/index.js",
     "files": [
