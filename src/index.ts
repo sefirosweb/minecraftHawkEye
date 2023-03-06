@@ -8,6 +8,7 @@ import loadBot from "./loadBot"
 import { startRadar, stopRadar, detectAim } from './projectilRadar'
 import { calculateArrowTrayectory } from "./calculateArrowTrayectory"
 import { HawkEye, HawkEyeEvents, OptionsMasterGrade, Projectil, Weapons } from "./types";
+export * from "./types"
 
 declare module 'mineflayer' {
   interface Bot {
@@ -38,5 +39,6 @@ const inject = (bot: Bot) => {
     stopRadar
   }
 }
+
 
 export default inject
