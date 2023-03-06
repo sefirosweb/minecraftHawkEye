@@ -17,7 +17,7 @@ import { applyGravityToVoy, calculateYaw, degreesToRadians, getTargetDistance, g
 
 type TryGrade = ReturnType<typeof tryGrade> & { grade: number }
 
-const getMasterGrade = (targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, weapon: Weapons): GetMasterGrade | false => {
+const getMasterGrade = (targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, weapon: Weapons): GetMasterGrade | undefined => {
   if (!Object.keys(Weapons).includes(weapon)) {
     throw new Error(`${weapon} is not valid weapon for calculate the grade!`)
   }
@@ -38,7 +38,7 @@ const getMasterGrade = (targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, we
   // Check the first best trayectory
   let distances = getTargetDistance(startPosition, targetPosition)
   let shotCalculation = geBaseCalculation(distances.hDistance, distances.yDistance, GRAVITY, startPosition, targetPosition, BaseVo)
-  if (!shotCalculation) { return false }
+  if (!shotCalculation) { return undefined }
 
   // Recalculate the new target based on speed + first trayectory
   const premonition = getPremonition(shotCalculation.totalTicks, speed, startPosition, targetPosition)
@@ -47,7 +47,7 @@ const getMasterGrade = (targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, we
 
   // Recalculate the trayectory based on new target location
   shotCalculation = geBaseCalculation(distances.hDistance, distances.yDistance, GRAVITY, startPosition, targetPosition, BaseVo)
-  if (!shotCalculation) { return false }
+  if (!shotCalculation) { return undefined }
 
   // Get more precision on shot
   const precisionShot = getPrecisionShot(shotCalculation.grade, distances.hDistance, distances.yDistance, 1, GRAVITY, startPosition, targetPosition, BaseVo)
@@ -56,7 +56,7 @@ const getMasterGrade = (targetIn: OptionsMasterGrade | Entity, speedIn: Vec3, we
   // Calculate yaw
   const yaw = calculateYaw(startPosition, newTarget)
 
-  if (nearestDistance > 4) { return false } // Too far
+  if (nearestDistance > 4) { return undefined } // Too far
 
   return {
     pitch: degreesToRadians(nearestGrade / 10),

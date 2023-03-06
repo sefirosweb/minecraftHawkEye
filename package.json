@@ -8,8 +8,6 @@
     ],
     "dependencies": {
         "detect-collisions": "^7.0.5",
-        "mineflayer": "^4.8.1",
-        "prismarine-world": "^3.6.1",
         "vec3": "^0.1.8"
     },
     "devDependencies": {
@@ -23,6 +21,7 @@
         "babel-plugin-module-resolver": "^5.0.0",
         "chai": "^4.3.7",
         "minecraft-wrap": "^1.5.1",
+        "mineflayer": "^4.8.1",
         "mocha": "^10.2.0",
         "prismarine-viewer": "^1.24.0",
         "swc": "^1.0.11",
