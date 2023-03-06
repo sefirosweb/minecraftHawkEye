@@ -1,11 +1,25 @@
 import { Bot } from "mineflayer"
+import { Entity } from 'prismarine-entity';
+import { Vec3 } from "vec3";
 import { autoAttack, stop, detectProjectiles } from './hawkEye'
 import { getPlayer, simplyShot } from './botFunctions'
 import getMasterGrade from './hawkEyeEquations'
-import { Weapons } from "./types"
 import loadBot from "./loadBot"
 import { startRadar, stopRadar, detectAim } from './projectilRadar'
 import { calculateArrowTrayectory } from "./calculateArrowTrayectory"
+import { HawkEye, HawkEyeEvents, OptionsMasterGrade, Projectil, Weapons } from "./types";
+
+declare module 'mineflayer' {
+  interface Bot {
+    hawkEye: HawkEye;
+  }
+  interface BotEvents extends HawkEyeEvents {
+    auto_shot_stopped: (target: Entity | OptionsMasterGrade) => void;
+    target_aiming_at_you: (entity: Entity, arrowTrajectory: Array<Vec3>) => void;
+    incoming_projectil: (projectil: Projectil, arrowTrajectory: Array<Vec3>) => void;
+  }
+}
+
 
 const inject = (bot: Bot) => {
   loadBot(bot)
@@ -24,7 +38,5 @@ const inject = (bot: Bot) => {
     stopRadar
   }
 }
-
-export { HawkEye, HawkEyeEvents } from './types'
 
 export default inject

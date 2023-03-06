@@ -97,8 +97,6 @@ export interface HawkEyeEvents {
     incoming_projectil: (projectil: Projectil, arrowTrajectory: Array<Vec3>) => void
 }
 
-
-
 export interface Bot extends MineflayerBot {
     test: {
         groundY: number,
