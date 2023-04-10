@@ -17,7 +17,7 @@ First load mineflayer and minecrafthawkeye, and load plugin into mineflayer
 ```js
 const mineflayer = require('mineflayer')
 const minecraftHawkEye = require('minecrafthawkeye');
-bot.loadPlugin(minecraftHawkEye)
+bot.loadPlugin(minecraftHawkEye.default)
 const weapon = 'bow'
 ```
 
