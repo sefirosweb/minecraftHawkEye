@@ -35,6 +35,7 @@
         "test": "mocha -r ts-node/register -r test/hooks.ts --timeout 60000 --exit",
         "test:all": "npm run test 'test/hawkTests/*.ts'",
         "build": "babel src --extensions \".ts,.js\" --delete-dir-on-start --out-dir dist",
+        "pack": "npm run build && npm run build:types && npm pack",
         "build:types": "tsc -p tsconfig.build.json",
         "lint": "tslint -c tslint.json 'src/**/*.ts'",
         "lint:fix": "npm run lint -- --fix"

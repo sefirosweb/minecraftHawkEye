@@ -40,4 +40,4 @@ const inject = (bot: Bot) => {
   }
 }
 
-module.exports = inject
+export default inject
