@@ -70,7 +70,7 @@ const autoCalc = async () => {
   const waitTime = weaponsProps[weapon].waitTime
 
   const slotID = bot.getEquipmentDestSlot('hand')
-  if (bot.inventory.slots[slotID] === null || bot.inventory.slots[slotID].name !== weapon) {
+  if (bot.inventory.slots[slotID] === null || bot.inventory.slots[slotID]?.name !== weapon) {
     const weaponFound = bot.inventory.items().find(item => item.name === weapon)
     if (weaponFound) {
       try {
